@@ -1,15 +1,30 @@
-const express = require('express')
-const mongoose = require('mongoose')
+const express = require('express');
+const mongoose = require('mongoose');
+const app = express();
 
-const app = express()
-const PORT = 3000
+app.use(express.json());
 
-app.use(express.json())
+// Logger
+app.use((req, res, next) => {
+    const d = new Date().toISOString().substring(0, 16);
+    console.log(`${req.method} ${req.url} ${d}`);
+    next();
+});
 
-mongoose.connect('mongodb://localhost:27017/recursos_educativos')
-  .then(() => console.log('MongoDB ligado'))
-  .catch(err => console.error('Erro ao ligar ao MongoDB:', err))
+// Conexão ao MongoDB
+const nomeBD = "recursos_educativos";
+const mongoHost = process.env.MONGO_URL || `mongodb://127.0.0.1:27017/${nomeBD}`;
+mongoose.connect(mongoHost)
+    .then(() => console.log(`MongoDB: liguei-me à base de dados ${nomeBD}.`))
+    .catch(err => console.error('Erro:', err));
 
-app.listen(PORT, () => {
-  console.log(`API a correr em http://localhost:${PORT}`)
-})
+// Rotas
+const recursosRouter    = require('./routes/recursos');
+const utilizadoresRouter = require('./routes/utilizadores');
+const postsRouter       = require('./routes/posts');
+
+app.use('/recursos',     recursosRouter);
+app.use('/utilizadores', utilizadoresRouter);
+app.use('/posts',        postsRouter);
+
+app.listen(3000, () => console.log('API a correr em http://localhost:3000'));
