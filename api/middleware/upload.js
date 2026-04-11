@@ -1,31 +1,21 @@
-// const multer = require('multer');
-// const path = require('path');
-// const { v4: uuidv4 } = require('uuid');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, './uploads/');
-//     },
-//     filename: (req, file, cb) => {
-//         const ext = path.extname(file.originalname);
-//         cb(null, `${uuidv4()}${ext}`); // nome único para evitar colisões
-//     }
-// });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dir = path.join(__dirname, '..', 'uploads');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
 
-// const fileFilter = (req, file, cb) => {
-//     const tiposPermitidos = ['.pdf', '.zip', '.docx', '.pptx', '.txt', '.md'];
-//     const ext = path.extname(file.originalname).toLowerCase();
-//     if (tiposPermitidos.includes(ext)) {
-//         cb(null, true);
-//     } else {
-//         cb(new Error(`Tipo de ficheiro não permitido: ${ext}`), false);
-//     }
-// };
+const upload = multer({ storage: storage });
 
-// const upload = multer({
-//     storage,
-//     fileFilter,
-//     limits: { fileSize: 50 * 1024 * 1024 } // 50MB
-// });
-
-// module.exports = upload;
+module.exports = upload;
