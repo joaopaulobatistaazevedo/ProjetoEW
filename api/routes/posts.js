@@ -1,31 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/post');
+const { authenticate, authorize } = require('../middleware/auth');
 
-// GET /posts - listar todos os posts
+// GET /posts — público
 router.get('/', async (req, res) => {
     try {
-        // filtrar por recurso ex: /posts?recurso=id
         let query = {};
         if (req.query.recurso) query.recurso = req.query.recurso;
 
         const posts = await Post.find(query)
-                                .populate('autor', 'nome email')
-                                .populate('recurso', 'titulo')
-                                .populate('comentarios.autor', 'nome email');
+            .populate('autor', 'nome email')
+            .populate('recurso', 'titulo')
+            .populate('comentarios.autor', 'nome email');
         res.json(posts);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// GET /posts/:id - ver um post
+// GET /posts/:id — público
 router.get('/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id)
-                               .populate('autor', 'nome email')
-                               .populate('recurso', 'titulo')
-                               .populate('comentarios.autor', 'nome email');
+            .populate('autor', 'nome email')
+            .populate('recurso', 'titulo')
+            .populate('comentarios.autor', 'nome email');
         if (!post) return res.status(404).json({ error: 'Não encontrado' });
         res.json(post);
     } catch (err) {
@@ -33,10 +33,10 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST /posts - criar post
-router.post('/', async (req, res) => {
+// POST /posts — autenticado
+router.post('/', authenticate, async (req, res) => {
     try {
-        const post = new Post(req.body);
+        const post = new Post({ ...req.body, autor: req.user.id });
         const saved = await post.save();
         res.status(201).json(saved);
     } catch (err) {
@@ -44,34 +44,46 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /posts/:id - editar post
-router.put('/:id', async (req, res) => {
+// PUT /posts/:id — autor ou admin
+router.put('/:id', authenticate, async (req, res) => {
     try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: 'Não encontrado' });
+
+        if (req.user.role !== 'admin' && req.user.id !== post.autor.toString()) {
+            return res.status(403).json({ error: 'Sem permissão' });
+        }
+
         const updated = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updated) return res.status(404).json({ error: 'Não encontrado' });
         res.json(updated);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 });
 
-// DELETE /posts/:id - apagar post
-router.delete('/:id', async (req, res) => {
+// DELETE /posts/:id — autor ou admin
+router.delete('/:id', authenticate, async (req, res) => {
     try {
-        const deleted = await Post.findByIdAndDelete(req.params.id);
-        if (!deleted) return res.status(404).json({ error: 'Não encontrado' });
-        res.json({ message: 'Eliminado com sucesso', id: req.params.id });
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: 'Não encontrado' });
+
+        if (req.user.role !== 'admin' && req.user.id !== post.autor.toString()) {
+            return res.status(403).json({ error: 'Sem permissão' });
+        }
+
+        await Post.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Eliminado com sucesso' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// POST /posts/:id/comentarios - adicionar comentário
-router.post('/:id/comentarios', async (req, res) => {
+// POST /posts/:id/comentarios — autenticado
+router.post('/:id/comentarios', authenticate, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: 'Não encontrado' });
-        post.comentarios.push(req.body);
+        post.comentarios.push({ ...req.body, autor: req.user.id });
         await post.save();
         res.status(201).json(post);
     } catch (err) {
@@ -79,11 +91,19 @@ router.post('/:id/comentarios', async (req, res) => {
     }
 });
 
-// DELETE /posts/:id/comentarios/:cid - apagar comentário
-router.delete('/:id/comentarios/:cid', async (req, res) => {
+// DELETE /posts/:id/comentarios/:cid — autor do comentário ou admin
+router.delete('/:id/comentarios/:cid', authenticate, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post não encontrado' });
+
+        const comentario = post.comentarios.id(req.params.cid);
+        if (!comentario) return res.status(404).json({ error: 'Comentário não encontrado' });
+
+        if (req.user.role !== 'admin' && req.user.id !== comentario.autor.toString()) {
+            return res.status(403).json({ error: 'Sem permissão' });
+        }
+
         post.comentarios = post.comentarios.filter(c => c._id.toString() !== req.params.cid);
         await post.save();
         res.json({ message: 'Comentário eliminado' });

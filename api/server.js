@@ -22,9 +22,11 @@ mongoose.connect(mongoHost)
 const recursosRouter    = require('./routes/recursos');
 const utilizadoresRouter = require('./routes/utilizadores');
 const postsRouter       = require('./routes/posts');
+const authRouter = require('./routes/auth');
 
 app.use('/recursos',     recursosRouter);
 app.use('/utilizadores', utilizadoresRouter);
 app.use('/posts',        postsRouter);
+app.use('/auth', authRouter);
 
 app.listen(3000, () => console.log('API a correr em http://localhost:3000'));
