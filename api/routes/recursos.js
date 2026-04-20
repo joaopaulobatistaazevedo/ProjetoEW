@@ -1,87 +1,159 @@
 const express = require('express');
-const router = express.Router();
+const path = require('path');
 const Recurso = require('../models/recurso');
+const upload = require('../middleware/upload');
+const { authenticate, authorize } = require('../middleware/auth');
 
-// GET /recursos - listar todos os recursos públicos
+const router = express.Router();
+
+// GET /recursos — listar com filtros (público)
 router.get('/', async (req, res) => {
     try {
-        let query = { visibilidade: 'publico' };
+        const { tipo, hashtag, ano, visibilidade } = req.query;
+        const filtro = {};
 
-        // filtrar por tipo ex: /recursos?tipo=artigo
-        if (req.query.tipo) query.tipo = req.query.tipo;
+        if (tipo)         filtro.tipo = tipo;
+        if (visibilidade) filtro.visibilidade = visibilidade;
+        if (hashtag)      filtro.hashtags = hashtag;
+        if (ano)          filtro.dataCriacao = {
+            $gte: new Date(`${ano}-01-01`),
+            $lte: new Date(`${ano}-12-31`)
+        };
 
-        // filtrar por hashtag ex: /recursos?hashtag=python
-        if (req.query.hashtag) query.hashtags = req.query.hashtag;
+        const recursos = await Recurso.find(filtro)
+            .populate('produtor', 'nome email')
+            .sort({ dataRegisto: -1 });
 
-        const recursos = await Recurso.find(query)
-                                      .populate('produtor', 'nome email');
         res.json(recursos);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ erro: err.message });
     }
 });
 
-// GET /recursos/:id - ver um recurso pelo id
+// GET /recursos/top3 — top 3 por média de estrelas (público)
+router.get('/top3', async (req, res) => {
+    try {
+        const top3 = await Recurso.find({ visibilidade: 'publico' })
+            .sort({ mediaEstrelas: -1 })
+            .limit(3)
+            .populate('produtor', 'nome');
+
+        res.json(top3);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+// GET /recursos/:id — detalhe (público)
 router.get('/:id', async (req, res) => {
     try {
         const recurso = await Recurso.findById(req.params.id)
-                                     .populate('produtor', 'nome email');
-        if (!recurso) return res.status(404).json({ error: 'Não encontrado' });
+            .populate('produtor', 'nome email');
+
+        if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
         res.json(recurso);
     } catch (err) {
-        res.status(400).json({ error: 'ID inválido' });
+        res.status(500).json({ erro: err.message });
     }
 });
 
-// POST /recursos - criar novo recurso
-router.post('/', async (req, res) => {
+// GET /recursos/:id/download — autenticado, respeita visibilidade
+router.get('/:id/download', authenticate, async (req, res) => {
     try {
-        const recurso = new Recurso(req.body);
-        const saved = await recurso.save();
-        res.status(201).json(saved);
+        const recurso = await Recurso.findById(req.params.id);
+        if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
+        if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
+
+        // privado: só admin ou o próprio produtor
+        if (recurso.visibilidade === 'privado') {
+            if (req.user.role !== 'admin' && req.user.id !== recurso.produtor.toString()) {
+                return res.status(403).json({ erro: 'Sem permissão' });
+            }
+        }
+
+        res.download(path.resolve(recurso.ficheiro));
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(500).json({ erro: err.message });
     }
 });
 
-// PUT /recursos/:id - editar recurso
-router.put('/:id', async (req, res) => {
+// POST /recursos — criar (produtor ou admin)
+router.post('/', authenticate, authorize('produtor', 'admin'), upload.single('ficheiro'), async (req, res) => {
     try {
-        const updated = await Recurso.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updated) return res.status(404).json({ error: 'Não encontrado' });
-        res.json(updated);
+        const { titulo, subtitulo, tipo, dataCriacao, visibilidade, hashtags } = req.body;
+
+        const recurso = await Recurso.create({
+            titulo,
+            subtitulo,
+            tipo,
+            dataCriacao,
+            visibilidade,
+            hashtags: hashtags ? JSON.parse(hashtags) : [],
+            produtor: req.user.id,
+            ficheiro: req.file ? req.file.path : null
+        });
+
+        res.status(201).json(recurso);
     } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(500).json({ erro: err.message });
     }
 });
 
-// DELETE /recursos/:id - apagar recurso
-router.delete('/:id', async (req, res) => {
+// PUT /recursos/:id — editar (admin ou produtor dono)
+router.put('/:id', authenticate, async (req, res) => {
     try {
-        const deleted = await Recurso.findByIdAndDelete(req.params.id);
-        if (!deleted) return res.status(404).json({ error: 'Não encontrado' });
-        res.json({ message: 'Eliminado com sucesso', id: req.params.id });
+        const recurso = await Recurso.findById(req.params.id);
+        if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
+
+        if (req.user.role !== 'admin' && req.user.id !== recurso.produtor.toString()) {
+            return res.status(403).json({ erro: 'Sem permissão' });
+        }
+
+        const atualizado = await Recurso.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(atualizado);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ erro: err.message });
     }
 });
 
-// POST /recursos/:id/rating - dar estrelas a um recurso
-router.post('/:id/rating', async (req, res) => {
+// DELETE /recursos/:id — apagar (admin ou produtor dono)
+router.delete('/:id', authenticate, async (req, res) => {
     try {
-        const { estrelas } = req.body; // valor entre 1 e 5
+        const recurso = await Recurso.findById(req.params.id);
+        if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
+
+        if (req.user.role !== 'admin' && req.user.id !== recurso.produtor.toString()) {
+            return res.status(403).json({ erro: 'Sem permissão' });
+        }
+
+        await Recurso.findByIdAndDelete(req.params.id);
+        res.json({ mensagem: 'Recurso eliminado' });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+// PATCH /recursos/:id/rate — avaliar (autenticado)
+router.patch('/:id/rate', authenticate, async (req, res) => {
+    try {
+        const { estrelas } = req.body;
         if (!estrelas || estrelas < 1 || estrelas > 5)
-            return res.status(400).json({ error: 'Estrelas deve ser entre 1 e 5' });
+            return res.status(400).json({ erro: 'Estrelas deve ser entre 1 e 5' });
 
         const recurso = await Recurso.findById(req.params.id);
-        if (!recurso) return res.status(404).json({ error: 'Não encontrado' });
+        if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
 
-        // média simples entre o rating atual e o novo
-        recurso.rating = ((recurso.rating + estrelas) / 2).toFixed(1);
+        const indice = recurso.ratings.findIndex(r => r.utilizador.toString() === req.user.id);
+        if (indice >= 0) {
+            recurso.ratings[indice].estrelas = estrelas;
+        } else {
+            recurso.ratings.push({ utilizador: req.user.id, estrelas });
+        }
+
         await recurso.save();
-        res.json({ rating: recurso.rating });
+        res.json({ mediaEstrelas: recurso.mediaEstrelas, totalVotos: recurso.ratings.length });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ erro: err.message });
     }
 });
 
