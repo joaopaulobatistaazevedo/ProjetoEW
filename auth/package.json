@@ -7,11 +7,10 @@
     "start": "node auth_server.js"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.12.3",
-    "bcrypt": "^5.0.1",
-    "cookie-parser": "^1.4.5",
     "morgan": "^1.10.0"
   }
 }

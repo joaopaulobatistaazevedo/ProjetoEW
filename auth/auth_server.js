@@ -1,18 +1,24 @@
 const express = require('express');
 const morgan = require('morgan');
-const axios = require('axios');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
+const Utilizador = require('./models/utilizador');
 
 const app = express();
 
 // --- Configurações por Variáveis de Ambiente ---
 const PORT = process.env.PORT || 2623;
-const DATA_API_URL = process.env.DATA_API_URL || "http://api-dados:3001/utilizadores";
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/auth_service';
 const JWT_SECRET = process.env.JWT_SECRET || "jcr_secret_2026";
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
 const APP_PUBS_URL = process.env.APP_PUBS_URL || "http://localhost:2622";
+
+mongoose
+  .connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Auth: MongoDB ligado com sucesso.'))
+  .catch((err) => console.error('Auth: erro a ligar ao MongoDB:', err));
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -40,8 +46,8 @@ function verificaAcesso(req, res, next) {
 // --- Rotas Protegidas ---
 app.get('/users', verificaAcesso, async (req, res) => {
   try{
-    const response = await axios.get(DATA_API_URL);
-    res.render('utilizadores', { titulo: "Lista de Utilizadores", users: response.data });
+    const users = await Utilizador.find({}, '-password').sort({ nome: 1 });
+    res.render('utilizadores', { titulo: "Lista de Utilizadores", users });
   } catch (error) {
     res.status(500).render('error', { message: "Erro na API de Dados" });
   }
@@ -57,37 +63,54 @@ app.get('/users/register', (req, res) => {
   res.render('registo', { titulo: "Criar Nova Conta" });
 });
 
-// Rota de Login: Gera o JWT e guarda no Cookie
+// Rota de Registo: cria utilizador no serviço auth
+app.post('/users/register', async (req, res) => {
+  const { username, nome, email, password, role, filiacao } = req.body;
+
+  try {
+    const novo = await Utilizador.create({
+      username,
+      nome,
+      email,
+      password,
+      role,
+      filiacao,
+      ativo: true,
+      dataRegisto: new Date()
+    });
+
+    const token = jwt.sign(
+      { sub: novo._id.toString(), username: novo.username, nome: novo.nome, role: novo.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    return res.status(201).json({ token });
+  } catch (err) {
+    return res.status(400).json({
+      success: false,
+      message: 'Erro ao criar conta'
+    });
+  }
+});
+
+// Rota de Login: devolve JWT para a interface guardar em cookie
 app.post('/users/login', async (req, res) => {
   const { username, password } = req.body;
+
   try {
-    const response = await axios.get(`${DATA_API_URL}?username=${username}&password=${password}`);
-    const users = response.data;
+    const user = await Utilizador.findOne({ username, password });
+    if (!user) return res.status(401).json({ message: 'Credenciais inválidas' });
 
-    if (users.length > 0) {
-      const user = users[0];
-      const token = jwt.sign(
-        { sub: user.id, username: user.username, nome: user.nome, role: user.role },
-        JWT_SECRET,
-        { expiresIn: '1h' }
-      );
+    const token = jwt.sign(
+      { sub: user._id.toString(), username: user.username, nome: user.nome, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-      res.cookie(COOKIE_NAME, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 3600000
-      });
-
-      return res.json({
-        success: true,
-        message: "Login bem sucedido",
-        redirectTo: APP_PUBS_URL
-      });
-    } else {
-      res.render('login', { error: "Credenciais inválidas", titulo: "Página de Login" });
-    }
-  } catch (error) {
-    res.status(500).render('error', { message: "Erro na API de Dados" });
+    return res.status(201).json({ token });
+  } catch (err) {
+    return res.status(500).json({ message: 'Erro interno no login' });
   }
 });
 

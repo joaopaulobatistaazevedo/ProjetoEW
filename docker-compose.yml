@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   api-dados:
     build: ./api-dados
@@ -14,14 +13,14 @@ services:
   auth:
     build: ./auth
     ports:
-      - "3002:3002"
+      - "3002:2623"
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
       - PORT=2623
       - DATA_API_URL=http://api-dados:3001/utilizadores
       - JWT_SECRET=jcr_secret_2026
       - COOKIE_NAME=token
-      - APP_PUBS_URL=http://localhost:2622
+      - APP_PUBS_URL=http://localhost:3000
     depends_on:
       - mongodb_api
     networks:
@@ -32,7 +31,9 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - PORT=3000
       - API_URL=http://api-dados:3001
+      - AUTH_URL=http://auth:2623/users
       - COOKIE_NAME=token
       - JWT_SECRET=jcr_secret_2026
     depends_on:

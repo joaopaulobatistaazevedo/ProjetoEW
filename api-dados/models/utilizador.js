@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const utilizadorSchema = new mongoose.Schema({
     username:         { type: String, required: true, unique: true },
@@ -12,17 +11,5 @@ const utilizadorSchema = new mongoose.Schema({
     dataRegisto:      { type: Date, default: Date.now },
     dataUltimoAcesso: Date
 });
-
-// Hash automático da password antes de guardar
-utilizadorSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 12);
-    next();
-});
-
-// Método para verificar password no login
-utilizadorSchema.methods.verificarPassword = function (passwordEmTexto) {
-    return bcrypt.compare(passwordEmTexto, this.password);
-};
 
 module.exports = mongoose.model('Utilizador', utilizadorSchema);
