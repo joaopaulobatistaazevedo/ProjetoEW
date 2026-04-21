@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 
-const API = process.env.API_URL || 'http://localhost:3000';
+const API = process.env.API_URL || 'http://localhost:3001';
+const COOKIE_NAME = process.env.COOKIE_NAME || 'token';
 
 // GET /auth/login
 router.get('/login', (req, res) => {
@@ -15,7 +16,7 @@ router.post('/login', async (req, res) => {
         const resposta = await axios.post(`${API}/auth/login`, req.body);
         const { token, utilizador } = resposta.data;
 
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie(COOKIE_NAME, token, { httpOnly: true });
         res.cookie('user', JSON.stringify(utilizador));
         res.redirect('/');
     } catch (err) {
@@ -40,7 +41,7 @@ router.post('/registo', async (req, res) => {
 
 // GET /auth/logout
 router.get('/logout', (req, res) => {
-    res.clearCookie('token');
+    res.clearCookie(COOKIE_NAME);
     res.clearCookie('user');
     res.redirect('/');
 });

@@ -24,7 +24,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware de verificação de autenticação
-const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
+const COOKIE_NAME = process.env.COOKIE_NAME || 'token';
 const JWT_SECRET = process.env.JWT_SECRET || 'jcr_secret_2026';
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || '/auth/login';
 

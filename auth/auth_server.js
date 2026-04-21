@@ -9,7 +9,7 @@ const app = express();
 
 // --- Configurações por Variáveis de Ambiente ---
 const PORT = process.env.PORT || 2623;
-const DATA_API_URL = process.env.DATA_API_URL || "http://api-dados:2621/users";
+const DATA_API_URL = process.env.DATA_API_URL || "http://api-dados:3001/utilizadores";
 const JWT_SECRET = process.env.JWT_SECRET || "jcr_secret_2026";
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
 const APP_PUBS_URL = process.env.APP_PUBS_URL || "http://localhost:2622";

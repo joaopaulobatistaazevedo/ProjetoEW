@@ -2,9 +2,9 @@
   "name": "auth-service",
   "version": "1.0.0",
   "description": "Authentication service for the educational resources platform.",
-  "main": "app.js",
+  "main": "auth_server.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node auth_server.js"
   },
   "dependencies": {
     "express": "^4.17.1",

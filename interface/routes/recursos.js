@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 
-const API = process.env.API_URL || 'http://localhost:3000';
+const API = process.env.API_URL || 'http://localhost:3001';
 
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {

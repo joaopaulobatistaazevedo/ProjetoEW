@@ -1,24 +1,34 @@
-// const jwt = require('jsonwebtoken');
-// const SECRET = process.env.JWT_SECRET || 'segredo';
+const jwt = require('jsonwebtoken');
 
-// function authenticate(req, res, next) {
-//     const token = req.headers.authorization?.split(' ')[1]; // Bearer <token>
-//     if (!token) return res.status(401).json({ erro: 'Token em falta' });
+const JWT_SECRET = process.env.JWT_SECRET || 'jcr_secret_2026';
 
-//     try {
-//         req.user = jwt.verify(token, SECRET);
-//         next();
-//     } catch (err) {
-//         res.status(401).json({ erro: 'Token inválido ou expirado' });
-//     }
-// }
+function authenticate(req, res, next) {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-// function authorize(...roles) {
-//     return (req, res, next) => {
-//         if (!roles.includes(req.user.role))
-//             return res.status(403).json({ erro: 'Sem permissão' });
-//         next();
-//     };
-// }
+    if (!token) {
+        return res.status(401).json({ erro: 'Token em falta' });
+    }
 
-// module.exports = { authenticate, authorize };
+    try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        req.user = {
+            id: payload.id || payload.sub,
+            role: payload.role
+        };
+        return next();
+    } catch (err) {
+        return res.status(401).json({ erro: 'Token invalido ou expirado' });
+    }
+}
+
+function authorize(...roles) {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({ erro: 'Sem permissao' });
+        }
+        return next();
+    };
+}
+
+module.exports = { authenticate, authorize };
