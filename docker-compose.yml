@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  api-dados:
+    build: ./api-dados
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
+    depends_on:
+      - mongodb_api
+    networks:
+      - app-network
+
+  auth:
+    build: ./auth
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
+      - PORT=2623
+      - DATA_API_URL=http://api-dados:2621/users
+      - JWT_SECRET=jcr_secret_2026
+      - COOKIE_NAME=auth_token_alunos
+      - APP_PUBS_URL=http://localhost:2622
+    depends_on:
+      - mongodb_api
+    networks:
+      - app-network
+
+  interface:
+    build: ./interface
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-dados
+      - auth
+    networks:
+      - app-network
+
+  mongodb_api:
+    build:
+      context: ./api-dados
+      dockerfile: Dockerfile.mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_api_data:/data/db
+      - ./api-dados/mongo_init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+
+
+volumes:
+  mongodb_api_data:
+
+networks:
+  app-network:
+    driver: bridge
