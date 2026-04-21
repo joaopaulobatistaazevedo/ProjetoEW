@@ -1,0 +1,39 @@
+extends ../layout
+
+block content
+  - const isEdit = !!recurso
+  .w3-container.w3-padding-24
+    .w3-card-4.w3-white(style='max-width: 760px; margin: 0 auto;')
+      .w3-container.w3-blue
+        h2= titulo
+      .w3-container.w3-padding-16
+        if erro
+          .w3-panel.w3-pale-red.w3-border.w3-border-red
+            p= erro
+
+        form(method='POST', action=isEdit ? ('/recursos/' + recurso._id + '/editar') : '/recursos/novo')
+          p
+            label(for='titulo') Titulo
+            input#titulo.w3-input.w3-border(type='text', name='titulo', value=isEdit ? recurso.titulo : '', required=true)
+          p
+            label(for='subtitulo') Subtitulo
+            input#subtitulo.w3-input.w3-border(type='text', name='subtitulo', value=isEdit ? (recurso.subtitulo || '') : '')
+          p
+            label(for='tipo') Tipo
+            input#tipo.w3-input.w3-border(type='text', name='tipo', value=isEdit ? recurso.tipo : '', required=true)
+          p
+            label(for='dataCriacao') Data de criacao
+            input#dataCriacao.w3-input.w3-border(type='date', name='dataCriacao', value=isEdit && recurso.dataCriacao ? new Date(recurso.dataCriacao).toISOString().slice(0,10) : '')
+          p
+            label(for='visibilidade') Visibilidade
+            select#visibilidade.w3-select.w3-border(name='visibilidade')
+              option(value='publico' selected=(isEdit ? recurso.visibilidade === 'publico' : true)) publico
+              option(value='privado' selected=(isEdit && recurso.visibilidade === 'privado')) privado
+          p
+            label(for='hashtags') Hashtags (JSON array, ex.: ["js","express"])
+            input#hashtags.w3-input.w3-border(type='text', name='hashtags', value=isEdit && recurso.hashtags ? JSON.stringify(recurso.hashtags) : '[]')
+
+          p
+            button.w3-button.w3-blue.w3-block(type='submit') Guardar
+          p
+            a(href='/recursos') Voltar

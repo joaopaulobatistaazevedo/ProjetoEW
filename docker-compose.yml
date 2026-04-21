@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   api-dados:
     build: ./api-dados
@@ -52,8 +52,6 @@ services:
       - ./api-dados/mongo_init:/docker-entrypoint-initdb.d
     networks:
       - app-network
-
-
 
 volumes:
   mongodb_api_data:
