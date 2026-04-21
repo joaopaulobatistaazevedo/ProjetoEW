@@ -1,0 +1,8 @@
+FROM mongo:latest
+
+# Para importar ficheiros de dados JSON para o MongoDB ao iniciar o container,
+# coloca os teus ficheiros (ex: utilizadores.json, recursos.json, posts.json) na pasta mongo_init.
+# Exemplo de comando para copiar um ficheiro específico:
+#
+# O comando abaixo copia tudo da pasta mongo_init (incluindo scripts e dados):
+COPY mongo_init /docker-entrypoint-initdb.d/
