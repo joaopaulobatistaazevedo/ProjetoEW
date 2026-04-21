@@ -1,3 +1,4 @@
+var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -63,4 +64,26 @@ app.use('/recursos', verificarAutenticacao, recursosRouter);
 app.use('/posts', verificarAutenticacao, postsRouter);
 app.use('/utilizadores', verificarAutenticacao, utilizadoresRouter);
 
-module.exports = app;
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+const PORT = process.env.PORT || 8080;
+const API_URL = process.env.API_URL || 'http://localhost:3001';
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Interface a correr na porta ${PORT}`);
+    console.log(`API_URL: ${API_URL}`);
+});
