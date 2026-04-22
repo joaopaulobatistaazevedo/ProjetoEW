@@ -3,6 +3,7 @@ var express = require('express');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
+const setupSwagger = require('./swagger');
 
 var app = express();
 
@@ -20,6 +21,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+setupSwagger(app);
 
 // Regista modelos necessários para populate.
 require('./models/utilizador');
