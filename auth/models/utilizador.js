@@ -9,6 +9,6 @@ const utilizadorSchema = new mongoose.Schema({
   filiacao: String,
   dataRegisto: { type: Date, default: Date.now },
   ativo: { type: Boolean, default: true }
-});
+}, { versionKey: false });
 
 module.exports = mongoose.model('Utilizador', utilizadorSchema);

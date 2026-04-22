@@ -1,0 +1,55 @@
+extends ../layout
+
+block content
+  .w3-container.w3-padding-24
+    if utilizador
+      .w3-card.w3-white.w3-padding
+        h2= utilizador.nome
+        p
+          strong Username:
+          |  #{utilizador.username}
+        p
+          strong Email:
+          |  #{utilizador.email}
+        p
+          strong Role:
+          |  #{utilizador.role}
+        if utilizador.filiacao
+          p
+            strong Filiação:
+            |  #{utilizador.filiacao}
+
+      .w3-card.w3-white.w3-padding.w3-margin-top
+        h3 Editar utilizador
+        form(method='POST', action='/utilizadores/' + utilizador._id + '/editar')
+          p
+            label(for='username') Username
+            input#username.w3-input.w3-border(type='text', name='username', value=utilizador.username, required=true)
+          p
+            label(for='nome') Nome
+            input#nome.w3-input.w3-border(type='text', name='nome', value=utilizador.nome, required=true)
+          p
+            label(for='email') Email
+            input#email.w3-input.w3-border(type='email', name='email', value=utilizador.email, required=true)
+          p
+            label(for='role') Role
+            select#role.w3-select.w3-border(name='role')
+              option(value='admin' selected=utilizador.role === 'admin') admin
+              option(value='produtor' selected=utilizador.role === 'produtor') produtor
+              option(value='consumidor' selected=utilizador.role === 'consumidor') consumidor
+          p
+            label(for='filiacao') Filiação
+            input#filiacao.w3-input.w3-border(type='text', name='filiacao', value=utilizador.filiacao || '')
+          p
+            label(for='password') Nova password
+            input#password.w3-input.w3-border(type='password', name='password', placeholder='Deixar em branco para manter')
+          button.w3-button.w3-green(type='submit') Guardar alterações
+          a.w3-button.w3-light-grey.w3-margin-left(href='/utilizadores') Voltar
+
+      .w3-card.w3-white.w3-padding.w3-margin-top
+        h3 Apagar utilizador
+        form(method='POST', action='/utilizadores/' + utilizador._id + '/apagar')
+          button.w3-button.w3-red(type='submit') Apagar
+    else
+      p Utilizador não encontrado.
+      a.w3-button.w3-light-grey(href='/utilizadores') Voltar

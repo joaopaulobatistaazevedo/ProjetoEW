@@ -12,6 +12,7 @@ block content
               th Nome
               th Email
               th Role
+              th Ações
           tbody
             each u in utilizadores
               tr
@@ -19,5 +20,7 @@ block content
                 td= u.nome
                 td= u.email
                 td= u.role
+                td
+                  a.w3-button.w3-small.w3-blue(href='/utilizadores/' + u._id) Ver
     else
       p Sem utilizadores para mostrar.

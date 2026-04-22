@@ -10,10 +10,9 @@ router.get('/', async (req, res) => {
             axios.get(`${API}/recursos?visibilidade=publico`),
             axios.get(`${API}/recursos/top3`)
         ]);
-
         res.render('index', {
             titulo: 'Recursos Educativos',
-            recursos: recursosRes.data.slice(0, 6), // últimos 6
+            recursos: recursosRes.data.slice(0, 6),
             top3: top3Res.data
         });
     } catch (err) {

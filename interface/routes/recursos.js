@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 
-const API = process.env.API_URL || 'http://localhost:3001';
+const API         = process.env.API_URL     || 'http://localhost:3001';
+const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
@@ -23,7 +24,7 @@ router.get('/novo', (req, res) => {
 // POST /recursos/novo — submeter recurso
 router.post('/novo', async (req, res) => {
     try {
-        const token = req.cookies.token;
+        const token = req.cookies[COOKIE_NAME];
         await axios.post(`${API}/recursos`, req.body, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -63,7 +64,7 @@ router.get('/:id/editar', async (req, res) => {
 // POST /recursos/:id/editar
 router.post('/:id/editar', async (req, res) => {
     try {
-        const token = req.cookies.token;
+        const token = req.cookies[COOKIE_NAME];
         await axios.put(`${API}/recursos/${req.params.id}`, req.body, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -76,7 +77,7 @@ router.post('/:id/editar', async (req, res) => {
 // POST /recursos/:id/apagar
 router.post('/:id/apagar', async (req, res) => {
     try {
-        const token = req.cookies.token;
+        const token = req.cookies[COOKIE_NAME];
         await axios.delete(`${API}/recursos/${req.params.id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });

@@ -2,16 +2,15 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 
-const COOKIE_NAME = process.env.COOKIE_NAME || 'token';
-
-const AUTH = process.env.AUTH_URL || 'http://auth:2623/users';
+const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
+const AUTH        = process.env.AUTH_URL    || 'http://localhost:2623/users';
 
 // GET /auth/login
 router.get('/login', (req, res) => {
     res.render('auth/login', { titulo: 'Login' });
 });
 
-// POST /auth/login
+// POST /auth/login — envia credenciais ao auth service, guarda o token em cookie
 router.post('/login', async (req, res) => {
     try {
         const resposta = await axios.post(`${AUTH}/login`, req.body);
@@ -27,7 +26,7 @@ router.get('/registo', (req, res) => {
     res.render('auth/registo', { titulo: 'Registo' });
 });
 
-// POST /auth/registo
+// POST /auth/registo — cria conta no auth service
 router.post('/registo', async (req, res) => {
     try {
         await axios.post(`${AUTH}/register`, req.body);
@@ -37,10 +36,9 @@ router.post('/registo', async (req, res) => {
     }
 });
 
-// GET /auth/logout
+// GET /auth/logout — limpa o cookie
 router.get('/logout', (req, res) => {
     res.clearCookie(COOKIE_NAME);
-    res.clearCookie('user');
     res.redirect('/');
 });
 

@@ -61,7 +61,6 @@ const recursosController = {
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
             if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
 
-            // privado: só admin ou o próprio produtor
             if (recurso.visibilidade === 'privado') {
                 if (req.user.role !== 'admin' && req.user.id !== recurso.produtor.toString()) {
                     return res.status(403).json({ erro: 'Sem permissão' });
@@ -153,7 +152,6 @@ const recursosController = {
             res.status(500).json({ erro: err.message });
         }
     }
-
 };
 
 module.exports = recursosController;

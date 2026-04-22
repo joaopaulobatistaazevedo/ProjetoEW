@@ -1,0 +1,75 @@
+const express = require('express');
+const router = express.Router();
+const Utilizador = require('../controllers/utilizador');
+const auth = require('../auth/auth');
+
+const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
+
+// --- ROTAS ABERTAS ---
+
+// POST /users/register — criar conta
+router.post('/register', async (req, res) => {
+    try {
+        const novo = await Utilizador.insert(req.body);
+        res.status(201).json(novo);
+    } catch (err) {
+        res.status(400).json({ erro: err.message });
+    }
+});
+
+// POST /users/login — autenticar
+router.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const dados = await Utilizador.login(username, password);
+        res.cookie(COOKIE_NAME, dados.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000
+        });
+        res.status(200).json({ status: "Login efetuado com sucesso", user: dados.user, token: dados.token });
+    } catch (err) {
+        res.status(401).json({ erro: err.message });
+    }
+});
+
+// GET /users/logout — terminar sessão
+router.get('/logout', (req, res) => {
+    res.clearCookie(COOKIE_NAME);
+    res.status(200).json({ status: "Sessão terminada" });
+});
+
+// --- ROTAS PROTEGIDAS ---
+
+// GET /users — listar todos
+router.get('/', auth.verificaAcesso, (req, res) => {
+    Utilizador.list()
+        .then(dados => res.status(200).json(dados))
+        .catch(err => res.status(500).json({ erro: err.message }));
+});
+
+// GET /users/:id — ver um
+router.get('/:id', auth.verificaAcesso, (req, res) => {
+    Utilizador.findById(req.params.id)
+        .then(dados => {
+            if (dados) res.status(200).json(dados);
+            else res.status(404).json({ erro: "Utilizador não encontrado" });
+        })
+        .catch(err => res.status(500).json({ erro: err.message }));
+});
+
+// PUT /users/:id — atualizar
+router.put('/:id', auth.verificaAcesso, (req, res) => {
+    Utilizador.update(req.params.id, req.body)
+        .then(dados => res.status(200).json(dados))
+        .catch(err => res.status(500).json({ erro: err.message }));
+});
+
+// DELETE /users/:id — apagar
+router.delete('/:id', auth.verificaAcesso, (req, res) => {
+    Utilizador.remove(req.params.id)
+        .then(dados => res.status(200).json({ status: "Removido", dados }))
+        .catch(err => res.status(500).json({ erro: err.message }));
+});
+
+module.exports = router;
