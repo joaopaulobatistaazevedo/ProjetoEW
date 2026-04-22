@@ -21,6 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// Regista modelos necessários para populate.
+require('./models/utilizador');
+
 const recursosRouter = require('./routes/recursos');
 const postsRouter    = require('./routes/posts');
 

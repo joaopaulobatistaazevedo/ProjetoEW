@@ -5,13 +5,29 @@ const auth = require('../auth/auth');
 
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
 
+function toPublicUser(userDoc) {
+    if (!userDoc) return null;
+
+    const user = userDoc.toObject ? userDoc.toObject() : userDoc;
+    return {
+        _id: user._id,
+        username: user.username,
+        nome: user.nome,
+        email: user.email,
+        role: user.role,
+        filiacao: user.filiacao,
+        dataRegisto: user.dataRegisto,
+        ativo: user.ativo
+    };
+}
+
 // --- ROTAS ABERTAS ---
 
 // POST /users/register — criar conta
 router.post('/register', async (req, res) => {
     try {
         const novo = await Utilizador.insert(req.body);
-        res.status(201).json(novo);
+        res.status(201).json(toPublicUser(novo));
     } catch (err) {
         res.status(400).json({ erro: err.message });
     }
@@ -61,14 +77,14 @@ router.get('/:id', auth.verificaAcesso, (req, res) => {
 // PUT /users/:id — atualizar
 router.put('/:id', auth.verificaAcesso, (req, res) => {
     Utilizador.update(req.params.id, req.body)
-        .then(dados => res.status(200).json(dados))
+        .then(dados => res.status(200).json(toPublicUser(dados)))
         .catch(err => res.status(500).json({ erro: err.message }));
 });
 
 // DELETE /users/:id — apagar
 router.delete('/:id', auth.verificaAcesso, (req, res) => {
     Utilizador.remove(req.params.id)
-        .then(dados => res.status(200).json({ status: "Removido", dados }))
+        .then(dados => res.status(200).json({ status: "Removido", dados: toPublicUser(dados) }))
         .catch(err => res.status(500).json({ erro: err.message }));
 });
 
