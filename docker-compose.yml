@@ -17,10 +17,8 @@ services:
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
       - PORT=2623
-      - DATA_API_URL=http://api-dados:3001/utilizadores
       - JWT_SECRET=jcr_secret_2026
       - COOKIE_NAME=token
-      - APP_PUBS_URL=http://localhost:3000
     depends_on:
       - mongodb_api
     networks:
