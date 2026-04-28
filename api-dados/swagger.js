@@ -66,7 +66,7 @@ const swaggerSpec = {
                 parameters: [
                     { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
                 ],
-                responses: { '200': { description: 'Ficheiro enviado' }, '404': { description: 'Nao encontrado' } }
+                responses: { '200': { description: 'Ficheiro enviado' }, '404': { description: 'Não encontrado' } }
             }
         },
         '/api/files/{id}': {
@@ -75,7 +75,7 @@ const swaggerSpec = {
                 parameters: [
                     { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
                 ],
-                responses: { '200': { description: 'Removido' }, '404': { description: 'Nao encontrado' } }
+                responses: { '200': { description: 'Removido' }, '404': { description: 'Não encontrado' } }
             }
         },
         '/recursos': {

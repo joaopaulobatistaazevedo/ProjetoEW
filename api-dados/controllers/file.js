@@ -27,7 +27,8 @@ exports.uploadFile = async (req, res) => {
 // 2. Pesquisa / Listagem
 exports.getFiles = async (req, res) => {
     try {
-        const { search, category } = req.query;
+        const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+        const category = typeof req.query.category === 'string' ? req.query.category : undefined;
         const query = {};
         if (search) {
             query.$text = { $search: search };
@@ -47,7 +48,7 @@ exports.downloadFile = async (req, res) => {
     try {
         const file = await File.findById(req.params.id);
         if (!file) {
-            return res.status(401).json({ message: 'Ficheiro não encontrado.' });
+            return res.status(404).json({ message: 'Ficheiro não encontrado.' });
         }
         return res.download(file.path, file.originalName);
     } catch (error) {
@@ -60,7 +61,7 @@ exports.deleteFile = async (req, res) => {
     try {
         const file = await File.findById(req.params.id);
         if (!file) {
-            return res.status(401).json({ message: 'Ficheiro não encontrado.' });
+            return res.status(404).json({ message: 'Ficheiro não encontrado.' });
         }
 
         await fs.unlink(file.path);
