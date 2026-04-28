@@ -64,7 +64,13 @@ exports.deleteFile = async (req, res) => {
             return res.status(404).json({ message: 'Ficheiro não encontrado.' });
         }
 
-        await fs.unlink(file.path);
+        try {
+            await fs.unlink(file.path);
+        } catch (error) {
+            if (error.code !== 'ENOENT') {
+                throw error;
+            }
+        }
         await file.deleteOne();
         return res.json({ message: 'Ficheiro removido com sucesso.' });
     } catch (error) {
