@@ -25,6 +25,59 @@ const swaggerSpec = {
         }
     },
     paths: {
+        '/api/files': {
+            get: {
+                summary: 'Listar ficheiros',
+                parameters: [
+                    { name: 'search', in: 'query', schema: { type: 'string' } },
+                    { name: 'category', in: 'query', schema: { type: 'string' } }
+                ],
+                responses: { '200': { description: 'Lista de ficheiros' } }
+            }
+        },
+        '/api/files/upload': {
+            post: {
+                summary: 'Upload de ficheiro',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'multipart/form-data': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    file: { type: 'string', format: 'binary' },
+                                    tags: { type: 'string' },
+                                    category: { type: 'string' }
+                                },
+                                required: ['file']
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '201': { description: 'Ficheiro criado' },
+                    '400': { description: 'Nenhum ficheiro enviado' }
+                }
+            }
+        },
+        '/api/files/download/{id}': {
+            get: {
+                summary: 'Download de ficheiro',
+                parameters: [
+                    { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                responses: { '200': { description: 'Ficheiro enviado' }, '404': { description: 'Nao encontrado' } }
+            }
+        },
+        '/api/files/{id}': {
+            delete: {
+                summary: 'Remover ficheiro',
+                parameters: [
+                    { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                responses: { '200': { description: 'Removido' }, '404': { description: 'Nao encontrado' } }
+            }
+        },
         '/recursos': {
             get: {
                 summary: 'Listar recursos',

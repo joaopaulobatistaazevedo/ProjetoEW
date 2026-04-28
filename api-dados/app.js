@@ -4,6 +4,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 const setupSwagger = require('./swagger');
+const fs = require('fs');
+const path = require('path');
 
 var app = express();
 
@@ -28,9 +30,16 @@ require('./models/utilizador');
 
 const recursosRouter = require('./routes/recursos');
 const postsRouter    = require('./routes/posts');
+const fileRoutes     = require('./routes/fileRoutes');
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use('/recursos', recursosRouter);
 app.use('/posts',    postsRouter);
+app.use('/api/files', fileRoutes);
 
 app.get('/', (req, res) => {
     res.json({ data: new Date().toISOString(), status: 'API de dados a correr...' });

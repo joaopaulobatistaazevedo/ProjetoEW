@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const recursosController = require('../controllers/recursosController');
-const upload = require('../middleware/upload');
+const upload = require('../config/multer');
 const { authenticate, authorize } = require('../middleware/auth');
 
 // GET /recursos — listar com filtros (público)
