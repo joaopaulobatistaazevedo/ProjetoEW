@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: API de Gestão de Ficheiros
+  description: Serviço simples para upload, pesquisa e download de ficheiros.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:19001
+    description: Servidor Local
+
+paths:
+  /api/files/upload:
+    post:
+      summary: Faz o upload de um ficheiro
+      tags:
+        - Ficheiros
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: O ficheiro físico a carregar.
+                category:
+                  type: string
+                  description: Categoria do ficheiro.
+                tags:
+                  type: string
+                  description: Tags separadas por vírgulas (ex. "trabalho,urgente").
+      responses:
+        201:
+          description: Ficheiro carregado com sucesso.
+        400:
+          description: Erro no envio ou ficheiro não suportado.
+
+  /api/files:
+    get:
+      summary: Lista e pesquisa ficheiros
+      tags:
+        - Ficheiros
+      parameters:
+        - name: search
+          in: query
+          description: Termo de pesquisa para nome ou tags.
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filtrar por categoria específica.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Lista de ficheiros encontrados.
+
+  /api/files/download/{id}:
+    get:
+      summary: Faz o download de um ficheiro
+      tags:
+        - Ficheiros
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do ficheiro no MongoDB.
+          schema:
+            type: string
+      responses:
+        200:
+          description: O ficheiro binário.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        404:
+          description: Ficheiro não encontrado.
+
+  /api/files/{id}:
+    delete:
+      summary: Remove um ficheiro
+      tags:
+        - Ficheiros
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID do ficheiro no MongoDB.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Ficheiro e registo removidos.
+        404:
+          description: ID não encontrado.
