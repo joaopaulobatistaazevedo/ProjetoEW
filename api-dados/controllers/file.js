@@ -8,13 +8,17 @@ exports.uploadFile = async (req, res) => {
             return res.status(400).json({ message: 'Nenhum ficheiro enviado!' });
         }
 
+        const tags = typeof req.body.tags === 'string'
+            ? req.body.tags.split(',').map(tag => tag.trim()).filter(Boolean).map(tag => tag.toLowerCase())
+            : [];
+
         const newFile = new File({
             originalName: req.file.originalname,
             storageName: req.file.filename,
             path: req.file.path,
             mimeType: req.file.mimetype,
             size: req.file.size,
-            tags: req.body.tags ? req.body.tags.split(',') : [],
+            tags,
             category: req.body.category
         });
         await newFile.save();
@@ -68,7 +72,7 @@ exports.deleteFile = async (req, res) => {
             await fs.unlink(file.path);
         } catch (error) {
             if (error.code !== 'ENOENT') {
-                throw error;
+                return res.status(500).json({ error: error.message });
             }
         }
         await file.deleteOne();

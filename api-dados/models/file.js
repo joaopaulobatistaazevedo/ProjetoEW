@@ -6,7 +6,7 @@ const fileSchema = new mongoose.Schema({
     path: { type: String, required: true },
     mimeType: { type: String, required: true },
     size: { type: Number, required: true },
-    tags: [{ type: String, lowercase: true }],
+    tags: [{ type: String }],
     category: { type: String, default: 'geral' },
     description: { type: String, trim: true }
 }, { timestamps: true });
