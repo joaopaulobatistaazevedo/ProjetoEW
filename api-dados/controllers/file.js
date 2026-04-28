@@ -9,7 +9,7 @@ exports.uploadFile = async (req, res) => {
         }
 
         const tags = typeof req.body.tags === 'string'
-            ? req.body.tags.split(',').map(tag => tag.trim()).filter(Boolean).map(tag => tag.toLowerCase())
+            ? req.body.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(Boolean)
             : [];
 
         const newFile = new File({
@@ -68,14 +68,14 @@ exports.deleteFile = async (req, res) => {
             return res.status(404).json({ message: 'Ficheiro não encontrado.' });
         }
 
+        await file.deleteOne();
         try {
             await fs.unlink(file.path);
         } catch (error) {
             if (error.code !== 'ENOENT') {
-                return res.status(500).json({ error: error.message });
+                console.error('Erro ao remover ficheiro do disco:', error.message);
             }
         }
-        await file.deleteOne();
         return res.json({ message: 'Ficheiro removido com sucesso.' });
     } catch (error) {
         return res.status(500).json({ error: error.message });

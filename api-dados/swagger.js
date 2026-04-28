@@ -38,6 +38,7 @@ const swaggerSpec = {
         '/api/files/upload': {
             post: {
                 summary: 'Upload de ficheiro',
+                security: [{ bearerAuth: [] }],
                 requestBody: {
                     required: true,
                     content: {
@@ -56,7 +57,8 @@ const swaggerSpec = {
                 },
                 responses: {
                     '201': { description: 'Ficheiro criado' },
-                    '400': { description: 'Nenhum ficheiro enviado' }
+                    '400': { description: 'Nenhum ficheiro enviado' },
+                    '401': { description: 'Não autenticado' }
                 }
             }
         },
@@ -72,10 +74,15 @@ const swaggerSpec = {
         '/api/files/{id}': {
             delete: {
                 summary: 'Remover ficheiro',
+                security: [{ bearerAuth: [] }],
                 parameters: [
                     { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
                 ],
-                responses: { '200': { description: 'Removido' }, '404': { description: 'Não encontrado' } }
+                responses: {
+                    '200': { description: 'Removido' },
+                    '401': { description: 'Não autenticado' },
+                    '404': { description: 'Não encontrado' }
+                }
             }
         },
         '/recursos': {
