@@ -1,5 +1,17 @@
 const File = require('../models/file');
 const fs = require('fs').promises;
+const path = require('path');
+
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+
+const resolveUploadPath = (filePath) => {
+    const resolvedPath = path.resolve(filePath);
+    const normalizedUploadsDir = path.resolve(uploadsDir) + path.sep;
+    if (!resolvedPath.startsWith(normalizedUploadsDir)) {
+        return null;
+    }
+    return resolvedPath;
+};
 
 // 1. Upload
 exports.uploadFile = async (req, res) => {
@@ -54,7 +66,11 @@ exports.downloadFile = async (req, res) => {
         if (!file) {
             return res.status(404).json({ message: 'Ficheiro não encontrado.' });
         }
-        return res.download(file.path, file.originalName);
+        const resolvedPath = resolveUploadPath(file.path);
+        if (!resolvedPath) {
+            return res.status(400).json({ message: 'Caminho de ficheiro inválido.' });
+        }
+        return res.download(resolvedPath, file.originalName);
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -68,14 +84,18 @@ exports.deleteFile = async (req, res) => {
             return res.status(404).json({ message: 'Ficheiro não encontrado.' });
         }
 
-        await file.deleteOne();
+        const resolvedPath = resolveUploadPath(file.path);
+        if (!resolvedPath) {
+            return res.status(400).json({ message: 'Caminho de ficheiro inválido.' });
+        }
         try {
-            await fs.unlink(file.path);
+            await fs.unlink(resolvedPath);
         } catch (error) {
             if (error.code !== 'ENOENT') {
-                console.error('Erro ao remover ficheiro do disco:', error.message);
+                return res.status(500).json({ error: error.message });
             }
         }
+        await file.deleteOne();
         return res.json({ message: 'Ficheiro removido com sucesso.' });
     } catch (error) {
         return res.status(500).json({ error: error.message });
