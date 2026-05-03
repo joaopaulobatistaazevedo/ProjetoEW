@@ -5,6 +5,9 @@ services:
       - "3001:3001"
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
+      - JWT_SECRET=jcr_secret_2026
+      - COOKIE_NAME=token
+      - INTERFACE_URL=http://interface:3000
     depends_on:
       - mongodb_api
     networks:
@@ -19,6 +22,8 @@ services:
       - PORT=2623
       - JWT_SECRET=jcr_secret_2026
       - COOKIE_NAME=token
+      - SWAGGER_URL=http://localhost:3002
+      - INTERFACE_URL=http://interface:3000
     depends_on:
       - mongodb_api
     networks:

@@ -1,6 +1,7 @@
 const swaggerUi = require('swagger-ui-express');
 
 const PORT = process.env.PORT || 2623;
+const SWAGGER_URL = process.env.SWAGGER_URL || 'http://localhost:3002';
 
 const swaggerSpec = {
     openapi: '3.0.3',
@@ -11,8 +12,8 @@ const swaggerSpec = {
     },
     servers: [
         {
-            url: `http://localhost:${PORT}`,
-            description: 'Servidor local'
+            url: SWAGGER_URL,
+            description: 'Auth Service'
         }
     ],
     components: {
