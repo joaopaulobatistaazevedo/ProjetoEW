@@ -11,11 +11,42 @@ const PORT      = process.env.PORT      || 2623;
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/auth_service';
 
 mongoose.connect(MONGO_URL)
-    .then(() => console.log('Auth: MongoDB ligado com sucesso.'))
+    .then(() => {
+        console.log('Auth: MongoDB ligado com sucesso.');
+        ensureBaseAdmin();
+    })
     .catch(err => {
         console.error('Auth: Erro crítico:', err.message);
         process.exit(1);
     });
+
+// Garantir existência de utilizador admin base
+const Utilizador = require('./models/utilizador');
+const bcrypt = require('bcryptjs');
+async function ensureBaseAdmin() {
+    try {
+        const admin = await Utilizador.findOne({ role: 'admin' }).exec();
+        if (!admin) {
+            const password = process.env.BASE_ADMIN_PASS || 'admin';
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash(password, salt);
+            const novo = new Utilizador({
+                username: process.env.BASE_ADMIN_USER || 'admin',
+                nome: process.env.BASE_ADMIN_NOME || 'admin',
+                email: process.env.BASE_ADMIN_EMAIL || 'admin@local',
+                password: hash,
+                role: 'admin',
+                filiacao: process.env.BASE_ADMIN_FILIACAO || 'admin'
+            });
+            await novo.save();
+            console.log('Auth: Utilizador admin base criado (username/password = admin/admin por defeito).');
+        } else {
+            console.log('Auth: Já existe pelo menos um admin.');
+        }
+    } catch (err) {
+        console.error('Auth: Erro ao garantir admin base:', err.message);
+    }
+}
 
 app.use(morgan('dev'));
 app.use(express.json());
