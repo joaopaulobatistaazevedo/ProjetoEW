@@ -81,8 +81,8 @@ module.exports.verificaAutor = (recurso) => {
         }
         
         // Produtor só pode alterar seus recursos
-        // Comparar req.user.sub (ID do user) com recurso.produtor (ID do autor)
-        if (recurso && recurso.produtor && recurso.produtor.toString() === req.user.sub) {
+        // Comparar req.user.sub (ID do user) com recurso.autor (ID do autor)
+        if (recurso && recurso.autor && recurso.autor.toString() === req.user.sub) {
             return next();
         }
         

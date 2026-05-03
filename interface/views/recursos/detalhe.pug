@@ -18,12 +18,12 @@ block content
         strong Media de estrelas:
         |  #{recurso.mediaEstrelas || 0}
       p
-        if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.produtor._id))
+        if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
           a.w3-button.w3-blue(href='/recursos/' + recurso._id + '/editar') Editar
           form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
             button.w3-button.w3-red(type='submit') Apagar
         else
-          span.w3-text-grey Apenas o produtor ou admin pode editar/apagar este recurso.
+          span.w3-text-grey Apenas o autor ou admin pode editar/apagar este recurso.
 
     .w3-card.w3-white.w3-padding.w3-margin-top
       h3 Novo post

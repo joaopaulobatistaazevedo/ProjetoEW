@@ -29,7 +29,7 @@ block content
               th Titulo
               th Tipo
               th Visibilidade
-              th Produtor
+              th Autor
               th Acoes
           tbody
             each recurso in recursos
@@ -37,10 +37,10 @@ block content
                 td= recurso.titulo
                 td= recurso.tipo
                 td= recurso.visibilidade
-                td= (recurso.produtor && recurso.produtor.nome) || '-'
+                td= (recurso.autor && recurso.autor.nome) || '-'
                 td
                   a.w3-button.w3-small.w3-blue(href='/recursos/' + recurso._id) Ver
-                  if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.produtor._id))
+                  if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
                     a.w3-button.w3-small.w3-orange(href='/recursos/' + recurso._id + '/editar') Editar
                     form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
                       button.w3-button.w3-small.w3-red(type='submit') Apagar
