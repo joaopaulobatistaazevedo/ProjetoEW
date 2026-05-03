@@ -1,0 +1,26 @@
+services:
+  # Serviço da Base de Dados
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_gestao_ficheiros
+    ports:
+      - "27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # O teu Serviço de Gestão de Ficheiros
+  app:
+    build: .
+    container_name: file_manager_app
+    restart: always
+    ports:
+      - "19001:19001"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/gestao_ficheiros
+      - PORT=19001
+    depends_on:
+      - mongodb
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+volumes:
+  mongo_data:

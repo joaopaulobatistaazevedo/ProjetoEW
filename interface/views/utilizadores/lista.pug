@@ -1,0 +1,26 @@
+extends ../layout
+
+block content
+  .w3-container.w3-padding-24
+    h2 Utilizadores
+    if utilizadores && utilizadores.length
+      .w3-responsive
+        table.w3-table-all
+          thead
+            tr
+              th Username
+              th Nome
+              th Email
+              th Role
+              th Ações
+          tbody
+            each u in utilizadores
+              tr
+                td= u.username
+                td= u.nome
+                td= u.email
+                td= u.role
+                td
+                  a.w3-button.w3-small.w3-blue(href='/utilizadores/' + u._id) Ver
+    else
+      p Sem utilizadores para mostrar.

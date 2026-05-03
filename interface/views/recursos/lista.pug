@@ -1,0 +1,48 @@
+extends ../layout
+
+block content
+  .w3-container.w3-padding-24
+    .w3-bar.w3-margin-bottom
+      h2.w3-bar-item Recursos
+      if user
+        a.w3-button.w3-blue.w3-right.w3-margin-right(href='/recursos/novo') Novo recurso
+
+    if erro
+      .w3-panel.w3-pale-red.w3-border.w3-border-red
+        p= erro
+
+    form.w3-row-padding.w3-margin-bottom(method='GET', action='/recursos')
+      .w3-quarter
+        input.w3-input.w3-border(type='text', name='tipo', placeholder='tipo', value=(filtros && filtros.tipo) || '')
+      .w3-quarter
+        input.w3-input.w3-border(type='text', name='hashtag', placeholder='hashtag', value=(filtros && filtros.hashtag) || '')
+      .w3-quarter
+        input.w3-input.w3-border(type='text', name='ano', placeholder='ano', value=(filtros && filtros.ano) || '')
+      .w3-quarter
+        button.w3-button.w3-dark-grey.w3-block(type='submit') Filtrar
+
+    if recursos && recursos.length
+      .w3-responsive
+        table.w3-table-all
+          thead
+            tr
+              th Titulo
+              th Tipo
+              th Visibilidade
+              th Autor
+              th Acoes
+          tbody
+            each recurso in recursos
+              tr
+                td= recurso.titulo
+                td= recurso.tipo
+                td= recurso.visibilidade
+                td= (recurso.autor && recurso.autor.nome) || '-'
+                td
+                  a.w3-button.w3-small.w3-blue(href='/recursos/' + recurso._id) Ver
+                  if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
+                    a.w3-button.w3-small.w3-orange(href='/recursos/' + recurso._id + '/editar') Editar
+                    form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
+                      button.w3-button.w3-small.w3-red(type='submit') Apagar
+    else
+      p Nao existem recursos para mostrar.

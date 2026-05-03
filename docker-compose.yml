@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   api-dados:
     build: ./api-dados
@@ -6,6 +5,9 @@ services:
       - "3001:3001"
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
+      - JWT_SECRET=jcr_secret_2026
+      - COOKIE_NAME=token
+      - INTERFACE_URL=http://interface:3000
     depends_on:
       - mongodb_api
     networks:
@@ -14,14 +16,14 @@ services:
   auth:
     build: ./auth
     ports:
-      - "3002:3002"
+      - "3002:2623"
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
       - PORT=2623
-      - DATA_API_URL=http://api-dados:2621/users
       - JWT_SECRET=jcr_secret_2026
-      - COOKIE_NAME=auth_token_alunos
-      - APP_PUBS_URL=http://localhost:2622
+      - COOKIE_NAME=token
+      - SWAGGER_URL=http://localhost:3002
+      - INTERFACE_URL=http://interface:3000
     depends_on:
       - mongodb_api
     networks:
@@ -31,6 +33,12 @@ services:
     build: ./interface
     ports:
       - "3000:3000"
+    environment:
+      - PORT=3000
+      - API_URL=http://api-dados:3001
+      - AUTH_URL=http://auth:2623/users
+      - COOKIE_NAME=token
+      - JWT_SECRET=jcr_secret_2026
     depends_on:
       - api-dados
       - auth
@@ -48,8 +56,6 @@ services:
       - ./api-dados/mongo_init:/docker-entrypoint-initdb.d
     networks:
       - app-network
-
-
 
 volumes:
   mongodb_api_data:

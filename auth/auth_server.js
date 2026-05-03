@@ -1,102 +1,74 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const morgan = require('morgan');
-const axios = require('axios');
-const path = require('path');
-const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const path = require('path');
+const setupSwagger = require('./swagger');
 
 const app = express();
 
-// --- Configurações por Variáveis de Ambiente ---
-const PORT = process.env.PORT || 2623;
-const DATA_API_URL = process.env.DATA_API_URL || "http://api-dados:2621/users";
-const JWT_SECRET = process.env.JWT_SECRET || "jcr_secret_2026";
-const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
-const APP_PUBS_URL = process.env.APP_PUBS_URL || "http://localhost:2622";
+const PORT      = process.env.PORT      || 2623;
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/auth_service';
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
+mongoose.connect(MONGO_URL)
+    .then(() => {
+        console.log('Auth: MongoDB ligado com sucesso.');
+        ensureBaseAdmin();
+    })
+    .catch(err => {
+        console.error('Auth: Erro crítico:', err.message);
+        process.exit(1);
+    });
+
+// Garantir existência de utilizador admin base
+const Utilizador = require('./models/utilizador');
+const bcrypt = require('bcryptjs');
+async function ensureBaseAdmin() {
+    try {
+        const admin = await Utilizador.findOne({ role: 'admin' }).exec();
+        if (!admin) {
+            const password = process.env.BASE_ADMIN_PASS || 'admin';
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash(password, salt);
+            const novo = new Utilizador({
+                username: process.env.BASE_ADMIN_USER || 'admin',
+                nome: process.env.BASE_ADMIN_NOME || 'admin',
+                email: process.env.BASE_ADMIN_EMAIL || 'admin@local',
+                password: hash,
+                role: 'admin',
+                filiacao: process.env.BASE_ADMIN_FILIACAO || 'admin'
+            });
+            await novo.save();
+            console.log('Auth: Utilizador admin base criado (username/password = admin/admin por defeito).');
+        } else {
+            console.log('Auth: Já existe pelo menos um admin.');
+        }
+    } catch (err) {
+        console.error('Auth: Erro ao garantir admin base:', err.message);
+    }
+}
 
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+setupSwagger(app);
 
-// --- Middleware de Proteção ---
-function verificaAcesso(req, res, next) {
-  const token = req.cookies[COOKIE_NAME];
-  if (!token) return res.status(401).redirect('/users/login');
-  else
-    jwt.verify(token, JWT_SECRET, (err, payload) => {
-      if (err) return res.status(401).redirect('/users/login');
-      else{
-        req.user = payload;
-        next();
-      }
-    });
-}
+const usersRouter = require('./routes/users');
+app.use('/users', usersRouter);
 
-// --- Rotas Protegidas ---
-app.get('/users', verificaAcesso, async (req, res) => {
-  try{
-    const response = await axios.get(DATA_API_URL);
-    res.render('utilizadores', { titulo: "Lista de Utilizadores", users: response.data });
-  } catch (error) {
-    res.status(500).render('error', { message: "Erro na API de Dados" });
-  }
+app.get('/', (req, res) => {
+    res.json({ data: new Date().toISOString(), status: `Auth a correr na porta ${PORT}` });
 });
 
-// --- Rotas Abertas ---
-
-app.get('/users/login', (req, res) => {
-  res.render('login', { titulo: "Página de Login", redirectTo: APP_PUBS_URL });
+app.use((req, res) => {
+    res.status(404).json({ erro: "Caminho não encontrado." });
 });
 
-app.get('/users/register', (req, res) => {
-  res.render('registo', { titulo: "Criar Nova Conta" });
+app.use((err, req, res, next) => {
+    console.error("ERRO:", err.stack);
+    res.status(err.status || 500).json({ erro: err.message });
 });
 
-// Rota de Login: Gera o JWT e guarda no Cookie
-app.post('/users/login', async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const response = await axios.get(`${DATA_API_URL}?username=${username}&password=${password}`);
-    const users = response.data;
-
-    if (users.length > 0) {
-      const user = users[0];
-      const token = jwt.sign(
-        { sub: user.id, username: user.username, nome: user.nome, role: user.role },
-        JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-
-      res.cookie(COOKIE_NAME, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 3600000
-      });
-
-      return res.json({
-        success: true,
-        message: "Login bem sucedido",
-        redirectTo: APP_PUBS_URL
-      });
-    } else {
-      res.render('login', { error: "Credenciais inválidas", titulo: "Página de Login" });
-    }
-  } catch (error) {
-    res.status(500).render('error', { message: "Erro na API de Dados" });
-  }
-});
-
-// Logout: Apaga o cookie
-app.get('/users/logout', verificaAcesso, (req, res) => {
-  res.clearCookie(COOKIE_NAME);
-  res.redirect('/users/login');
-});
-
-app.listen(PORT, () => {
-  console.log(`Auth Server a correr na porta ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Auth Server a correr na porta ${PORT}`));

@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  .w3-container.w3-padding-32
+    .w3-card-4.w3-white(style='max-width: 520px; margin: 0 auto;')
+      .w3-container.w3-blue
+        h2 Login
+      .w3-container.w3-padding-16
+        if erro
+          .w3-panel.w3-pale-red.w3-border.w3-border-red
+            p= erro
+        form(method='POST', action='/auth/login')
+          p
+            label(for='username') Username
+            input#username.w3-input.w3-border(type='text', name='username', required=true)
+          p
+            label(for='password') Password
+            input#password.w3-input.w3-border(type='password', name='password', required=true)
+          p
+            button.w3-button.w3-blue.w3-block(type='submit') Entrar
+        p.w3-small
+          | Ainda nao tens conta?
+          a(href='/auth/registo')  Regista-te aqui

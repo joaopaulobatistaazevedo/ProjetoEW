@@ -13,8 +13,8 @@ router.get('/top3', recursosController.getTop3Recursos);
 // GET /recursos/:id/download — autenticado, respeita visibilidade
 router.get('/:id/download', authenticate, recursosController.downloadRecurso);
 
-// POST /recursos — criar (produtor ou admin)
-router.post('/', authenticate, authorize('produtor', 'admin'), upload.single('ficheiro'), recursosController.createRecurso);
+// POST /recursos — criar (qualquer autenticado, será promovido a produtor)
+router.post('/', authenticate, upload.single('ficheiro'), recursosController.createRecurso);
 
 // GET /recursos/:id — detalhe (público)
 router.get('/:id', recursosController.getRecursoById);

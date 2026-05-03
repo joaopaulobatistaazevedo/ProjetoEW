@@ -2,20 +2,23 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
+    "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
+    "morgan": "^1.10.1",
     "multer": "^2.1.1",
-    "uuid": "^13.0.0"
+    "swagger-ui-express": "^5.0.1"
   }
 }

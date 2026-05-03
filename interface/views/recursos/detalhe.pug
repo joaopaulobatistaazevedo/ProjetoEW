@@ -1,0 +1,67 @@
+extends ../layout
+
+block content
+  .w3-container.w3-padding-24
+    .w3-card.w3-white.w3-padding
+      h2= recurso.titulo
+      if recurso.subtitulo
+        p
+          strong Subtitulo:
+          |  #{recurso.subtitulo}
+      p
+        strong Tipo:
+        |  #{recurso.tipo}
+      p
+        strong Visibilidade:
+        |  #{recurso.visibilidade}
+      p
+        strong Media de estrelas:
+        |  #{recurso.mediaEstrelas || 0}
+      p
+        if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
+          a.w3-button.w3-blue(href='/recursos/' + recurso._id + '/editar') Editar
+          form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
+            button.w3-button.w3-red(type='submit') Apagar
+        else
+          span.w3-text-grey Apenas o autor ou admin pode editar/apagar este recurso.
+
+    .w3-card.w3-white.w3-padding.w3-margin-top
+      h3 Novo post
+      if user && (user.role === 'admin' || user.role === 'produtor')
+        form(method='POST', action='/posts')
+          input(type='hidden', name='recurso', value=recurso._id)
+          p
+            label(for='titulo') Titulo
+            input#titulo.w3-input.w3-border(type='text', name='titulo')
+          p
+            label(for='conteudo') Conteudo
+            textarea#conteudo.w3-input.w3-border(name='conteudo', required=true)
+          button.w3-button.w3-green(type='submit') Publicar
+      else
+        p.w3-text-red Apenas produtores podem publicar posts. Faça um contribuição para se tornar produtor!
+
+    .w3-card.w3-white.w3-padding.w3-margin-top
+      h3 Posts
+      if posts && posts.length
+        each post in posts
+          .w3-panel.w3-light-grey
+            h4= post.titulo || 'Sem titulo'
+            p= post.conteudo
+            p.w3-small Autor: #{(post.autor && post.autor.nome) || 'Desconhecido'}
+            form(method='POST', action='/posts/' + post._id + '/comentarios')
+              p
+                textarea.w3-input.w3-border(name='conteudo', placeholder='Comentar...', required=true)
+              button.w3-button.w3-blue(type='submit') Comentar
+            if post.comentarios && post.comentarios.length
+              ul
+                each c in post.comentarios
+                  li #{(c.autor && c.autor.nome) || 'Utilizador'}: #{c.conteudo}
+            if user && (user.role === 'admin' || user.sub === post.autor._id)
+              form(method='POST', action='/posts/' + post._id + '/apagar')
+                input(type='hidden', name='recurso', value=recurso._id)
+                button.w3-button.w3-small.w3-red(type='submit') Apagar post
+      else
+        p Ainda nao existem posts deste recurso.
+
+    .w3-margin-top
+      a(href='/recursos') Voltar a lista

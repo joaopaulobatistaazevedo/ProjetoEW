@@ -5,11 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var jwt = require('jsonwebtoken');
 
-var indexRouter      = require('./routes/index');
-var recursosRouter   = require('./routes/recursos');
-var postsRouter      = require('./routes/posts');
+var indexRouter        = require('./routes/index');
+var recursosRouter     = require('./routes/recursos');
+var postsRouter        = require('./routes/posts');
 var utilizadoresRouter = require('./routes/utilizadores');
-var authRouter       = require('./routes/auth');
+var authRouter         = require('./routes/auth');
 
 var app = express();
 
@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware de verificação de autenticação
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
-const JWT_SECRET = process.env.JWT_SECRET || 'jcr_secret_2026';
+const JWT_SECRET  = process.env.JWT_SECRET  || 'jcr_secret_2026';
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || '/auth/login';
 
 function verificarAutenticacao(req, res, next) {
@@ -50,7 +50,9 @@ app.use((req, res, next) => {
         try {
             const payload = jwt.verify(req.cookies[COOKIE_NAME], JWT_SECRET);
             res.locals.user = payload;
-        } catch {}
+        } catch (err) {
+            console.warn('Falha a verificar JWT na interface:', err.message);
+        }
     }
     next();
 });
@@ -60,27 +62,27 @@ app.use('/', indexRouter);
 app.use('/auth', authRouter);
 
 // Rotas protegidas
-app.use('/recursos', verificarAutenticacao, recursosRouter);
-app.use('/posts', verificarAutenticacao, postsRouter);
+app.use('/recursos',     verificarAutenticacao, recursosRouter);
+app.use('/posts',        verificarAutenticacao, postsRouter);
 app.use('/utilizadores', verificarAutenticacao, utilizadoresRouter);
 
-// catch 404 and forward to error handler
+// catch 404
 app.use(function(req, res, next) {
-  next(createError(404));
+    next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+    res.status(err.status || 500);
+    res.render('erro', {
+        titulo: 'Erro',
+        mensagem: err.message || 'Ocorreu um erro.'
+    });
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT    = process.env.PORT    || 8080;
 const API_URL = process.env.API_URL || 'http://localhost:3001';
 
 app.listen(PORT, '0.0.0.0', () => {
