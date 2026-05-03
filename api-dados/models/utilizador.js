@@ -9,7 +9,8 @@ const utilizadorSchema = new mongoose.Schema({
     role: String,
     filiacao: String,
     ativo: Boolean,
-    dataRegisto: Date
+    dataRegisto: Date,
+    dataUltimoAcesso: Date
 }, {
     versionKey: false,
     collection: 'utilizadors'

@@ -61,4 +61,17 @@ router.post('/:id/apagar', async (req, res) => {
     }
 });
 
+// POST /utilizadores/:id/promover/admin — promover a admin
+router.post('/:id/promover/admin', async (req, res) => {
+    try {
+        const token = req.cookies[COOKIE_NAME];
+        await axios.put(`${AUTH}/${req.params.id}/promote/admin`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        res.redirect(`/utilizadores/${req.params.id}`);
+    } catch (err) {
+        res.render('erro', { titulo: 'Erro', mensagem: 'Erro ao promover utilizador a admin' });
+    }
+});
+
 module.exports = router;

@@ -4,7 +4,8 @@ block content
   .w3-container.w3-padding-24
     .w3-bar.w3-margin-bottom
       h2.w3-bar-item Recursos
-      a.w3-button.w3-blue.w3-right.w3-margin-right(href='/recursos/novo') Novo recurso
+      if user
+        a.w3-button.w3-blue.w3-right.w3-margin-right(href='/recursos/novo') Novo recurso
 
     if erro
       .w3-panel.w3-pale-red.w3-border.w3-border-red
@@ -39,8 +40,9 @@ block content
                 td= (recurso.produtor && recurso.produtor.nome) || '-'
                 td
                   a.w3-button.w3-small.w3-blue(href='/recursos/' + recurso._id) Ver
-                  a.w3-button.w3-small.w3-orange(href='/recursos/' + recurso._id + '/editar') Editar
-                  form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
-                    button.w3-button.w3-small.w3-red(type='submit') Apagar
+                  if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.produtor._id))
+                    a.w3-button.w3-small.w3-orange(href='/recursos/' + recurso._id + '/editar') Editar
+                    form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
+                      button.w3-button.w3-small.w3-red(type='submit') Apagar
     else
       p Nao existem recursos para mostrar.

@@ -73,7 +73,7 @@ const recursosController = {
         }
     },
 
-    // POST /recursos — criar (produtor ou admin)
+    // POST /recursos — criar (qualquer autenticado, será promovido a produtor)
     createRecurso: async (req, res) => {
         try {
             const { titulo, subtitulo, tipo, dataCriacao, visibilidade, hashtags } = req.body;
@@ -88,6 +88,19 @@ const recursosController = {
                 produtor: req.user.id,
                 ficheiro: req.file ? req.file.path : null
             });
+
+            // Promover utilizador a produtor se consumidor (call assíncrono, não bloqueia resposta)
+            if (req.user.role === 'consumidor') {
+                const axios = require('axios');
+                const AUTH_SERVICE_URL = process.env.AUTH_URL || 'http://localhost:2623';
+                const token = req.headers.authorization?.split(' ')[1];
+                
+                axios.put(
+                    `${AUTH_SERVICE_URL}/users/${req.user.id}/promote/produtor`,
+                    {},
+                    { headers: { Authorization: `Bearer ${token}` } }
+                ).catch(err => console.error('Erro ao promover para produtor:', err.message));
+            }
 
             res.status(201).json(recurso);
         } catch (err) {
