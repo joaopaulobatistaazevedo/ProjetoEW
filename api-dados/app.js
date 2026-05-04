@@ -26,14 +26,17 @@ setupSwagger(app);
 // Regista modelos necessários para populate.
 require('./models/utilizador');
 require('./models/aip');
+require('./models/exportacao');
 
 const recursosRouter = require('./routes/recursos');
 const postsRouter    = require('./routes/posts');
 const ingestaoRouter = require('./routes/ingestao');
+const disseminacaoRouter = require('./routes/disseminacao');
 
-app.use('/recursos',  recursosRouter);
-app.use('/posts',     postsRouter);
-app.use('/ingestao',  ingestaoRouter);
+app.use('/recursos',     recursosRouter);
+app.use('/posts',        postsRouter);
+app.use('/ingestao',     ingestaoRouter);
+app.use('/disseminacao', disseminacaoRouter);
 
 app.get('/', (req, res) => {
     res.json({ data: new Date().toISOString(), status: 'API de dados a correr...' });
