@@ -1,128 +1,84 @@
 const AIP = require('../models/aip');
 const Recurso = require('../models/recurso');
-const Exportacao = require('../models/exportacao');
 const zipGenerator = require('./zipGenerator');
+const Exportacao = require('../models/exportacao');
+const JSZip = require('jszip');
 const verificacaoPermissoes = require('./verificacaoPermissoes');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
 
 /**
- * Serviço: Disseminação (DIP)
- * Responsável por construir DIPs e exportar recursos
+ * Serviço: Disseminação (DIP) - VERSÃO SIMPLIFICADA
+ * 
+ * Responsabilidade ÚNICA: Exportar recurso como DIP-ZIP
+ * 
+ * Fluxo:
+ * 1. Carregar AIP (metadados + lista de ficheiros)
+ * 2. Aplicar filtros de visibilidade
+ * 3. Enriquecer com caminhos locais e checksums
+ * 4. Gerar ZIP (BagIt format)
+ * 5. Retornar { zipBuffer, metadata, dip }
  */
-class DisseminacaoService {
-    
+const disseminacaoService = {
+
     /**
-     * Carrega um AIP da base de dados
+     * Exporta um recurso como DIP-ZIP
      * @param {string} recursoId - ID do recurso
-     * @returns {Promise<object>}
+     * @param {string} utilizadorId - ID do utilizador (para logs)
+     * @param {string} papelUtilizador - 'produtor', 'consumidor', etc
+     * @returns {Promise<{zipBuffer, metadata, dip}>}
      */
-    async carregarAIP(recursoId) {
+    exportarRecurso: async function(recursoId, utilizadorId, papelUtilizador = 'consumidor') {
+        const tempoInicio = Date.now();
+        
         try {
+            // 1. CARREGAR AIP (do storage + BD)
             const aip = await AIP.findOne({ recursoId: recursoId })
-                .populate('recursoId', 'id titulo tipo visibilidade autor')
-                .populate('produtor', 'id nome email');
+                .populate('recursoId', 'titulo visibilidade autor');
             
             if (!aip) {
                 throw new Error(`AIP não encontrado para recurso ${recursoId}`);
             }
+
+            // 2. CARREGAR RECURSO
+            const recurso = await Recurso.findById(recursoId);
+            if (!recurso) {
+                throw new Error(`Recurso ${recursoId} não encontrado`);
+            }
             
-            return aip;
-            
-        } catch (err) {
-            console.error('Erro ao carregar AIP:', err);
-            throw err;
-        }
-    }
-    
-    /**
-     * Constrói um DIP a partir de um AIP
-     * Aplica filtros de visibilidade e enriquece metadados
-     * 
-     * @param {object} aip - AIP da BD
-     * @param {string} utilizadorId - ID do utilizador solicitante
-     * @param {string} papelUtilizador - Papel do utilizador
-     * @returns {Promise<object>} DIP estruturado
-     */
-    async construirDIP(aip, utilizadorId, papelUtilizador = 'consumidor') {
-        try {
-            // 1. Filtrar ficheiros por visibilidade
-            const filtro = await verificacaoPermissoes.filtrarFicheirosParaDIP(
-                aip,
+            // 3. APLICAR FILTROS DE VISIBILIDADE
+            const filtro = verificacaoPermissoes.aplicarFiltrosVisibilidade(
+                aip.ficheirosOriginais || [],
+                recurso.visibilidade,
                 utilizadorId,
                 papelUtilizador
             );
             
-            // 2. Buscar recurso para dados complementares
-            const recurso = await Recurso.findById(aip.recursoId)
-                .populate('autor', 'id nome email');
-            
-            // 3. Construir DIP
+            // 4. CONSTRUIR DIP (estrutura simples)
             const dip = {
-                aipId: aip.sipId,
-                recursoId: aip.recursoId,
-                dataIngestao: aip.dataIngestao,
-                
-                manifesto_original: aip.manifesto,
-                
-                metadados_originais: {
-                    titulo: recurso.titulo,
-                    subtitulo: recurso.subtitulo,
-                    tipo: recurso.tipo,
-                    hashtags: recurso.hashtags,
-                    visibilidade: recurso.visibilidade,
-                    dataCriacao: recurso.dataCriacao,
-                    descricao: recurso.descricao,
-                    autor: {
-                        id: recurso.autor._id,
-                        nome: recurso.autor.nome,
-                        email: recurso.autor.email
-                    }
-                },
-                
-                metadados_enriquecidos: {
-                    dataIngestao: aip.dataIngestao,
-                    dataExportacao: new Date(),
-                    exportadoPor: utilizadorId,
-                    versionAIP: 1,
-                    visibilidade: recurso.visibilidade
-                },
-                
-                ficheirosIncluidos: filtro.ficheirosIncluidos,
-                ficheirosExcluidos: filtro.ficheirosExcluidos,
-                
-                versionAIP: 1
+                aipId: aip._id,
+                recursoId: recursoId,
+                titulo: recurso.titulo,
+                visibilidade: recurso.visibilidade,
+                dataExportacao: new Date(),
+                exportadoPor: utilizadorId,
+                ficheirosIncluidos: filtro.ficheirosIncluidos || [],
+                ficheirosExcluidos: filtro.ficheirosExcluidos || []
             };
-            
-            return dip;
-            
-        } catch (err) {
-            console.error('Erro ao construir DIP:', err);
-            throw err;
-        }
-    }
-    
-    /**
-     * Enriquece DIP com informações de ficheiros (caminhos locais, checksums)
-     * @param {object} dip 
-     * @param {string} storageLocal - Caminho no storage
-     * @returns {Promise<object>}
-     */
-    async enriquecerDIPComFicheiros(dip, storageLocal) {
-        try {
-            // Verificar se os ficheiros existem no storage
-            const pastaData = path.join(storageLocal, 'data');
+
+            // 5. ENRIQUECER FICHEIROS (caminhos locais + checksums)
+            const pastaData = path.join(aip.storageLocal || '', 'data');
             
             for (const ficheiro of dip.ficheirosIncluidos) {
                 const caminhoLocal = path.join(pastaData, ficheiro.name);
                 
-                // Verificar se ficheiro existe
                 try {
+                    // Verificar se ficheiro existe
                     await fs.access(caminhoLocal);
                     ficheiro.caminhoLocal = caminhoLocal;
                     
-                    // Se não tem checksum, calcular
+                    // Calcular checksum se não existe
                     if (!ficheiro.checksum_sha256 || ficheiro.checksum_sha256 === 'pendente') {
                         const conteudo = await fs.readFile(caminhoLocal);
                         ficheiro.checksum_sha256 = crypto
@@ -131,97 +87,59 @@ class DisseminacaoService {
                             .digest('hex');
                     }
                 } catch (err) {
-                    console.warn(`Aviso: Ficheiro não encontrado: ${caminhoLocal}`);
-                    // Não falhar, apenas marcar como indisponível
+                    console.warn(`⚠ Ficheiro não encontrado: ${caminhoLocal}`);
                     ficheiro.caminhoLocal = null;
                 }
             }
-            
-            return dip;
-            
-        } catch (err) {
-            console.error('Erro ao enriquecer DIP com ficheiros:', err);
-            throw err;
-        }
-    }
-    
-    /**
-     * Exporta um recurso individual como DIP-ZIP
-     * 
-     * @param {string} recursoId - ID do recurso a exportar
-     * @param {string} utilizadorId - ID do utilizador solicitante
-     * @param {string} papelUtilizador - Papel do utilizador
-     * @param {object} opcoes - Opções (formato, etc)
-     * 
-     * @returns {Promise<object>} { zipBuffer, metadata }
-     */
-    async exportarRecurso(recursoId, utilizadorId, papelUtilizador, opcoes = {}) {
-        const tempoInicio = Date.now();
-        
-        try {
-            // 1. Carregar AIP
-            const aip = await this.carregarAIP(recursoId);
-            
-            // 2. Construir DIP
-            const dip = await this.construirDIP(aip, utilizadorId, papelUtilizador);
-            
-            // 3. Enriquecer com informações de ficheiros
-            const dipEnriquecido = await this.enriquecerDIPComFicheiros(
-                dip,
-                aip.storageLocal
-            );
-            
-            // 4. Gerar ZIP
+
+            // 6. GERAR ZIP (BagIt format)
             const zipBuffer = await zipGenerator.gerarDIPZip(
-                dipEnriquecido,
-                aip.sipId,
+                dip,
+                aip._id.toString(),
                 recursoId,
-                utilizadorId,
-                opcoes
+                utilizadorId
             );
-            
-            // 5. Calcular checksum do ZIP
+
+            // 7. CALCULAR CHECKSUM DO ZIP
             const checksumZIP = crypto
                 .createHash('sha256')
                 .update(zipBuffer)
                 .digest('hex');
-            
+
             const tempoProcessamento = Date.now() - tempoInicio;
-            
-            // 6. Preparar metadata para auditoria
+
+            // 8. PREPARAR METADATA PARA LOGS/AUDITORIA
             const metadata = {
-                aipId: aip.sipId,
+                aipId: aip._id.toString(),
                 recursoId: recursoId,
                 tamanhoZIP: zipBuffer.length,
                 checksumDIP: checksumZIP,
                 tempoProcessamento: tempoProcessamento,
-                ficheirosIncluidos: dipEnriquecido.ficheirosIncluidos.length,
-                ficheirosExcluidos: dipEnriquecido.ficheirosExcluidos.length
+                ficheirosIncluidos: dip.ficheirosIncluidos.length,
+                ficheirosExcluidos: dip.ficheirosExcluidos.length
             };
-            
+
+            console.log(`✅ DIP exportado: ${recursoId} (${(zipBuffer.length / 1024).toFixed(2)}KB) em ${tempoProcessamento}ms`);
+
             return {
                 zipBuffer,
                 metadata,
-                dip: dipEnriquecido
+                dip
             };
-            
+
         } catch (err) {
-            console.error('Erro ao exportar recurso:', err);
+            console.error(`❌ Erro ao exportar recurso ${recursoId}:`, err.message);
             throw err;
         }
     }
-    
+
     /**
-     * Registra uma exportação na auditoria
-     * @param {string} aipId 
-     * @param {string} recursoId 
-     * @param {string} utilizadorId 
-     * @param {object} metadata 
-     * @param {object} req - Request HTTP (para IP, user-agent)
-     * @returns {Promise<object>} Entrada Exportacao criada
+     * Registar uma exportação na auditoria (melhor esforço)
      */
-    async registarExportacao(aipId, recursoId, utilizadorId, metadata, req) {
+    ,registarExportacao: async function(aipId, recursoId, utilizadorId, metadata, req) {
         try {
+            if (!Exportacao) return null;
+
             const exportacao = new Exportacao({
                 aipId: aipId,
                 recursoId: recursoId,
@@ -236,47 +154,24 @@ class DisseminacaoService {
                     ficheirosExcluidos: metadata.ficheirosExcluidos
                 },
                 status: 'sucesso',
-                ipSolicitante: req.ip || req.connection.remoteAddress,
-                userAgent: req.get('user-agent')
+                ipSolicitante: req && (req.ip || (req.connection && req.connection.remoteAddress)) || 'desconhecido',
+                userAgent: req && req.get ? req.get('user-agent') : ''
             });
-            
+
             await exportacao.save();
-            
-            // Incrementar contagem de downloads no AIP
-            await AIP.findByIdAndUpdate(
-                aip._id,
-                { $inc: { downloadCount: 1 } }
-            );
-            
             return exportacao;
-            
         } catch (err) {
-            console.error('Erro ao registar exportação:', err);
-            // Não falhar a operação se auditoria falhar
-            console.warn('Aviso: Auditoria não foi registada, mas exportação foi bem-sucedida');
+            console.warn('Aviso: falha ao registar exportacao:', err.message);
             return null;
         }
     }
-    
+
     /**
-     * Exporta múltiplos recursos num único ZIP
-     * Estrutura: recursos-lote/
-     *   ├── recurso-{id1}/
-     *   │   ├── manifest.json
-     *   │   └── data/
-     *   ├── recurso-{id2}/
-     *   └── lote-metadados.json
-     * 
-     * @param {array} recursoIds - Array de IDs de recursos
-     * @param {string} utilizadorId 
-     * @param {string} papelUtilizador 
-     * @returns {Promise<Buffer>} ZIP do lote
+     * Exportar múltiplos recursos num único ZIP (lote)
      */
-    async exportarMultiplos(recursoIds, utilizadorId, papelUtilizador) {
+    ,exportarMultiplos: async function(recursoIds, utilizadorId, papelUtilizador) {
         try {
-            const AdmZip = require('adm-zip');
-            const zipLote = new AdmZip();
-            
+            const zipLote = new JSZip();
             const metadadosLote = {
                 tipo_pacote: 'DIP_LOTE',
                 versao: '1.0',
@@ -285,58 +180,53 @@ class DisseminacaoService {
                 numeroRecursos: recursoIds.length,
                 recursos: []
             };
-            
-            // Processar cada recurso
+
             for (const recursoId of recursoIds) {
                 try {
-                    const { zipBuffer, metadata } = await this.exportarRecurso(
-                        recursoId,
-                        utilizadorId,
-                        papelUtilizador
-                    );
-                    
-                    // Extrair e reorganizar ficheiros do ZIP
-                    const zipItem = new AdmZip(zipBuffer);
-                    const entries = zipItem.getEntries();
-                    
-                    for (const entry of entries) {
-                        const novoNome = `recurso-${recursoId}/${entry.entryName}`;
-                        if (entry.isDirectory) {
-                            zipLote.addFile(novoNome + '/');
+                    const { zipBuffer, metadata } = await this.exportarRecurso(recursoId, utilizadorId, papelUtilizador);
+
+                    const zipItem = new JSZip();
+                    await zipItem.loadAsync(zipBuffer);
+
+                    for (const [nomeEntrada, dadosEntrada] of Object.entries(zipItem.files)) {
+                        const novoNome = `recurso-${recursoId}/${nomeEntrada}`;
+                        if (dadosEntrada.dir) {
+                            zipLote.folder(novoNome);
                         } else {
-                            zipLote.addFile(novoNome, entry.getData());
+                            const conteudo = await dadosEntrada.async('nodebuffer');
+                            zipLote.file(novoNome, conteudo);
                         }
                     }
-                    
+
                     metadadosLote.recursos.push({
                         recursoId: recursoId,
                         aipId: metadata.aipId,
                         tamanho: metadata.tamanhoZIP,
                         checksum: metadata.checksumDIP
                     });
-                    
+
                 } catch (err) {
-                    console.warn(`Aviso: Recurso ${recursoId} não foi exportado:`, err.message);
-                    metadadosLote.recursos.push({
-                        recursoId: recursoId,
-                        erro: err.message
-                    });
+                    console.warn(`Aviso: Recurso ${recursoId} não foi exportado: ${err.message}`);
+                    metadadosLote.recursos.push({ recursoId: recursoId, erro: err.message });
                 }
             }
-            
-            zipLote.addFile(
-                'lote-metadados.json',
-                Buffer.from(JSON.stringify(metadadosLote, null, 2))
-            );
-            
-            return zipLote.toBuffer();
-            
+
+            zipLote.file('lote-metadados.json', JSON.stringify(metadadosLote, null, 2));
+
+            const buffer = await zipLote.generateAsync({
+                type: 'nodebuffer',
+                compression: 'DEFLATE',
+                compressionOptions: { level: 9 }
+            });
+
+            return buffer;
         } catch (err) {
-            console.error('Erro ao exportar múltiplos recursos:', err);
             throw err;
         }
     }
-    
-}
 
-module.exports = new DisseminacaoService();
+};
+
+module.exports = disseminacaoService;
+
+
