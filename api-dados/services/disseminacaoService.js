@@ -55,6 +55,8 @@ const disseminacaoService = {
             );
 
             const manifesto = aip.manifesto || {};
+            const visibilidade = recurso.visibilidade;
+            const dataExportacao = new Date().toISOString();
 
             // 4. CONSTRUIR DIP (estrutura compatível com zipGenerator)
             const dip = {
@@ -63,18 +65,18 @@ const disseminacaoService = {
                     subtitulo: manifesto.subtitulo,
                     tipo: manifesto.tipo,
                     hashtags: manifesto.hashtags || [],
-                    visibilidade: recurso.visibilidade,
+                    visibilidade,
                     dataCriacao: manifesto.dataCriacao,
                     descricao: manifesto.descricao
                 },
                 metadados_enriquecidos: {
                     dataIngestao: aip.dataIngestao,
-                    dataExportacao: new Date().toISOString(),
+                    dataExportacao,
                     produtorId: aip.produtor,
                     exportadoPor: utilizadorId,
                     versionAIP: '1',
                     estadoArmazenamento: aip.status || 'ok',
-                    visibilidade: recurso.visibilidade
+                    visibilidade
                 },
                 ficheirosIncluidos: filtro.ficheirosIncluidos || [],
                 ficheirosExcluidos: filtro.ficheirosExcluidos || []
