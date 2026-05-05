@@ -47,6 +47,10 @@ module.exports.login = async (username, password) => {
     const pwdOk = await bcrypt.compare(password, user.password);
     if (!pwdOk) throw new Error('Password incorreta.');
 
+    // Atualizar dataUltimoAcesso
+    user.dataUltimoAcesso = new Date();
+    await user.save();
+
     const token = jwt.sign(
         { sub: user._id.toString(), username: user.username, nome: user.nome, role: user.role },
         JWT_SECRET,
@@ -54,4 +58,26 @@ module.exports.login = async (username, password) => {
     );
 
     return { token, user: { nome: user.nome, role: user.role } };
+};
+
+// Promover utilizador a produtor (consumidor → produtor)
+module.exports.promoteToProdutor = async (id) => {
+    const user = await Utilizador.findById(id);
+    if (!user) throw new Error('Utilizador não encontrado.');
+    if (user.role === 'consumidor') {
+        user.role = 'produtor';
+        await user.save();
+    }
+    return user;
+};
+
+// Promover utilizador a admin (apenas admin)
+module.exports.promoteToAdmin = async (id) => {
+    const user = await Utilizador.findById(id);
+    if (!user) throw new Error('Utilizador não encontrado.');
+    if (user.role !== 'admin') {
+        user.role = 'admin';
+        await user.save();
+    }
+    return user;
 };

@@ -8,9 +8,13 @@ const postSchema = new mongoose.Schema({
     dataPost: { type: Date, default: Date.now },
     comentarios: [{
         autor:    { type: mongoose.Schema.Types.ObjectId, ref: 'Utilizador' },
-        conteudo: String,
+        conteudo: { type: String, required: true},
         data:     { type: Date, default: Date.now }
     }]
 });
+
+// Índices úteis
+postSchema.index({ recurso: 1 });
+postSchema.index({ autor: 1 });
 
 module.exports = mongoose.model('Post', postSchema);

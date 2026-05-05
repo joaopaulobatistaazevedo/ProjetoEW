@@ -35,7 +35,20 @@ const postsController = {
     // POST /posts — autenticado
     createPost: async (req, res) => {
         try {
-            const post = new Post({ ...req.body, autor: req.user.id });
+            const { recurso: recursoId, conteudo, titulo } = req.body;
+            if (!conteudo || conteudo.trim().length < 2) return res.status(400).json({ error: 'Conteúdo inválido' });
+
+            // Se associado a um recurso, garantir que existe e que a visibilidade permite
+            if (recursoId) {
+                const Recurso = require('../models/recurso');
+                const recurso = await Recurso.findById(recursoId);
+                if (!recurso) return res.status(400).json({ error: 'Recurso associado não encontrado' });
+                if (recurso.visibilidade === 'privado' && req.user.role !== 'admin' && req.user.id !== recurso.autor.toString()) {
+                    return res.status(403).json({ error: 'Sem permissão para postar neste recurso' });
+                }
+            }
+
+            const post = new Post({ titulo, conteudo, recurso: recursoId, autor: req.user.id });
             const saved = await post.save();
             res.status(201).json(saved);
         } catch (err) {
@@ -82,7 +95,9 @@ const postsController = {
         try {
             const post = await Post.findById(req.params.id);
             if (!post) return res.status(404).json({ error: 'Não encontrado' });
-            post.comentarios.push({ ...req.body, autor: req.user.id });
+            const { conteudo } = req.body;
+            if (!conteudo || conteudo.trim().length < 1) return res.status(400).json({ error: 'Comentário inválido' });
+            post.comentarios.push({ conteudo, autor: req.user.id });
             await post.save();
             res.status(201).json(post);
         } catch (err) {

@@ -50,7 +50,9 @@ app.use((req, res, next) => {
         try {
             const payload = jwt.verify(req.cookies[COOKIE_NAME], JWT_SECRET);
             res.locals.user = payload;
-        } catch {}
+        } catch (err) {
+            console.warn('Falha a verificar JWT na interface:', err.message);
+        }
     }
     next();
 });

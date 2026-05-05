@@ -17,6 +17,7 @@ function toPublicUser(userDoc) {
         role: user.role,
         filiacao: user.filiacao,
         dataRegisto: user.dataRegisto,
+        dataUltimoAcesso: user.dataUltimoAcesso,
         ativo: user.ativo
     };
 }
@@ -26,7 +27,9 @@ function toPublicUser(userDoc) {
 // POST /users/register — criar conta
 router.post('/register', async (req, res) => {
     try {
-        const novo = await Utilizador.insert(req.body);
+        // Forçar role a 'consumidor' independentemente do input
+        const data = { ...req.body, role: 'consumidor' };
+        const novo = await Utilizador.insert(data);
         res.status(201).json(toPublicUser(novo));
     } catch (err) {
         res.status(400).json({ erro: err.message });
@@ -74,18 +77,42 @@ router.get('/:id', auth.verificaAcesso, (req, res) => {
         .catch(err => res.status(500).json({ erro: err.message }));
 });
 
-// PUT /users/:id — atualizar
-router.put('/:id', auth.verificaAcesso, (req, res) => {
+// PUT /users/:id — atualizar (apenas admin)
+router.put('/:id', auth.verificaAcesso, auth.verificaAdmin, (req, res) => {
     Utilizador.update(req.params.id, req.body)
         .then(dados => res.status(200).json(toPublicUser(dados)))
         .catch(err => res.status(500).json({ erro: err.message }));
 });
 
-// DELETE /users/:id — apagar
-router.delete('/:id', auth.verificaAcesso, (req, res) => {
+// DELETE /users/:id — apagar (apenas admin)
+router.delete('/:id', auth.verificaAcesso, auth.verificaAdmin, (req, res) => {
     Utilizador.remove(req.params.id)
         .then(dados => res.status(200).json({ status: "Removido", dados: toPublicUser(dados) }))
         .catch(err => res.status(500).json({ erro: err.message }));
+});
+
+// PUT /users/:id/promote/produtor — promover consumidor a produtor
+router.put('/:id/promote/produtor', auth.verificaAcesso, async (req, res) => {
+    try {
+        // Só permite promover a si próprio, a menos que seja admin
+        if (req.user.sub !== req.params.id && req.user.role !== 'admin') {
+            return res.status(403).json({ erro: "Pode apenas promover-se a si próprio" });
+        }
+        const promovido = await Utilizador.promoteToProdutor(req.params.id);
+        res.status(200).json(toPublicUser(promovido));
+    } catch (err) {
+        res.status(400).json({ erro: err.message });
+    }
+});
+
+// PUT /users/:id/promote/admin — promover qualquer utilizador a admin (apenas admin)
+router.put('/:id/promote/admin', auth.verificaAcesso, auth.verificaAdmin, async (req, res) => {
+    try {
+        const promovido = await Utilizador.promoteToAdmin(req.params.id);
+        res.status(200).json(toPublicUser(promovido));
+    } catch (err) {
+        res.status(400).json({ erro: err.message });
+    }
 });
 
 module.exports = router;

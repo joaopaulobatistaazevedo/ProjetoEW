@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 
 const recursoSchema = new mongoose.Schema({
     titulo:       { type: String, required: true },
+    descricao:    { type: String },
     subtitulo:    String,
     tipo:         { type: String, enum: ['artigo', 'tese', 'slides', 'teste', 'relatorio', 'aplicacao', 'problema', 'outro'], required: true },
     dataCriacao:  Date,
     dataRegisto:  { type: Date, default: Date.now },
     visibilidade: { type: String, enum: ['publico', 'privado'], default: 'publico' },
-    produtor:     { type: mongoose.Schema.Types.ObjectId, ref: 'Utilizador', required: true },
+    autor:        { type: mongoose.Schema.Types.ObjectId, ref: 'Utilizador', required: true },
     hashtags:     [String],
     ficheiro:     String,
     ratings: [{
@@ -26,5 +27,14 @@ recursoSchema.pre('save', function (next) {
     }
     next();
 });
+
+// Índices para acelerar consultas por campos comuns
+recursoSchema.index({ tipo: 1 });
+recursoSchema.index({ visibilidade: 1 });
+recursoSchema.index({ autor: 1 });
+recursoSchema.index({ dataRegisto: -1 });
+recursoSchema.index({ mediaEstrelas: -1 });
+recursoSchema.index({ hashtags: 1 });
+recursoSchema.index({ titulo: 'text', subtitulo: 'text', descricao: 'text', hashtags: 'text' });
 
 module.exports = mongoose.model('Recurso', recursoSchema);
