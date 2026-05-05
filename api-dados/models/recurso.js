@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Recurso educativo publicado na plataforma
 const recursoSchema = new mongoose.Schema({
     titulo:       { type: String, required: true },
     descricao:    { type: String },

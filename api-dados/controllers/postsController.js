@@ -38,7 +38,7 @@ const postsController = {
             const { recurso: recursoId, conteudo, titulo } = req.body;
             if (!conteudo || conteudo.trim().length < 2) return res.status(400).json({ error: 'Conteúdo inválido' });
 
-            // Se associado a um recurso, garantir que existe e que a visibilidade permite
+            // Se associado a recurso, validar existencia e visibilidade
             if (recursoId) {
                 const Recurso = require('../models/recurso');
                 const recurso = await Recurso.findById(recursoId);

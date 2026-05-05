@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Post de discussao associado a recurso
 const postSchema = new mongoose.Schema({
     titulo:   String,
     conteudo: { type: String, required: true },

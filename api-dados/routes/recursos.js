@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const recursosController = require('../controllers/recursosController');
+// Upload de ficheiro do recurso
 const upload = require('../middleware/upload');
 const { authenticate, authorize } = require('../middleware/auth');
 

@@ -1,7 +1,9 @@
+// Swagger UI setup
 const swaggerUi = require('swagger-ui-express');
 
 const PORT = process.env.PORT || 3001;
 
+// OpenAPI spec object
 const swaggerSpec = {
     openapi: '3.0.3',
     info: {
@@ -214,6 +216,7 @@ const swaggerSpec = {
     }
 };
 
+// Mount swagger UI and raw spec
 function setupSwagger(app) {
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     app.get('/docs.json', (req, res) => {

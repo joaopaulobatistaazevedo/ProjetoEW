@@ -24,7 +24,7 @@ const disseminacaoController = {
                 papelUtilizador
             );
             
-            // Registar na auditoria (não falhar se falhar auditoria)
+            // Registar na auditoria (melhor esforco)
             try {
                 await disseminacaoService.registarExportacao(
                     metadata.aipId,
@@ -37,7 +37,7 @@ const disseminacaoController = {
                 console.warn('Aviso: Falha ao registar auditoria:', auditErr.message);
             }
             
-            // Preparar response
+            // Response com headers de metadados
             const nomeArquivo = `recurso-${recursoId}-${Date.now()}.zip`;
             
             res.setHeader('Content-Type', 'application/zip');
@@ -92,7 +92,7 @@ const disseminacaoController = {
                 });
             }
             
-            // Verificar permissões para cada recurso
+            // Verificar permissao para cada recurso
             const recursosPermitidos = [];
             for (const recursoId of recursoIds) {
                 try {

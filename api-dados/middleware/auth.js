@@ -1,5 +1,7 @@
+// JWT auth helpers
 const jwt = require('jsonwebtoken');
 
+// Fallback secret para ambiente local
 const JWT_SECRET = process.env.JWT_SECRET || 'jcr_secret_2026';
 
 // Hierarquia de roles: admin > produtor > consumidor
@@ -15,6 +17,7 @@ function isConsumidor(role) {
     return role === 'consumidor' || role === 'produtor' || role === 'admin';
 }
 
+// Extract token and attach req.user
 function authenticate(req, res, next) {
     const authHeader = req.headers.authorization || '';
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -25,6 +28,7 @@ function authenticate(req, res, next) {
 
     try {
         const payload = jwt.verify(token, JWT_SECRET);
+        // Normalize payload into req.user
         req.user = {
             id: payload.id || payload.sub,
             username: payload.username,
@@ -38,6 +42,7 @@ function authenticate(req, res, next) {
 }
 
 // Autorização por role: admin > produtor > consumidor
+// Role-based access control with hierarchy
 function authorize(...roles) {
     return (req, res, next) => {
         if (!req.user) {

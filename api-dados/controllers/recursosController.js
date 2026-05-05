@@ -1,6 +1,7 @@
 const path = require('path');
 const Recurso = require('../models/recurso');
 
+// Normalize hashtags input into array of strings
 function normalizarHashtags(valor) {
     if (!valor) return [];
     if (Array.isArray(valor)) return valor.map(tag => String(tag).trim()).filter(Boolean);
@@ -37,7 +38,7 @@ const recursosController = {
                 $lte: new Date(`${ano}-12-31`)
             };
 
-            // Ordenação: aceitar 'dataRegisto', 'mediaEstrelas' ou 'relevancia' (relevancia = mediaEstrelas desc, dataRegisto desc)
+            // Ordenacao com ranking opcional por relevancia
             let sortObj = { dataRegisto: -1 };
             const ord = order === 'asc' ? 1 : -1;
             if (sort === 'mediaEstrelas') sortObj = { mediaEstrelas: ord };
@@ -50,6 +51,7 @@ const recursosController = {
             const pg = parseInt(page) > 0 ? parseInt(page) : 1;
             const skip = (pg - 1) * lim;
 
+            // Query base com populate e pagina
             const query = Recurso.find(filtro)
                 .populate('autor', 'nome email')
                 .sort(sortObj)
@@ -102,6 +104,7 @@ const recursosController = {
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
             if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
 
+            // Privado: apenas admin ou autor
             if (recurso.visibilidade === 'privado') {
                 if (req.user.role !== 'admin' && req.user.id !== recurso.autor.toString()) {
                     return res.status(403).json({ erro: 'Sem permissão' });
@@ -136,7 +139,7 @@ const recursosController = {
                 ficheiro: req.file ? req.file.path : null
             });
 
-            // Promover utilizador a produtor se consumidor (call assíncrono, não bloqueia resposta)
+            // Promover utilizador a produtor se consumidor (nao bloqueia resposta)
             if (req.user.role === 'consumidor') {
                 const axios = require('axios');
                 const AUTH_SERVICE_URL = process.env.AUTH_URL || 'http://localhost:2623';
@@ -165,7 +168,7 @@ const recursosController = {
                 return res.status(403).json({ erro: 'Sem permissão' });
             }
 
-            // Sanitizar e validar campos atualizáveis
+            // Sanitizar e validar campos atualizaveis
             const allowed = ['titulo','subtitulo','descricao','tipo','dataCriacao','visibilidade','hashtags','ficheiro'];
             const update = {};
             for (const k of allowed) {
@@ -211,6 +214,7 @@ const recursosController = {
             const recurso = await Recurso.findById(req.params.id);
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
 
+            // Atualiza rating existente ou cria novo
             const indice = recurso.ratings.findIndex(r => r.utilizador.toString() === req.user.id);
             if (indice >= 0) {
                 recurso.ratings[indice].estrelas = estrelas;

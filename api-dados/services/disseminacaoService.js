@@ -196,6 +196,7 @@ const disseminacaoService = {
                 recursos: []
             };
 
+            // Loop por recurso e anexar ZIPs ao lote
             for (const recursoId of recursoIds) {
                 try {
                     const { zipBuffer, metadata } = await this.exportarRecurso(recursoId, utilizadorId, papelUtilizador);
@@ -203,6 +204,7 @@ const disseminacaoService = {
                     const zipItem = new JSZip();
                     await zipItem.loadAsync(zipBuffer);
 
+                    // Recriar entradas sob pasta recurso-{id}/
                     for (const [nomeEntrada, dadosEntrada] of Object.entries(zipItem.files)) {
                         const novoNome = `recurso-${recursoId}/${nomeEntrada}`;
                         if (dadosEntrada.dir) {

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Auditoria de exportacoes (DIP)
 const exportacaoSchema = new mongoose.Schema({
     // Identificadores
     aipId: {
