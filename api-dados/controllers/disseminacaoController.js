@@ -12,7 +12,7 @@ const disseminacaoController = {
         try {
             const { recursoId } = req.params;
             const utilizadorId = req.user.id;
-            const papelUtilizador = req.user.papel || 'consumidor';
+            const papelUtilizador = req.user.role || 'consumidor';
             
             // A verificação de permissão já foi feita pelo middleware
             // O recurso está em req.recurso
@@ -66,7 +66,7 @@ const disseminacaoController = {
         try {
             const { ids } = req.query;
             const utilizadorId = req.user.id;
-            const papelUtilizador = req.user.papel || 'consumidor';
+            const papelUtilizador = req.user.role || 'consumidor';
             
             if (!ids) {
                 return res.status(400).json({
@@ -196,7 +196,7 @@ const disseminacaoController = {
     exportarTodosRecursos: async (req, res) => {
         try {
             const utilizadorId = req.user.id;
-            const papelUtilizador = req.user.papel;
+            const papelUtilizador = req.user.role || 'consumidor';
             
             // Buscar todos os recursos do utilizador
             const recursos = await Recurso.find({ autor: utilizadorId })

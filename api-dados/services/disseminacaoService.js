@@ -48,21 +48,34 @@ const disseminacaoService = {
             }
             
             // 3. APLICAR FILTROS DE VISIBILIDADE
-            const filtro = verificacaoPermissoes.aplicarFiltrosVisibilidade(
-                aip.ficheirosOriginais || [],
-                recurso.visibilidade,
+            const filtro = await verificacaoPermissoes.filtrarFicheirosParaDIP(
+                aip,
                 utilizadorId,
                 papelUtilizador
             );
-            
-            // 4. CONSTRUIR DIP (estrutura simples)
+
+            const manifesto = aip.manifesto || {};
+
+            // 4. CONSTRUIR DIP (estrutura compatível com zipGenerator)
             const dip = {
-                aipId: aip._id,
-                recursoId: recursoId,
-                titulo: recurso.titulo,
-                visibilidade: recurso.visibilidade,
-                dataExportacao: new Date(),
-                exportadoPor: utilizadorId,
+                metadados: {
+                    titulo: manifesto.titulo,
+                    subtitulo: manifesto.subtitulo,
+                    tipo: manifesto.tipo,
+                    hashtags: manifesto.hashtags || [],
+                    visibilidade: recurso.visibilidade,
+                    dataCriacao: manifesto.dataCriacao,
+                    descricao: manifesto.descricao
+                },
+                metadados_enriquecidos: {
+                    dataIngestao: aip.dataIngestao,
+                    dataExportacao: new Date().toISOString(),
+                    produtorId: aip.produtor,
+                    exportadoPor: utilizadorId,
+                    versionAIP: '1',
+                    estadoArmazenamento: aip.status || 'ok',
+                    visibilidade: recurso.visibilidade
+                },
                 ficheirosIncluidos: filtro.ficheirosIncluidos || [],
                 ficheirosExcluidos: filtro.ficheirosExcluidos || []
             };

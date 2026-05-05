@@ -8,7 +8,7 @@ async function verificarPermissaoExportacao(req, res, next) {
     try {
         const { recursoId } = req.params;
         const utilizadorId = req.user.id;
-        const papelUtilizador = req.user.papel || 'consumidor';
+        const papelUtilizador = req.user.role || 'consumidor';
         
         const { temPermissao, motivo } = await verificacaoPermissoes.podeExportarRecurso(
             recursoId,
