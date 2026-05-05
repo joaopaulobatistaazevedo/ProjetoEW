@@ -3,7 +3,7 @@ var router = express.Router();
 var axios = require('axios');
 
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
-const AUTH        = process.env.AUTH_URL    || 'http://localhost:2623/users';
+const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
 
 // GET /auth/login
 router.get('/login', (req, res) => {

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 
-const AUTH        = process.env.AUTH_URL    || 'http://localhost:2623/users';
+const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
 // GET /utilizadores — listar todos (via auth service)

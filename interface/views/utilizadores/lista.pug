@@ -1,26 +1,49 @@
 extends ../layout
 
 block content
-  .w3-container.w3-padding-24
-    h2 Utilizadores
+  .container.py-6
+    // Header
+    h1.mb-6
+      i.fas.fa-users(style='margin-right: 0.75rem; color: var(--primary);')
+      span Comunidade de Utilizadores
+
     if utilizadores && utilizadores.length
-      .w3-responsive
-        table.w3-table-all
-          thead
-            tr
-              th Username
-              th Nome
-              th Email
-              th Role
-              th Ações
-          tbody
-            each u in utilizadores
-              tr
-                td= u.username
-                td= u.nome
-                td= u.email
-                td= u.role
-                td
-                  a.w3-button.w3-small.w3-blue(href='/utilizadores/' + u._id) Ver
+      .row
+        each u in utilizadores
+          .col-4
+            .card
+              .card-body
+                .text-center.mb-4
+                  i.fas.fa-user-circle(style='font-size: 3rem; color: var(--primary);')
+                
+                h3(style='margin: 1rem 0;')= u.nome
+                
+                .resource-meta(style='justify-content: center;')
+                  span
+                    i.fas.fa-at
+                    | #{u.username}
+                
+                if u.filiacao
+                  p(style='color: var(--gray); font-size: 0.9rem;')
+                    i.fas.fa-building(style='margin-right: 0.5rem;')
+                    | #{u.filiacao}
+                
+                .role-badge(style='text-align: center; margin-bottom: 1rem;')
+                  - let badgeStyle = u.role === 'admin' ? 'background-color: #e0e7ff; color: #1e3a8a;' : (u.role === 'produtor' ? 'background-color: #dbeafe; color: #0c4a6e;' : 'background-color: #d1d5db; color: #374151;')
+                  span.resource-badge(style=badgeStyle)
+                    i.fas.fa-certificate(style='margin-right: 0.25rem;')
+                    | #{u.role.charAt(0).toUpperCase() + u.role.slice(1)}
+                
+                p(style='color: #64748b; font-size: 0.9rem;')
+                  i.fas.fa-envelope(style='margin-right: 0.5rem;')
+                  | #{u.email}
+              
+              .card-footer
+                a.btn.btn-primary.btn-block(href='/utilizadores/' + u._id)
+                  i.fas.fa-eye
+                  span Ver Perfil
     else
-      p Sem utilizadores para mostrar.
+      .empty-state
+        i.fas.fa-inbox.empty-icon
+        h3.empty-title Nenhum utilizador encontrado
+        p.empty-text A comunidade está vazia no momento.

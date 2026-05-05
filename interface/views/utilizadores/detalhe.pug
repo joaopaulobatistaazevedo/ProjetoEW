@@ -1,69 +1,130 @@
 extends ../layout
 
 block content
-  .w3-container.w3-padding-24
+  .container.py-6
+    // Breadcrumb
+    .mb-4
+      a(href='/utilizadores', style='color: var(--gray);')
+        i.fas.fa-arrow-left(style='margin-right: 0.25rem;')
+        span Voltar a Utilizadores
+
     if utilizador
-      .w3-card.w3-white.w3-padding
-        h2= utilizador.nome
-        p
-          strong Username:
-          |  #{utilizador.username}
-        p
-          strong Email:
-          |  #{utilizador.email}
-        p
-          strong Role:
-          |  #{utilizador.role}
-        if utilizador.filiacao
-          p
-            strong Filiação:
-            |  #{utilizador.filiacao}
-
-      .w3-card.w3-white.w3-padding.w3-margin-top
-        h3 Editar utilizador
-        if user && user.role === 'admin'
-          form(method='POST', action='/utilizadores/' + utilizador._id + '/editar')
-            p
-              label(for='username') Username
-              input#username.w3-input.w3-border(type='text', name='username', value=utilizador.username, required=true)
-            p
-              label(for='nome') Nome
-              input#nome.w3-input.w3-border(type='text', name='nome', value=utilizador.nome, required=true)
-            p
-              label(for='email') Email
-              input#email.w3-input.w3-border(type='email', name='email', value=utilizador.email, required=true)
-            p
-              label(for='role') Role
-              select#role.w3-select.w3-border(name='role')
-                option(value='admin' selected=utilizador.role === 'admin') admin
-                option(value='produtor' selected=utilizador.role === 'produtor') produtor
-                option(value='consumidor' selected=utilizador.role === 'consumidor') consumidor
-            p
-              label(for='filiacao') Filiação
-              input#filiacao.w3-input.w3-border(type='text', name='filiacao', value=utilizador.filiacao || '')
-            p
-              label(for='password') Nova password
-              input#password.w3-input.w3-border(type='password', name='password', placeholder='Deixar em branco para manter')
-            button.w3-button.w3-green(type='submit') Guardar alterações
-            a.w3-button.w3-light-grey.w3-margin-left(href='/utilizadores') Voltar
-        else
-          p.w3-text-red Apenas administradores podem editar este utilizador.
-          a.w3-button.w3-light-grey(href='/utilizadores') Voltar
-
-      if user && user.role === 'admin'
-        .w3-card.w3-white.w3-padding.w3-margin-top
-          h3 Promover a Admin
-          if utilizador.role !== 'admin'
-            form(method='POST', action='/utilizadores/' + utilizador._id + '/promover/admin')
-              p Promover este utilizador a administrador
-              button.w3-button.w3-orange(type='submit') Promover a Admin
+      .row
+        .col-4
+          // Perfil Card
+          .card
+            .card-body.text-center
+              i.fas.fa-user-circle(style='font-size: 4rem; color: var(--primary); margin-bottom: 1rem;')
+              h2= utilizador.nome
+              p.text-muted
+                i.fas.fa-at(style='margin-right: 0.5rem;')
+                | #{utilizador.username}
+              
+              .role-badge.mt-4
+                - let badgeStyle = utilizador.role === 'admin' ? 'background-color: #e0e7ff; color: #1e3a8a;' : (utilizador.role === 'produtor' ? 'background-color: #dbeafe; color: #0c4a6e;' : 'background-color: #d1d5db; color: #374151;')
+                span.resource-badge(style=badgeStyle)
+                  i.fas.fa-certificate(style='margin-right: 0.25rem;')
+                  | #{utilizador.role.charAt(0).toUpperCase() + utilizador.role.slice(1)}
+        
+        .col-8
+          // Detalhes do Utilizador
+          .card.mb-6
+            .card-header
+              i.fas.fa-user
+              span  Informações Pessoais
+            
+            .card-body
+              .info-group.mb-4
+                strong
+                  i.fas.fa-envelope(style='margin-right: 0.5rem;')
+                  | Email
+                p= utilizador.email
+              
+              if utilizador.filiacao
+                .info-group.mb-4
+                  strong
+                    i.fas.fa-building(style='margin-right: 0.5rem;')
+                    | Instituição
+                  p= utilizador.filiacao
+              
+              .info-group
+                strong
+                  i.fas.fa-calendar-alt(style='margin-right: 0.5rem;')
+                  | Membro desde
+                p= utilizador.dataRegisto ? new Date(utilizador.dataRegisto).toLocaleDateString('pt-PT') : 'N/A'
+          
+          // Editar Utilizador (apenas admins)
+          if user && user.role === 'admin'
+            .card
+              .card-header
+                i.fas.fa-edit
+                span  Editar Utilizador
+              
+              form(method='POST', action='/utilizadores/' + utilizador._id + '/editar')
+                .card-body
+                  .form-group
+                    label(for='username')
+                      i.fas.fa-at(style='margin-right: 0.5rem;')
+                      span Nome de Utilizador
+                    input#username.form-control(type='text', name='username', value=utilizador.username, required=true)
+                  
+                  .form-group
+                    label(for='nome')
+                      i.fas.fa-id-card(style='margin-right: 0.5rem;')
+                      span Nome Completo
+                    input#nome.form-control(type='text', name='nome', value=utilizador.nome, required=true)
+                  
+                  .form-group
+                    label(for='email')
+                      i.fas.fa-envelope(style='margin-right: 0.5rem;')
+                      span Email
+                    input#email.form-control(type='email', name='email', value=utilizador.email, required=true)
+                  
+                  .form-group
+                    label(for='role')
+                      i.fas.fa-certificate(style='margin-right: 0.5rem;')
+                      span Role
+                    select#role.form-control(name='role')
+                      option(value='admin' selected=utilizador.role === 'admin') Admin
+                      option(value='produtor' selected=utilizador.role === 'produtor') Produtor
+                      option(value='consumidor' selected=utilizador.role === 'consumidor') Consumidor
+                  
+                  .form-group
+                    label(for='filiacao')
+                      i.fas.fa-building(style='margin-right: 0.5rem;')
+                      span Instituição (opcional)
+                    input#filiacao.form-control(type='text', name='filiacao', value=utilizador.filiacao || '')
+                  
+                  .form-group
+                    label(for='password')
+                      i.fas.fa-lock(style='margin-right: 0.5rem;')
+                      span Nova Palavra-passe
+                    input#password.form-control(type='password', name='password', placeholder='Deixar em branco para manter a atual')
+                
+                .card-footer
+                  button.btn.btn-primary(type='submit')
+                    i.fas.fa-save
+                    span Guardar Alterações
+                  a.btn.btn-outline(href='/utilizadores')
+                    i.fas.fa-arrow-left
+                    span Voltar
           else
-            p.w3-text-grey Este utilizador já é administrador.
-
-        .w3-card.w3-white.w3-padding.w3-margin-top
-          h3 Apagar utilizador
-          form(method='POST', action='/utilizadores/' + utilizador._id + '/apagar')
-            button.w3-button.w3-red(type='submit') Apagar
+            .card
+              .card-body
+                .alert.alert-warning
+                  i.fas.fa-lock(style='margin-right: 0.5rem;')
+                  strong Permissões Insuficientes
+                  p Apenas administradores podem editar informações de utilizadores.
+                
+                a.btn.btn-outline(href='/utilizadores')
+                  i.fas.fa-arrow-left
+                  span Voltar
     else
-      p Utilizador não encontrado.
-      a.w3-button.w3-light-grey(href='/utilizadores') Voltar
+      .card
+        .card-body
+          .alert.alert-danger
+            i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+            strong Utilizador não encontrado.
+          a.btn.btn-outline(href='/utilizadores')
+            i.fas.fa-arrow-left
+            span Voltar

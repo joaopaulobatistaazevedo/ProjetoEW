@@ -1,8 +1,29 @@
 extends layout
 
 block content
-  .w3-container.w3-padding-24
-    .w3-panel.w3-pale-red.w3-border.w3-border-red
-      h3= titulo || 'Erro'
-      p= mensagem || 'Ocorreu um erro.'
-    a.w3-button.w3-dark-grey(href='/') Voltar a home
+  .container.py-8
+    .row
+      .col-12
+        .empty-state(style='padding: 4rem 1.5rem;')
+          if status && status === 404
+            i.fas.fa-search.empty-icon(style='color: var(--warning); font-size: 4rem;')
+            h1.empty-title Página Não Encontrada
+            p.empty-text
+              | Desculpe, a página que está procurando não existe (Erro 404).
+          else if status && status === 500
+            i.fas.fa-exclamation-triangle.empty-icon(style='color: var(--danger); font-size: 4rem;')
+            h1.empty-title Erro do Servidor
+            p.empty-text
+              | Desculpe, ocorreu um erro no servidor. Tente novamente mais tarde.
+          else
+            i.fas.fa-exclamation-circle.empty-icon(style='color: var(--danger); font-size: 4rem;')
+            h1.empty-title= titulo || 'Erro'
+            p.empty-text= mensagem || 'Ocorreu um erro inesperado.'
+          
+          .mt-6(style='margin-top: 3rem;')
+            a.btn.btn-primary(href='/')
+              i.fas.fa-home
+              span Voltar à Página Inicial
+            a.btn.btn-secondary(href='/' onclick='window.history.back();' style='margin-left: 1rem;')
+              i.fas.fa-arrow-left
+              span Voltar

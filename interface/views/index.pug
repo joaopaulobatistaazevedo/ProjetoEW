@@ -1,33 +1,49 @@
 extends layout
 
 block content
-  .w3-container.w3-padding-64
-    .w3-display-container(style="min-height: 600px;")
-      .w3-display-middle.w3-center(style="width: 90%; max-width: 900px;")
-        .w3-card-4.w3-white.w3-round-large.w3-animate-top
-          header.w3-container.w3-blue
-            h1.w3-margin-top
-              | Recursos Educativos
-          
-          .w3-container.w3-padding-24
-            if user
-              p.w3-text-dark
-                | Bem-vindo, 
-                strong= user.nome
-              
-              .w3-row.w3-margin-top
-                .w3-col.s6.w3-padding
-                  a.w3-button.w3-blue.w3-block(href="/recursos") Ver Recursos
-                .w3-col.s6.w3-padding
-                  a.w3-button.w3-green.w3-block(href="/utilizadores") Utilizadores
-              
-              .w3-row.w3-margin-top
-                .w3-col.s6.w3-padding
-                  a.w3-button.w3-orange.w3-block(href="/posts") Posts
-                .w3-col.s6.w3-padding
-                  a.w3-button.w3-red.w3-block(href="/auth/logout") Sair
-            else
-              p.w3-text-grey
-                | Aceda à plataforma de recursos educativos
-              
-              a.w3-button.w3-blue.w3-block.w3-padding-16(href="/auth/login") Login
+  if user
+    // Hero com Bem-vindo
+    section.hero
+      .hero-content
+        h1
+          i.fas.fa-welcome
+          span  Bem-vindo de volta!
+        p Olá #{user.nome}, vamos explorar e compartilhar conhecimento educativo.
+    
+    // Seção Principal
+    .container.py-6
+      .row
+        .col-12.mb-6
+          h2
+            i.fas.fa-chart-line(style='color: var(--primary); margin-right: 0.5rem;')
+            span Acesso Rápido
+        
+        .col-3
+          .card.stat-card
+            span.stat-number
+              i.fas.fa-book(style='color: var(--secondary);')
+            span.stat-label Explorar Recursos
+            a.btn.btn-outline.mt-4(href="/recursos") Ir para Recursos
+        
+        .col-3
+          .card.stat-card
+            span.stat-number
+              i.fas.fa-users(style='color: var(--primary);')
+            span.stat-label Comunidade
+            a.btn.btn-outline.mt-4(href="/utilizadores") Ver Utilizadores
+
+  else
+    // Hero - Visitante não autenticado
+    section.hero
+      .hero-content
+        h1
+          i.fas.fa-graduation-cap
+          span  Plataforma de Recursos Educativos
+        p Explore recursos educativos e participe da comunidade.
+        .mt-4(style='display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;')
+          a.btn.btn-primary(href="/auth/login")
+            i.fas.fa-sign-in-alt
+            span Entrar
+          a.btn.btn-secondary(href="/auth/registo")
+            i.fas.fa-user-plus
+            span Registar-se

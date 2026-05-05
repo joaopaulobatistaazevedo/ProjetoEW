@@ -2,38 +2,78 @@ extends ../layout
 
 block content
   - const isEdit = !!recurso
-  .w3-container.w3-padding-24
-    .w3-card-4.w3-white(style='max-width: 760px; margin: 0 auto;')
-      .w3-container.w3-blue
-        h2= titulo
-      .w3-container.w3-padding-16
-        if erro
-          .w3-panel.w3-pale-red.w3-border.w3-border-red
-            p= erro
-
-        form(method='POST', action=isEdit ? ('/recursos/' + recurso._id + '/editar') : '/recursos/novo')
-          p
-            label(for='titulo') Titulo
-            input#titulo.w3-input.w3-border(type='text', name='titulo', value=isEdit ? recurso.titulo : '', required=true)
-          p
-            label(for='subtitulo') Subtitulo
-            input#subtitulo.w3-input.w3-border(type='text', name='subtitulo', value=isEdit ? (recurso.subtitulo || '') : '')
-          p
-            label(for='tipo') Tipo
-            input#tipo.w3-input.w3-border(type='text', name='tipo', value=isEdit ? recurso.tipo : '', required=true)
-          p
-            label(for='dataCriacao') Data de criacao
-            input#dataCriacao.w3-input.w3-border(type='date', name='dataCriacao', value=isEdit && recurso.dataCriacao ? new Date(recurso.dataCriacao).toISOString().slice(0,10) : '')
-          p
-            label(for='visibilidade') Visibilidade
-            select#visibilidade.w3-select.w3-border(name='visibilidade')
-              option(value='publico' selected=(isEdit ? recurso.visibilidade === 'publico' : true)) publico
-              option(value='privado' selected=(isEdit && recurso.visibilidade === 'privado')) privado
-          p
-            label(for='hashtags') Hashtags (JSON array, ex.: ["js","express"])
-            input#hashtags.w3-input.w3-border(type='text', name='hashtags', value=isEdit && recurso.hashtags ? JSON.stringify(recurso.hashtags) : '[]')
-
-          p
-            button.w3-button.w3-blue.w3-block(type='submit') Guardar
-          p
-            a(href='/recursos') Voltar
+  .container.container-lg.py-6
+    .row
+      .col-12
+        .card
+          .card-header
+            h2
+              i(class=isEdit ? 'fas fa-edit' : 'fas fa-plus')
+              span(style='margin-left: 0.75rem;')= titulo
+          
+          .card-body
+            if erro
+              .alert.alert-danger
+                i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+                strong= erro
+            
+            form(method='POST', action=isEdit ? ('/recursos/' + recurso._id + '/editar') : '/recursos/novo')
+              .row
+                .col-12
+                  .form-group
+                    label(for='titulo')
+                      i.fas.fa-bookmark(style='margin-right: 0.5rem;')
+                      span Título
+                    input#titulo.form-control(type='text', name='titulo', placeholder='Título do recurso...', value=isEdit ? recurso.titulo : '', required=true)
+                
+                .col-12
+                  .form-group
+                    label(for='subtitulo')
+                      i.fas.fa-align-left(style='margin-right: 0.5rem;')
+                      span Subtítulo (opcional)
+                    input#subtitulo.form-control(type='text', name='subtitulo', placeholder='Descrição breve...', value=isEdit ? (recurso.subtitulo || '') : '')
+                
+                .col-6
+                  .form-group
+                    label(for='tipo')
+                      i.fas.fa-tag(style='margin-right: 0.5rem;')
+                      span Tipo de Recurso
+                    input#tipo.form-control(type='text', name='tipo', placeholder='Ex: Vídeo, Documento, Quiz...', value=isEdit ? recurso.tipo : '', required=true)
+                
+                .col-6
+                  .form-group
+                    label(for='dataCriacao')
+                      i.fas.fa-calendar-alt(style='margin-right: 0.5rem;')
+                      span Data de Criação
+                    input#dataCriacao.form-control(type='date', name='dataCriacao', value=isEdit && recurso.dataCriacao ? new Date(recurso.dataCriacao).toISOString().slice(0,10) : '')
+                
+                .col-12
+                  .form-group
+                    label(for='visibilidade')
+                      i.fas.fa-eye(style='margin-right: 0.5rem;')
+                      span Visibilidade
+                    select#visibilidade.form-control(name='visibilidade')
+                      option(value='publico' selected=(isEdit ? recurso.visibilidade === 'publico' : true))
+                        i.fas.fa-globe(style='margin-right: 0.25rem;')
+                        | Público
+                      option(value='privado' selected=(isEdit && recurso.visibilidade === 'privado'))
+                        i.fas.fa-lock(style='margin-right: 0.25rem;')
+                        | Privado
+                
+                .col-12
+                  .form-group
+                    label(for='hashtags')
+                      i.fas.fa-hashtag(style='margin-right: 0.5rem;')
+                      span Hashtags (JSON array)
+                    input#hashtags.form-control(type='text', name='hashtags', placeholder='["educação", "matemática", "online"]', value=isEdit && recurso.hashtags ? JSON.stringify(recurso.hashtags) : '[]')
+                    small.text-muted(style='display: block; margin-top: 0.5rem;')
+                      i.fas.fa-info-circle(style='margin-right: 0.25rem;')
+                      | Formato: Array JSON com strings, ex: ["tag1", "tag2"]
+            
+            .card-footer
+              button.btn.btn-primary(type='submit')
+                i(class=isEdit ? 'fas fa-save' : 'fas fa-check')
+                span= isEdit ? 'Guardar Alterações' : 'Criar Recurso'
+              a.btn.btn-outline(href='/recursos')
+                i.fas.fa-arrow-left
+                span Cancelar

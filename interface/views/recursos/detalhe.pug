@@ -1,67 +1,190 @@
 extends ../layout
 
 block content
-  .w3-container.w3-padding-24
-    .w3-card.w3-white.w3-padding
-      h2= recurso.titulo
-      if recurso.subtitulo
-        p
-          strong Subtitulo:
-          |  #{recurso.subtitulo}
-      p
-        strong Tipo:
-        |  #{recurso.tipo}
-      p
-        strong Visibilidade:
-        |  #{recurso.visibilidade}
-      p
-        strong Media de estrelas:
-        |  #{recurso.mediaEstrelas || 0}
-      p
-        if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
-          a.w3-button.w3-blue(href='/recursos/' + recurso._id + '/editar') Editar
-          form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline')
-            button.w3-button.w3-red(type='submit') Apagar
+  .container.py-6
+    // Breadcrumb
+    .mb-4
+      a(href='/recursos', style='color: var(--gray);')
+        i.fas.fa-arrow-left(style='margin-right: 0.25rem;')
+        span Voltar a Recursos
+
+    // Detalhe do Recurso
+    .row.mb-6
+      .col-8
+        .card
+          .card-header
+            h1= recurso.titulo
+            if recurso.subtitulo
+              p.resource-subtitle= recurso.subtitulo
+          
+          .card-body
+            if recurso.visibilidade === 'publico'
+              span.resource-badge.badge-public
+                i.fas.fa-globe(style='margin-right: 0.25rem;')
+                | Público
+            else
+              span.resource-badge.badge-private
+                i.fas.fa-lock(style='margin-right: 0.25rem;')
+                | Privado
+            
+            .resource-meta
+              span
+                i.fas.fa-tag
+                strong= recurso.tipo
+              if recurso.autor
+                span
+                  i.fas.fa-user
+                strong= recurso.autor.nome
+              span
+                i.fas.fa-star(style='color: var(--warning);')
+                strong Média: #{recurso.mediaEstrelas || '0'}
+            
+            hr(style='margin: 1.5rem 0; border: none; border-top: 1px solid var(--light-gray);')
+            
+            if recurso.descricao
+              h3 Descrição
+              p!= recurso.descricao
+            
+            if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
+              .card-footer
+                a.btn.btn-primary(href='/recursos/' + recurso._id + '/editar')
+                  i.fas.fa-edit
+                  span Editar Recurso
+                form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline', onsubmit='return confirm("Tem a certeza? Esta ação não pode ser desfeita.");')
+                  button.btn.btn-danger(type='submit')
+                    i.fas.fa-trash-alt
+                    span Apagar Recurso
+            else if !user
+              .alert.alert-info
+                i.fas.fa-info-circle(style='margin-right: 0.5rem;')
+                strong Faça login para comentar e interagir com este recurso.
+      
+      .col-4
+        // Sidebar com Informações Adicionais
+        .card
+          .card-header
+            i.fas.fa-info-circle
+            span  Informações
+          .card-body
+            if recurso.tipo
+              div.mb-4
+                strong Tipo:
+                p= recurso.tipo
+            
+            if recurso.visibilidade
+              div.mb-4
+                strong Visibilidade:
+                p
+                  if recurso.visibilidade === 'publico'
+                    i.fas.fa-globe(style='color: var(--primary); margin-right: 0.25rem;')
+                    | Público
+                  else
+                    i.fas.fa-lock(style='color: var(--warning); margin-right: 0.25rem;')
+                    | Privado
+            
+            if recurso.autor
+              div.mb-4
+                strong Autor:
+                p= recurso.autor.nome
+            
+            if recurso.criatedAt
+              div
+                strong Criado em:
+                p= new Date(recurso.criatedAt).toLocaleDateString('pt-PT')
+
+    // Seção de Posts e Comentários
+    .row
+      .col-12
+        // Novo Post
+        if user && (user.role === 'admin' || user.role === 'produtor')
+          .card.mb-6
+            .card-header
+              i.fas.fa-pen
+              span  Publicar Discussão
+            
+            form(method='POST', action='/posts')
+              input(type='hidden', name='recurso', value=recurso._id)
+              
+              .card-body
+                .form-group
+                  label(for='titulo') Título da Discussão
+                  input#titulo.form-control(type='text', name='titulo', placeholder='Título do seu post...', required=true)
+                
+                .form-group
+                  label(for='conteudo') Conteúdo
+                  textarea#conteudo.form-control(name='conteudo', placeholder='Partilhe suas ideias e insights...', required=true)
+              
+              .card-footer
+                button.btn.btn-primary(type='submit')
+                  i.fas.fa-paper-plane
+                  span Publicar
+        else if user
+          .alert.alert-warning.mb-6
+            i.fas.fa-star(style='margin-right: 0.5rem;')
+            strong Apenas produtores podem publicar.
+            | Faça uma contribuição para se tornar produtor!
         else
-          span.w3-text-grey Apenas o autor ou admin pode editar/apagar este recurso.
+          .alert.alert-info.mb-6
+            i.fas.fa-sign-in-alt(style='margin-right: 0.5rem;')
+            strong
+              a(href='/auth/login') Faça login
+              |  para publicar discussões.
 
-    .w3-card.w3-white.w3-padding.w3-margin-top
-      h3 Novo post
-      if user && (user.role === 'admin' || user.role === 'produtor')
-        form(method='POST', action='/posts')
-          input(type='hidden', name='recurso', value=recurso._id)
-          p
-            label(for='titulo') Titulo
-            input#titulo.w3-input.w3-border(type='text', name='titulo')
-          p
-            label(for='conteudo') Conteudo
-            textarea#conteudo.w3-input.w3-border(name='conteudo', required=true)
-          button.w3-button.w3-green(type='submit') Publicar
-      else
-        p.w3-text-red Apenas produtores podem publicar posts. Faça um contribuição para se tornar produtor!
-
-    .w3-card.w3-white.w3-padding.w3-margin-top
-      h3 Posts
-      if posts && posts.length
-        each post in posts
-          .w3-panel.w3-light-grey
-            h4= post.titulo || 'Sem titulo'
-            p= post.conteudo
-            p.w3-small Autor: #{(post.autor && post.autor.nome) || 'Desconhecido'}
-            form(method='POST', action='/posts/' + post._id + '/comentarios')
-              p
-                textarea.w3-input.w3-border(name='conteudo', placeholder='Comentar...', required=true)
-              button.w3-button.w3-blue(type='submit') Comentar
-            if post.comentarios && post.comentarios.length
-              ul
-                each c in post.comentarios
-                  li #{(c.autor && c.autor.nome) || 'Utilizador'}: #{c.conteudo}
-            if user && (user.role === 'admin' || user.sub === post.autor._id)
-              form(method='POST', action='/posts/' + post._id + '/apagar')
-                input(type='hidden', name='recurso', value=recurso._id)
-                button.w3-button.w3-small.w3-red(type='submit') Apagar post
-      else
-        p Ainda nao existem posts deste recurso.
-
-    .w3-margin-top
-      a(href='/recursos') Voltar a lista
+        // Lista de Posts
+        .card
+          .card-header
+            i.fas.fa-comments
+            span  Discussões (#{posts ? posts.length : 0})
+          
+          if posts && posts.length
+            each post in posts
+              .card-body(style='border-bottom: 1px solid var(--light-gray); padding: 1.5rem;')
+                .row.mb-3
+                  .col-9
+                    h4= post.titulo || 'Sem titulo'
+                  .col-3.text-right
+                    small.text-muted
+                      i.fas.fa-user-circle(style='margin-right: 0.25rem;')
+                      | #{(post.autor && post.autor.nome) || 'Utilizador Desconhecido'}
+                
+                p(style='color: #475569; line-height: 1.6;')= post.conteudo
+                
+                // Comentários
+                if post.comentarios && post.comentarios.length
+                  .mt-4
+                    .mb-3
+                      strong
+                        i.fas.fa-comments(style='margin-right: 0.5rem;')
+                        | Comentários (#{post.comentarios.length})
+                    
+                    each c in post.comentarios
+                      .card(style='margin-bottom: 0.75rem; border: 1px solid var(--light-gray);')
+                        .card-body(style='padding: 1rem;')
+                          p.mb-2
+                            strong= (c.autor && c.autor.nome) || 'Utilizador'
+                            br
+                            small.text-muted= c.conteudo
+                
+                // Formulário de Comentário
+                if user
+                  form.mt-3(method='POST', action='/posts/' + post._id + '/comentarios')
+                    .row
+                      .col-10
+                        textarea.form-control(name='conteudo', placeholder='Deixe seu comentário...', required=true, style='resize: none; height: 60px;')
+                      .col-2
+                        button.btn.btn-primary.btn-block(type='submit')
+                          i.fas.fa-reply
+                          span Comentar
+                
+                // Ação Apagar Post (se autorizado)
+                if user && (user.role === 'admin' || user.sub === post.autor._id)
+                  form.mt-3(method='POST', action='/posts/' + post._id + '/apagar', onsubmit='return confirm("Tem a certeza?");')
+                    input(type='hidden', name='recurso', value=recurso._id)
+                    button.btn.btn-sm.btn-danger(type='submit')
+                      i.fas.fa-trash-alt
+                      | Apagar Post
+          else
+            .card-body
+              .empty-state(style='padding: 2rem 0;')
+                i.fas.fa-comments.empty-icon
+                p Ainda não há discussões neste recurso. Seja o primeiro a comentar!
