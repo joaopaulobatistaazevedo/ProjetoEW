@@ -65,7 +65,7 @@ const ZipGenerator = {
         // Apenas ficheiros com checksum valido
         return ficheiros
             .filter(f => f.checksum_sha256 && f.checksum_sha256 !== 'pendente')
-            .map(f => `${f.checksum_sha256}  data/${f.name}`)
+            .map(f => `${f.checksum_sha256}  data/${f.nomeNoDIP || f.name}`)
             .join('\n');
     },
 
@@ -81,13 +81,15 @@ AIP ID: ${dip.aipId}
 Recurso ID: ${recursoId}
 Utilizador: ${utilizadorId}
 Visibilidade: ${dip.metadados_enriquecidos.visibilidade}
+Tipo de pedido: ${dip.pedido?.tipo || 'completo'}
+Transformação: ${dip.pedido?.transformacao || 'original'}
 Ficheiros incluídos: ${dip.ficheirosIncluidos.length}
 Ficheiros excluídos: ${dip.ficheirosExcluidos.length}
 
 --- FICHEIROS INCLUÍDOS ---
-${dip.ficheirosIncluidos.map(f => `✓ ${f.name} (${(f.size / 1024).toFixed(2)}KB) SHA256: ${f.checksum_sha256 || 'pendente'}`).join('\n')}
+${dip.ficheirosIncluidos.map(f => `✓ ${f.nomeNoDIP || f.name} (${(f.size / 1024).toFixed(2)}KB) SHA256: ${f.checksum_sha256 || 'pendente'}${f.nomeOriginal ? ` | origem: ${f.nomeOriginal}` : ''}`).join('\n')}
 
---- FICHEIROS EXCLUÍDOS (por política de visibilidade) ---
+--- FICHEIROS EXCLUÍDOS ---
 ${dip.ficheirosExcluidos.length > 0 ? dip.ficheirosExcluidos.map(f => `✗ ${f.name} - ${f.motivo_exclusao}`).join('\n') : 'Nenhum'}
 
 --- RESULTADO ---
@@ -119,16 +121,20 @@ Status: OK
                     dataExportacao: new Date().toISOString(),
                     exportadoPor: opcoes.utilizadorId
                 }),
+                pedido_utilizador: tipo === 'DIP' ? (sip.pedido || null) : null,
                 metadados_originais: sip.metadados || {},
                 metadados_enriquecidos: typeof sip.metadados_enriquecidos === 'object' 
                     ? sip.metadados_enriquecidos 
                     : {},
                 ficheiros: sip.ficheirosIncluidos?.map(f => ({
-                    name: f.name,
+                    name: f.nomeNoDIP || f.name,
+                    nome_original: f.nomeOriginal || f.name,
                     size: f.size,
                     type: f.type || 'application/octet-stream',
                     required: f.required !== undefined ? f.required : false,
                     checksum_sha256: f.checksum_sha256 || 'pendente',
+                    checksum_original_sha256: f.checksum_original_sha256 || null,
+                    transformacao: f.transformacao || 'original',
                     incluido: true
                 })) || [],
                 ficheiros_excluidos: sip.ficheirosExcluidos?.length || 0
@@ -145,10 +151,17 @@ Status: OK
             // 3) Conteudos em /data/
             if (sip.ficheirosIncluidos && sip.ficheirosIncluidos.length > 0) {
                 for (const ficheiro of sip.ficheirosIncluidos) {
+                    const nomeNoDIP = ficheiro.nomeNoDIP || ficheiro.name;
+
+                    if (ficheiro.conteudoBuffer) {
+                        zipper.file(`data/${nomeNoDIP}`, ficheiro.conteudoBuffer);
+                        continue;
+                    }
+
                     if (ficheiro.caminhoLocal) {
                         try {
                             const conteudo = await fs.readFile(ficheiro.caminhoLocal);
-                            zipper.file(`data/${ficheiro.name}`, conteudo);
+                            zipper.file(`data/${nomeNoDIP}`, conteudo);
                         } catch (err) {
                             console.warn(`⚠ Ficheiro não encontrado: ${ficheiro.name}`);
                         }

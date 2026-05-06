@@ -5,6 +5,29 @@ var axios = require('axios');
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
+function obterMensagemErroAPI(err, fallback = 'Ocorreu um erro ao contactar a API.') {
+    const data = err.response && err.response.data;
+
+    if (!data) {
+        return fallback;
+    }
+
+    if (Buffer.isBuffer(data)) {
+        try {
+            const parsed = JSON.parse(data.toString('utf8'));
+            return parsed.mensagem || parsed.erro || parsed.error || fallback;
+        } catch (parseErr) {
+            return fallback;
+        }
+    }
+
+    if (typeof data === 'string') {
+        return data;
+    }
+
+    return data.mensagem || data.erro || data.error || fallback;
+}
+
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
     try {
@@ -41,6 +64,7 @@ router.get('/:id', async (req, res) => {
             axios.get(`${API}/recursos/${req.params.id}`),
             axios.get(`${API}/posts?recurso=${req.params.id}`)
         ]);
+
         res.render('recursos/detalhe', {
             titulo: recursoRes.data.titulo,
             recurso: recursoRes.data,
@@ -48,6 +72,42 @@ router.get('/:id', async (req, res) => {
         });
     } catch (err) {
         res.status(404).render('erro', { titulo: 'Erro', mensagem: 'Recurso não encontrado' });
+    }
+});
+
+// GET /recursos/:id/exportar-dip — proxy autenticado para download DIP
+router.get('/:id/exportar-dip', async (req, res) => {
+    try {
+        const token = req.cookies[COOKIE_NAME];
+        const resposta = await axios.get(
+            `${API}/disseminacao/recursos/${req.params.id}/exportar`,
+            {
+                params: req.query,
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'arraybuffer'
+            }
+        );
+
+        const headersPassThrough = [
+            'content-type',
+            'content-disposition',
+            'content-length',
+            'x-dip-checksum',
+            'x-dip-size'
+        ];
+
+        headersPassThrough.forEach(nome => {
+            if (resposta.headers[nome]) {
+                res.setHeader(nome, resposta.headers[nome]);
+            }
+        });
+
+        res.send(Buffer.from(resposta.data));
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel exportar o DIP solicitado.')
+        });
     }
 });
 

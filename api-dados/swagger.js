@@ -129,6 +129,20 @@ const swaggerSpec = {
                 responses: { '200': { description: 'Avaliacao registada' }, '400': { description: 'Dados invalidos' } }
             }
         },
+        '/disseminacao/recursos/{recursoId}/exportar': {
+            get: {
+                summary: 'Exportar DIP de um recurso',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'recursoId', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                responses: {
+                    '200': { description: 'DIP gerado com sucesso' },
+                    '403': { description: 'Sem permissao' },
+                    '404': { description: 'AIP ou recurso nao encontrado' }
+                }
+            }
+        },
         '/posts': {
             get: {
                 summary: 'Listar posts',

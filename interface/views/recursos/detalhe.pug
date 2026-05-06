@@ -92,6 +92,29 @@ block content
                 strong Criado em:
                 p= new Date(recurso.criatedAt).toLocaleDateString('pt-PT')
 
+    .row.mb-6
+      .col-12
+        .card
+          .card-header
+            i.fas.fa-box-open
+            span  Disseminação OAIS (DIP)
+          .card-body
+            p.dip-intro
+              | Nesta fase inicial, o DIP é exportado como um pacote equivalente ao SIP.
+              |  O sistema devolve o recurso preservado em formato ZIP, mantendo a mesma estrutura base de manifesto e ficheiros.
+
+            .alert.alert-info
+              i.fas.fa-circle-info(style='margin-right: 0.5rem;')
+              strong Fase inicial:
+              |  o utilizador descarrega o pacote completo, sem filtros nem transformações adicionais.
+
+            .dip-toolbar
+              a.btn.btn-secondary(href='/recursos/' + recurso._id + '/exportar-dip')
+                i.fas.fa-download
+                span Exportar DIP
+              p.dip-help
+                | Numa fase seguinte poderemos separar DIP e SIP com mais detalhe, mas por agora mantemos a equivalência para fechar o ciclo base de ingestão e disseminação.
+
     // Posts e comentarios
     .row
       .col-12

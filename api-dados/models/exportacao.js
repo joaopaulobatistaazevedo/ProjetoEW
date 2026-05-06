@@ -44,6 +44,15 @@ const exportacaoSchema = new mongoose.Schema({
         visibilidade: String,
         ficheirosIncluidos: Number,
         ficheirosExcluidos: Number,
+        ficheirosSolicitados: [String],
+        tipoPedido: {
+            type: String,
+            enum: ['completo', 'subconjunto', 'ficheiro-individual']
+        },
+        transformacao: {
+            type: String,
+            enum: ['original', 'texto']
+        },
         motivosExclusao: [String]
     },
     

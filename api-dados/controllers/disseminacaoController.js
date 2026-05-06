@@ -1,6 +1,5 @@
 const disseminacaoService = require('../services/disseminacaoService');
 const verificacaoPermissoes = require('../services/verificacaoPermissoes');
-const Recurso = require('../models/recurso');
 
 const disseminacaoController = {
     
@@ -18,7 +17,7 @@ const disseminacaoController = {
             // O recurso está em req.recurso
             
             // Exportar
-            const { zipBuffer, metadata, dip } = await disseminacaoService.exportarRecurso(
+            const { zipBuffer, metadata } = await disseminacaoService.exportarRecurso(
                 recursoId,
                 utilizadorId,
                 papelUtilizador
@@ -38,7 +37,7 @@ const disseminacaoController = {
             }
             
             // Response com headers de metadados
-            const nomeArquivo = `recurso-${recursoId}-${Date.now()}.zip`;
+            const nomeArquivo = `dip-${recursoId}-${Date.now()}.zip`;
             
             res.setHeader('Content-Type', 'application/zip');
             res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
@@ -50,9 +49,9 @@ const disseminacaoController = {
             
         } catch (err) {
             console.error('Erro ao exportar recurso:', err);
-            res.status(500).json({
+            res.status(err.statusCode || 500).json({
                 status: 'erro',
-                mensagem: 'Erro ao exportar recurso',
+                mensagem: err.message || 'Erro ao exportar recurso',
                 erro: err.message
             });
         }

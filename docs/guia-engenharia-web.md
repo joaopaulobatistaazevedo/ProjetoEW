@@ -292,15 +292,14 @@ No projeto, o `AIP` nao e apenas um ZIP guardado. E a combinacao de:
 
 `DIP` significa `Dissemination Information Package`.
 
-No estado atual do projeto, o DIP ja segue a ideia OAIS mais flexivel:
+Na fase inicial do projeto, estamos a trabalhar com a aproximacao pratica `DIP ≈ SIP`:
 
-- nao tem de ser igual ao SIP;
-- nao tem de conter todos os ficheiros originais;
-- pode ser gerado a partir do AIP;
-- pode conter todos os ficheiros, um subconjunto, ou apenas um ficheiro;
-- pode entregar a representacao original ou, em certos casos, uma representacao transformada para texto.
+- o DIP e gerado a partir do AIP;
+- o pacote exportado mantem a mesma estrutura base do SIP;
+- o utilizador descarrega o pacote completo do recurso;
+- a evolucao para DIP parcial ou transformado fica para fases seguintes.
 
-Isto e importante porque o AIP preserva tudo, mas o DIP so entrega o que faz sentido para o pedido do utilizador.
+Isto permite fechar primeiro o ciclo base `SIP -> AIP -> DIP` antes de introduzir variantes mais avancadas de disseminacao.
 
 ## 10) Ingestao SIP no codigo
 
@@ -363,48 +362,29 @@ Ficheiros principais:
 
 ### Rotas de disseminacao
 
-- `GET /disseminacao/recursos/:recursoId/opcoes`
 - `GET /disseminacao/recursos/:recursoId/exportar`
 - `GET /disseminacao/recursos/exportar-multiplos`
 - `GET /disseminacao/recursos/:recursoId/historico-exportacoes`
 - `GET /disseminacao/meus-recursos/exportar-todos`
 
-### Exportacao seletiva
+### Exportacao na fase inicial
 
-O endpoint `GET /disseminacao/recursos/:recursoId/exportar` agora aceita opcoes de pedido, por exemplo:
-
-- sem parametros: exporta o DIP completo;
-- `?ficheiro=slides.pdf`: exporta apenas um ficheiro;
-- `?ficheiro=a.pdf&ficheiro=b.txt`: exporta um subconjunto;
-- `?transformacao=texto`: tenta gerar uma representacao textual quando o formato e compativel.
+O endpoint `GET /disseminacao/recursos/:recursoId/exportar` devolve, nesta fase, um DIP completo equivalente ao SIP na estrutura base.
 
 Antes de gerar o DIP, o sistema:
 
 1. carrega o `AIP`;
 2. carrega o `Recurso`;
 3. valida permissao de acesso;
-4. valida se os ficheiros pedidos existem no `manifesto`;
-5. filtra os ficheiros a incluir;
-6. prepara checksums e caminhos locais;
-7. chama o `zipGenerator` para montar:
+4. prepara checksums e caminhos locais;
+5. inclui os ficheiros preservados no pacote completo;
+6. chama o `zipGenerator` para montar:
    - `manifest.json`
    - `bagit.txt`
    - `checksums.txt`
    - `disseminacao.log`
    - pasta `data/` com os ficheiros incluidos
-8. regista auditoria em `Exportacao`.
-
-### O endpoint de opcoes
-
-`GET /disseminacao/recursos/:recursoId/opcoes` existe para a interface saber o que pode mostrar ao utilizador.
-
-Ele devolve informacao como:
-
-- lista de ficheiros preservados;
-- tamanhos;
-- tipos MIME;
-- se suportam transformacao para texto;
-- tipos de pedido suportados.
+7. regista auditoria em `Exportacao`.
 
 ## 12) Permissoes e visibilidade
 
@@ -472,11 +452,10 @@ As colecoes principais sao:
 ### Fluxo D: exportar DIP
 
 1. Utilizador abre detalhe do recurso na `interface`.
-2. A `interface` pede a `api-dados` as opcoes de exportacao.
-3. O utilizador escolhe exportacao completa, parcial ou individual.
-4. A `interface` chama a rota de exportacao com o token.
-5. A `api-dados` gera o ZIP a partir do `AIP`.
-6. A `interface` devolve o ficheiro ao browser.
+2. O utilizador escolhe exportar o DIP.
+3. A `interface` chama a rota de exportacao com o token.
+4. A `api-dados` gera o ZIP a partir do `AIP`.
+5. A `interface` devolve o ficheiro ao browser.
 
 ## 15) Como ler o projeto sem te perderes
 
@@ -514,7 +493,7 @@ Se tiveres de explicar o projeto em poucas frases, a ideia certa e esta:
 - MongoDB guarda os metadados;
 - os ficheiros preservados ficam no filesystem em `api-dados/uploads/recursos`;
 - o OAIS aparece no fluxo `SIP -> AIP -> DIP`;
-- o DIP no estado atual ja pode ser seletivo e nao precisa de coincidir com o SIP original.
+- nesta fase inicial, o DIP e tratado como equivalente ao SIP na estrutura base.
 
 ## 18) Ficheiros que vale a pena abrir a seguir
 
