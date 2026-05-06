@@ -19,14 +19,13 @@ const recursoSchema = new mongoose.Schema({
     mediaEstrelas: { type: Number, default: 0 }
 });
 
-recursoSchema.pre('save', function (next) {
-    if (this.ratings.length === 0) {
+recursoSchema.pre('save', function () {
+    if (!this.ratings || this.ratings.length === 0) {
         this.mediaEstrelas = 0;
-    } else {
-        const total = this.ratings.reduce((sum, r) => sum + r.estrelas, 0);
-        this.mediaEstrelas = +(total / this.ratings.length).toFixed(1);
+        return;
     }
-    next();
+    const total = this.ratings.reduce((sum, r) => sum + r.estrelas, 0);
+    this.mediaEstrelas = +(total / this.ratings.length).toFixed(1);
 });
 
 // Índices para acelerar consultas por campos comuns

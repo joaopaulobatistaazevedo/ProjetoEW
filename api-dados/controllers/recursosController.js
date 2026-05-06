@@ -160,6 +160,7 @@ const recursosController = {
 
             res.status(201).json(await enriquecerComTipos(recurso));
         } catch (err) {
+            console.error('Erro em createRecurso:', err && err.stack ? err.stack : err);
             res.status(500).json({ erro: err.message });
         }
     },

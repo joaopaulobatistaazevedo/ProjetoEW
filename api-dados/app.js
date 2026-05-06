@@ -60,6 +60,7 @@ app.get('/', (req, res) => {
 app.use(function(req, res, next) { next(createError(404)); });
 
 app.use(function(err, req, res, next) {
+    console.error(err && err.stack ? err.stack : err);
     res.status(err.status || 500).json({ error: err.message });
 });
 

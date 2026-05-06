@@ -14,8 +14,17 @@ router.get('/top3', recursosController.getTop3Recursos);
 // GET /recursos/:id/download — autenticado, respeita visibilidade
 router.get('/:id/download', authenticate, recursosController.downloadRecurso);
 
+// Conditional upload middleware: only invoke multer for multipart/form-data
+function conditionalUpload(req, res, next) {
+	const ct = (req.headers['content-type'] || '').toLowerCase();
+	if (ct.startsWith('multipart/form-data')) {
+		return upload.single('ficheiro')(req, res, next);
+	}
+	return next();
+}
+
 // POST /recursos — criar (qualquer autenticado, será promovido a produtor)
-router.post('/', authenticate, upload.single('ficheiro'), recursosController.createRecurso);
+router.post('/', authenticate, conditionalUpload, recursosController.createRecurso);
 
 // GET /recursos/:id — detalhe (público)
 router.get('/:id', recursosController.getRecursoById);

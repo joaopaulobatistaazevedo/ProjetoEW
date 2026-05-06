@@ -80,11 +80,27 @@ router.get('/:id', auth.verificaAcesso, (req, res) => {
         .catch(err => res.status(500).json({ erro: err.message }));
 });
 
-// PUT /users/:id — atualizar (apenas admin)
-router.put('/:id', auth.verificaAcesso, auth.verificaAdmin, (req, res) => {
-    Utilizador.update(req.params.id, req.body)
-        .then(dados => res.status(200).json(toPublicUser(dados)))
-        .catch(err => res.status(500).json({ erro: err.message }));
+// PUT /users/:id — atualizar (admin ou o proprio utilizador)
+router.put('/:id', auth.verificaAcesso, async (req, res) => {
+    try {
+        const isSelf = req.user.sub === req.params.id;
+        const isAdmin = req.user.role === 'admin';
+
+        // Só o próprio utilizador ou um admin podem atualizar o registo
+        if (!isSelf && !isAdmin) {
+            return res.status(403).json({ erro: 'Sem permissão' });
+        }
+
+        // Impedir que um admin altere a password de outro utilizador
+        if (!isSelf && req.body && req.body.password) {
+            delete req.body.password;
+        }
+
+        const updated = await Utilizador.update(req.params.id, req.body);
+        res.status(200).json(toPublicUser(updated));
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
 // DELETE /users/:id — apagar (apenas admin)
