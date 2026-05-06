@@ -11,7 +11,7 @@ block content
     if utilizador
       .row
         .col-4
-          // Perfil Card
+          // Perfil
           .card
             .card-body.text-center
               i.fas.fa-user-circle(style='font-size: 4rem; color: var(--primary); margin-bottom: 1rem;')
@@ -27,7 +27,7 @@ block content
                   | #{utilizador.role.charAt(0).toUpperCase() + utilizador.role.slice(1)}
         
         .col-8
-          // Detalhes do Utilizador
+          // Detalhes do utilizador
           .card.mb-6
             .card-header
               i.fas.fa-user
@@ -53,7 +53,7 @@ block content
                   | Membro desde
                 p= utilizador.dataRegisto ? new Date(utilizador.dataRegisto).toLocaleDateString('pt-PT') : 'N/A'
           
-          // Editar Utilizador (apenas admins)
+          // Editar utilizador (apenas admins)
           if user && user.role === 'admin'
             .card
               .card-header

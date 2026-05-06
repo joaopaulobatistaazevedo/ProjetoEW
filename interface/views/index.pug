@@ -2,7 +2,7 @@ extends layout
 
 block content
   if user
-    // Hero com Bem-vindo
+    // Hero (autenticado)
     section.hero
       .hero-content
         h1
@@ -10,7 +10,7 @@ block content
           span  Bem-vindo de volta!
         p Olá #{user.nome}, vamos explorar e compartilhar conhecimento educativo.
     
-    // Seção Principal
+    // Acesso rapido
     .container.py-6
       .row
         .col-12.mb-6
@@ -33,7 +33,7 @@ block content
             a.btn.btn-outline.mt-4(href="/utilizadores") Ver Utilizadores
 
   else
-    // Hero - Visitante não autenticado
+    // Hero (visitante)
     section.hero
       .hero-content
         h1

@@ -129,6 +129,8 @@ A interface valida o cookie JWT antes de permitir rotas protegidas (`/recursos`,
 - **AIP**: pacote interno e validado que o sistema guarda.
 - **DIP**: pacote que sai do sistema (download/disseminacao).
 
+No modelo **OAIS**, o **DIP** nao tem de ser igual ao **SIP**, nem tem de incluir tudo o que foi submetido. O **DIP** representa apenas a versao disponibilizada ao utilizador final no processo de disseminacao, podendo ser uma selecao parcial ou uma transformacao do conteudo preservado no **AIP**. Isso permite a extracao seletiva de conteudos a partir do **AIP**, por exemplo entregar apenas um ficheiro individual do SIP original, em vez do pacote completo. Assim, o **DIP** pode conter um unico ficheiro, um subconjunto dos ficheiros originais, ou uma versao transformada, conforme o pedido do utilizador. Esta abordagem garante flexibilidade no acesso, sem comprometer a integridade do **AIP**.
+
 ### No ProjetoEW
 
 - **SIP**: um ZIP com `manifest.json` e pasta `data/`.

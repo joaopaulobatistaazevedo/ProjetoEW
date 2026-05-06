@@ -1,3 +1,4 @@
+// Auth helpers (JWT + roles)
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET  = process.env.JWT_SECRET  || "jcr_secret_2026";
@@ -19,7 +20,7 @@ function isConsumidor(role) {
 
 // --- Middleware de Autenticação ---
 
-// Verifica o token por Header, Cookie ou Query String
+// Verifica token por Header, Cookie ou Query
 module.exports.verificaAcesso = (req, res, next) => {
     let token = null;
 

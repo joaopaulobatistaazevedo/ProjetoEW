@@ -17,6 +17,7 @@ block content
                 i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
                 strong= erro
             
+            // Formulario de criar/editar
             form(method='POST', action=isEdit ? ('/recursos/' + recurso._id + '/editar') : '/recursos/novo')
               .row
                 .col-12
@@ -70,6 +71,7 @@ block content
                       i.fas.fa-info-circle(style='margin-right: 0.25rem;')
                       | Formato: Array JSON com strings, ex: ["tag1", "tag2"]
             
+            // Acoes do formulario
             .card-footer
               button.btn.btn-primary(type='submit')
                 i(class=isEdit ? 'fas fa-save' : 'fas fa-check')

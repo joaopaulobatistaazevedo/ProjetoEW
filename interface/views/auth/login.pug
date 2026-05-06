@@ -16,6 +16,7 @@ block content
                 i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
                 strong= erro
             
+            // Formulario de login
             form(method='POST', action='/auth/login')
               .form-group
                 label(for='username')
@@ -35,6 +36,7 @@ block content
             
             hr(style='margin: 2rem 0; border: none; border-top: 1px solid var(--light-gray);')
             
+            // Link para registo
             .text-center(style='text-align: center;')
               p.text-muted(style='color: var(--gray); margin-bottom: 1rem;')
                 | Ainda não tem conta?

@@ -3,8 +3,10 @@ const router = express.Router();
 const Utilizador = require('../controllers/utilizador');
 const auth = require('../auth/auth');
 
+// Cookie onde o token e guardado
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
 
+// Remover campos sensiveis do output
 function toPublicUser(userDoc) {
     if (!userDoc) return null;
 
@@ -41,6 +43,7 @@ router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         const dados = await Utilizador.login(username, password);
+        // Cookie HTTP-only para sessao
         res.cookie(COOKIE_NAME, dados.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

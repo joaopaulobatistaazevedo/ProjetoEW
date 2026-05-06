@@ -7,9 +7,11 @@ const setupSwagger = require('./swagger');
 
 const app = express();
 
+// Config
 const PORT      = process.env.PORT      || 2623;
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/auth_service';
 
+// MongoDB connection
 mongoose.connect(MONGO_URL)
     .then(() => {
         console.log('Auth: MongoDB ligado com sucesso.');
@@ -20,7 +22,7 @@ mongoose.connect(MONGO_URL)
         process.exit(1);
     });
 
-// Garantir existência de utilizador admin base
+// Garantir existencia de utilizador admin base
 const Utilizador = require('./models/utilizador');
 const bcrypt = require('bcryptjs');
 async function ensureBaseAdmin() {
@@ -48,6 +50,7 @@ async function ensureBaseAdmin() {
     }
 }
 
+// Middleware pipeline
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -55,6 +58,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 setupSwagger(app);
 
+// Routes
 const usersRouter = require('./routes/users');
 app.use('/users', usersRouter);
 

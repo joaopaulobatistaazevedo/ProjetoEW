@@ -21,7 +21,7 @@ router.get('/novo', (req, res) => {
     res.render('recursos/form', { titulo: 'Submeter Recurso', recurso: null });
 });
 
-// POST /recursos/novo — submeter recurso
+// POST /recursos/novo — submeter recurso (forward token)
 router.post('/novo', async (req, res) => {
     try {
         const token = req.cookies[COOKIE_NAME];
@@ -34,7 +34,7 @@ router.post('/novo', async (req, res) => {
     }
 });
 
-// GET /recursos/:id — detalhe
+// GET /recursos/:id — detalhe + posts
 router.get('/:id', async (req, res) => {
     try {
         const [recursoRes, postsRes] = await Promise.all([
@@ -61,7 +61,7 @@ router.get('/:id/editar', async (req, res) => {
     }
 });
 
-// POST /recursos/:id/editar
+// POST /recursos/:id/editar — atualizar
 router.post('/:id/editar', async (req, res) => {
     try {
         const token = req.cookies[COOKIE_NAME];
@@ -74,7 +74,7 @@ router.post('/:id/editar', async (req, res) => {
     }
 });
 
-// POST /recursos/:id/apagar
+// POST /recursos/:id/apagar — remover
 router.post('/:id/apagar', async (req, res) => {
     try {
         const token = req.cookies[COOKIE_NAME];

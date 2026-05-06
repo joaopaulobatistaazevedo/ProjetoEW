@@ -10,7 +10,7 @@ router.get('/login', (req, res) => {
     res.render('auth/login', { titulo: 'Login' });
 });
 
-// POST /auth/login — envia credenciais ao auth service, guarda o token em cookie
+// POST /auth/login — envia credenciais ao auth service e guarda token em cookie
 router.post('/login', async (req, res) => {
     try {
         const resposta = await axios.post(`${AUTH}/login`, req.body);

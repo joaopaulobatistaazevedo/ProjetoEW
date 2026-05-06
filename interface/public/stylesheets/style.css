@@ -1,4 +1,4 @@
-/* ===== VARIÁVEIS E RESET ===== */
+/* ===== VARIAVEIS E RESET ===== */
 :root {
   --primary: #2563eb;
   --primary-dark: #1e40af;
@@ -70,7 +70,7 @@ a:hover {
   color: var(--primary-dark);
 }
 
-/* ===== NAVEGAÇÃO - HEADER ===== */
+/* ===== NAVEGACAO - HEADER ===== */
 .navbar {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   padding: 1rem 0;
@@ -710,7 +710,7 @@ hr {
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== ANIMAÇÕES ===== */
+/* ===== ANIMACOES ===== */
 @keyframes fadeIn {
   from {
     opacity: 0;

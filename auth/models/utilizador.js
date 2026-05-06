@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Utilizador do servico de autenticacao
 const utilizadorSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   nome: { type: String, required: true },

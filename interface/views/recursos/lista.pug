@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   .container.py-6
-    // Header com Título e Botão de Novo Recurso
+    // Header + botao de novo recurso
     .row.mb-6
       .col-9
         h1
@@ -14,7 +14,7 @@ block content
             i.fas.fa-plus
             span Novo Recurso
     
-    // Alerta de Erro (se houver)
+    // Alerta de erro (se houver)
     if erro
       .alert.alert-danger
         i.fas.fa-exclamation-triangle(style='margin-right: 0.5rem;')
@@ -38,7 +38,7 @@ block content
               i.fas.fa-search
               span Filtrar
     
-    // Recursos
+    // Lista de recursos
     if recursos && recursos.length
       .row
         each recurso in recursos
