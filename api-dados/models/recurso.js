@@ -5,7 +5,7 @@ const recursoSchema = new mongoose.Schema({
     titulo:       { type: String, required: true },
     descricao:    { type: String },
     subtitulo:    String,
-    tipo:         { type: String, enum: ['artigo', 'tese', 'slides', 'teste', 'relatorio', 'aplicacao', 'problema', 'outro'], required: true },
+    tipo:         { type: String, required: true, trim: true, lowercase: true },
     dataCriacao:  Date,
     dataRegisto:  { type: Date, default: Date.now },
     visibilidade: { type: String, enum: ['publico', 'privado'], default: 'publico' },

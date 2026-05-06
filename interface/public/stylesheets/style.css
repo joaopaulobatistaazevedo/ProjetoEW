@@ -294,6 +294,7 @@ a:hover {
   background-color: var(--light);
   border-top: 1px solid var(--light-gray);
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   justify-content: flex-end;
 }
@@ -341,6 +342,13 @@ textarea:focus {
 textarea {
   resize: vertical;
   min-height: 120px;
+}
+
+.filters-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
 }
 
 /* ===== TABLES ===== */

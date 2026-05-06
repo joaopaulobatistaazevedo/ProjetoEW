@@ -30,7 +30,7 @@ block content
             .resource-meta
               span
                 i.fas.fa-tag
-                strong= recurso.tipo
+                strong= recurso.tipoNome || recurso.tipo
               if recurso.autor
                 span
                   i.fas.fa-user
@@ -69,7 +69,7 @@ block content
             if recurso.tipo
               div.mb-4
                 strong Tipo:
-                p= recurso.tipo
+                p= recurso.tipoNome || recurso.tipo
             
             if recurso.visibilidade
               div.mb-4

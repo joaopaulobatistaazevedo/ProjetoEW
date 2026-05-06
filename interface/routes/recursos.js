@@ -5,6 +5,31 @@ var axios = require('axios');
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
+function obterToken(req) {
+    return req.cookies[COOKIE_NAME];
+}
+
+function obterHeadersAutorizacao(req) {
+    const token = obterToken(req);
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function utilizadorEhAdmin(req) {
+    return req.user && req.user.role === 'admin';
+}
+
+async function obterTiposAtivos() {
+    const resposta = await axios.get(`${API}/tipos-recurso`);
+    return resposta.data;
+}
+
+async function obterTodosTiposAdmin(req) {
+    const resposta = await axios.get(`${API}/tipos-recurso/todos`, {
+        headers: obterHeadersAutorizacao(req)
+    });
+    return resposta.data;
+}
+
 function obterMensagemErroAPI(err, fallback = 'Ocorreu um erro ao contactar a API.') {
     const data = err.response && err.response.data;
 
@@ -31,29 +56,150 @@ function obterMensagemErroAPI(err, fallback = 'Ocorreu um erro ao contactar a AP
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
     try {
-        const params = new URLSearchParams(req.query).toString();
-        const resposta = await axios.get(`${API}/recursos?${params}`);
-        res.render('recursos/lista', { titulo: 'Recursos', recursos: resposta.data, filtros: req.query });
+        const [recursosRes, tiposRecurso] = await Promise.all([
+            axios.get(`${API}/recursos`, { params: req.query }),
+            obterTiposAtivos()
+        ]);
+
+        res.render('recursos/lista', {
+            titulo: 'Recursos',
+            recursos: recursosRes.data,
+            filtros: req.query,
+            tiposRecurso
+        });
     } catch (err) {
-        res.render('recursos/lista', { titulo: 'Recursos', recursos: [], filtros: {}, erro: err.message });
+        res.render('recursos/lista', {
+            titulo: 'Recursos',
+            recursos: [],
+            filtros: req.query || {},
+            tiposRecurso: [],
+            erro: obterMensagemErroAPI(err, 'Nao foi possivel carregar os recursos.')
+        });
     }
 });
 
 // GET /recursos/novo — formulário de criação
-router.get('/novo', (req, res) => {
-    res.render('recursos/form', { titulo: 'Submeter Recurso', recurso: null });
+router.get('/novo', async (req, res) => {
+    try {
+        const tiposRecurso = await obterTiposAtivos();
+        res.render('recursos/form', {
+            titulo: 'Submeter Recurso',
+            recurso: null,
+            tiposRecurso
+        });
+    } catch (err) {
+        res.status(500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar os tipos de recurso.')
+        });
+    }
 });
 
 // POST /recursos/novo — submeter recurso (forward token)
 router.post('/novo', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         await axios.post(`${API}/recursos`, req.body, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect('/recursos');
     } catch (err) {
-        res.render('recursos/form', { titulo: 'Submeter Recurso', recurso: null, erro: err.message });
+        let tiposRecurso = [];
+
+        try {
+            tiposRecurso = await obterTiposAtivos();
+        } catch (tiposErr) {
+            tiposRecurso = [];
+        }
+
+        res.status(err.response?.status || 500).render('recursos/form', {
+            titulo: 'Submeter Recurso',
+            recurso: req.body,
+            tiposRecurso,
+            erro: obterMensagemErroAPI(err, 'Nao foi possivel submeter o recurso.')
+        });
+    }
+});
+
+// GET /recursos/tipos — gestao de tipos de recurso (admin)
+router.get('/tipos', async (req, res) => {
+    if (!utilizadorEhAdmin(req)) {
+        return res.status(403).render('erro', {
+            titulo: 'Sem permissao',
+            mensagem: 'Apenas administradores podem gerir tipos de recurso.'
+        });
+    }
+
+    try {
+        const tiposRecurso = await obterTodosTiposAdmin(req);
+        res.render('recursos/tipos', {
+            titulo: 'Tipos de Recurso',
+            tiposRecurso,
+            formData: {},
+            sucesso: req.query.sucesso
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar a gestao de tipos de recurso.')
+        });
+    }
+});
+
+// POST /recursos/tipos/novo — criar novo tipo (admin)
+router.post('/tipos/novo', async (req, res) => {
+    if (!utilizadorEhAdmin(req)) {
+        return res.status(403).render('erro', {
+            titulo: 'Sem permissao',
+            mensagem: 'Apenas administradores podem gerir tipos de recurso.'
+        });
+    }
+
+    try {
+        await axios.post(`${API}/tipos-recurso`, req.body, {
+            headers: obterHeadersAutorizacao(req)
+        });
+
+        res.redirect('/recursos/tipos?sucesso=tipo-criado');
+    } catch (err) {
+        let tiposRecurso = [];
+
+        try {
+            tiposRecurso = await obterTodosTiposAdmin(req);
+        } catch (tiposErr) {
+            tiposRecurso = [];
+        }
+
+        res.status(err.response?.status || 500).render('recursos/tipos', {
+            titulo: 'Tipos de Recurso',
+            tiposRecurso,
+            formData: req.body,
+            erro: obterMensagemErroAPI(err, 'Nao foi possivel criar o tipo de recurso.')
+        });
+    }
+});
+
+// POST /recursos/tipos/:id/estado — ativar/desativar tipo (admin)
+router.post('/tipos/:id/estado', async (req, res) => {
+    if (!utilizadorEhAdmin(req)) {
+        return res.status(403).render('erro', {
+            titulo: 'Sem permissao',
+            mensagem: 'Apenas administradores podem gerir tipos de recurso.'
+        });
+    }
+
+    try {
+        await axios.put(`${API}/tipos-recurso/${req.params.id}`, {
+            ativo: req.body.ativo
+        }, {
+            headers: obterHeadersAutorizacao(req)
+        });
+
+        res.redirect('/recursos/tipos?sucesso=estado-atualizado');
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel atualizar o estado do tipo de recurso.')
+        });
     }
 });
 
@@ -114,8 +260,27 @@ router.get('/:id/exportar-dip', async (req, res) => {
 // GET /recursos/:id/editar
 router.get('/:id/editar', async (req, res) => {
     try {
-        const resposta = await axios.get(`${API}/recursos/${req.params.id}`);
-        res.render('recursos/form', { titulo: 'Editar Recurso', recurso: resposta.data });
+        const [recursoRes, tiposRecurso] = await Promise.all([
+            axios.get(`${API}/recursos/${req.params.id}`),
+            obterTiposAtivos()
+        ]);
+
+        const recurso = recursoRes.data;
+        const ehAdmin = utilizadorEhAdmin(req);
+        const ehDono = recurso.autor && req.user && req.user.sub === recurso.autor._id;
+
+        if (!ehAdmin && !ehDono) {
+            return res.status(403).render('erro', {
+                titulo: 'Sem permissao',
+                mensagem: 'Nao tem permissao para editar este recurso.'
+            });
+        }
+
+        res.render('recursos/form', {
+            titulo: 'Editar Recurso',
+            recurso,
+            tiposRecurso
+        });
     } catch (err) {
         res.redirect('/recursos');
     }
@@ -124,22 +289,40 @@ router.get('/:id/editar', async (req, res) => {
 // POST /recursos/:id/editar — atualizar
 router.post('/:id/editar', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         await axios.put(`${API}/recursos/${req.params.id}`, req.body, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect(`/recursos/${req.params.id}`);
     } catch (err) {
-        res.redirect('/recursos');
+        try {
+            const [recursoRes, tiposRecurso] = await Promise.all([
+                axios.get(`${API}/recursos/${req.params.id}`),
+                obterTiposAtivos()
+            ]);
+
+            const recurso = {
+                ...recursoRes.data,
+                ...req.body,
+                _id: req.params.id
+            };
+
+            res.status(err.response?.status || 500).render('recursos/form', {
+                titulo: 'Editar Recurso',
+                recurso,
+                tiposRecurso,
+                erro: obterMensagemErroAPI(err, 'Nao foi possivel atualizar o recurso.')
+            });
+        } catch (reloadErr) {
+            res.redirect('/recursos');
+        }
     }
 });
 
 // POST /recursos/:id/apagar — remover
 router.post('/:id/apagar', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         await axios.delete(`${API}/recursos/${req.params.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect('/recursos');
     } catch (err) {

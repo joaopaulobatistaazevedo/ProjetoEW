@@ -1,5 +1,6 @@
 const path = require('path');
 const Recurso = require('../models/recurso');
+const { obterTipoAtivoPorSlug, enriquecerComTipos } = require('../services/tiposRecursoService');
 
 // Normalize hashtags input into array of strings
 function normalizarHashtags(valor) {
@@ -64,7 +65,7 @@ const recursosController = {
 
             const recursos = await query;
 
-            res.json(recursos);
+            res.json(await enriquecerComTipos(recursos));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -78,7 +79,7 @@ const recursosController = {
                 .limit(3)
                 .populate('autor', 'nome');
 
-            res.json(top3);
+            res.json(await enriquecerComTipos(top3));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -91,7 +92,7 @@ const recursosController = {
                 .populate('autor', 'nome email');
 
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
-            res.json(recurso);
+            res.json(await enriquecerComTipos(recurso));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -125,13 +126,18 @@ const recursosController = {
             // Validações básicas
             if (!titulo || !tipo) return res.status(400).json({ erro: 'Titulo e tipo são obrigatórios' });
 
+            const tipoPermitido = await obterTipoAtivoPorSlug(tipo);
+            if (!tipoPermitido) {
+                return res.status(400).json({ erro: 'Tipo de recurso invalido ou inativo.' });
+            }
+
             const tags = normalizarHashtags(hashtags);
 
             const recurso = await Recurso.create({
                 titulo,
                 subtitulo,
                 descricao: req.body.descricao,
-                tipo,
+                tipo: tipoPermitido.slug,
                 dataCriacao: dataCriacao ? new Date(dataCriacao) : undefined,
                 visibilidade,
                 hashtags: tags,
@@ -152,7 +158,7 @@ const recursosController = {
                 ).catch(err => console.error('Erro ao promover para produtor:', err.message));
             }
 
-            res.status(201).json(recurso);
+            res.status(201).json(await enriquecerComTipos(recurso));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -180,8 +186,17 @@ const recursosController = {
 
             if (update.dataCriacao) update.dataCriacao = new Date(update.dataCriacao);
 
+            if (update.tipo !== undefined) {
+                const tipoPermitido = await obterTipoAtivoPorSlug(update.tipo);
+                if (!tipoPermitido) {
+                    return res.status(400).json({ erro: 'Tipo de recurso invalido ou inativo.' });
+                }
+
+                update.tipo = tipoPermitido.slug;
+            }
+
             const atualizado = await Recurso.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
-            res.json(atualizado);
+            res.json(await enriquecerComTipos(atualizado));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }

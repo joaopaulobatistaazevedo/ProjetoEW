@@ -39,7 +39,15 @@ block content
                     label(for='tipo')
                       i.fas.fa-tag(style='margin-right: 0.5rem;')
                       span Tipo de Recurso
-                    input#tipo.form-control(type='text', name='tipo', placeholder='Ex: Vídeo, Documento, Quiz...', value=isEdit ? recurso.tipo : '', required=true)
+                    select#tipo.form-control(name='tipo', required=true)
+                      option(value='') Selecione um tipo
+                      each tipo in tiposRecurso
+                        option(value=tipo.slug selected=((isEdit ? recurso.tipo : '') === tipo.slug))= tipo.nome
+                    small.text-muted(style='display: block; margin-top: 0.5rem;')
+                      | Os tipos sao geridos pelos administradores.
+                      if user && user.role === 'admin'
+                        | 
+                        a(href='/recursos/tipos') Gerir tipos
                 
                 .col-6
                   .form-group
@@ -65,17 +73,16 @@ block content
                   .form-group
                     label(for='hashtags')
                       i.fas.fa-hashtag(style='margin-right: 0.5rem;')
-                      span Hashtags (JSON array)
-                    input#hashtags.form-control(type='text', name='hashtags', placeholder='["educação", "matemática", "online"]', value=isEdit && recurso.hashtags ? JSON.stringify(recurso.hashtags) : '[]')
+                      span Hashtags
+                    input#hashtags.form-control(type='text', name='hashtags', placeholder='web, programacao, ensino', value=isEdit && recurso.hashtags ? recurso.hashtags.join(', ') : '')
                     small.text-muted(style='display: block; margin-top: 0.5rem;')
                       i.fas.fa-info-circle(style='margin-right: 0.25rem;')
-                      | Formato: Array JSON com strings, ex: ["tag1", "tag2"]
-            
-            // Acoes do formulario
-            .card-footer
-              button.btn.btn-primary(type='submit')
-                i(class=isEdit ? 'fas fa-save' : 'fas fa-check')
-                span= isEdit ? 'Guardar Alterações' : 'Criar Recurso'
-              a.btn.btn-outline(href='/recursos')
-                i.fas.fa-arrow-left
-                span Cancelar
+                      | Pode separar varias hashtags por virgulas.
+
+              .card-footer
+                button.btn.btn-primary(type='submit')
+                  i(class=isEdit ? 'fas fa-save' : 'fas fa-check')
+                  span= isEdit ? 'Guardar Alteracoes' : 'Criar Recurso'
+                a.btn.btn-outline(href='/recursos')
+                  i.fas.fa-arrow-left
+                  span Cancelar

@@ -40,11 +40,13 @@ A análise do código mostra que o projeto já está mais próximo de uma base f
 - modelo de post com comentários;
 - listagem, detalhe, criação, edição e remoção de recursos;
 - filtros de recursos por texto, tipo, hashtag, ano, autor e ordenação;
+- filtros de recursos por texto, tipo, hashtag, ano, visibilidade, autor e ordenação também expostos na interface;
 - avaliação por estrelas na API;
 - ingestão SIP com validação em camadas, criação de `Recurso` e registo de `AIP`;
 - consulta de AIPs e relatórios de validação na API;
 - exportação DIP por recurso, exportação múltipla, histórico de exportações e exportação de todos os recursos do utilizador;
 - fase inicial de disseminação alinhada com `DIP ≈ SIP` no fluxo principal da interface;
+- catálogo de tipos de recurso gerido por dados, com criação e ativação/desativação por `admin`;
 - Swagger em `auth` e `api-dados`;
 - interface Pug funcional para login, recursos, posts, utilizadores e exportação DIP.
 
@@ -54,10 +56,9 @@ A análise do código mostra que o projeto já está mais próximo de uma base f
 - ainda não existe importação inversa garantida do mesmo pacote exportado em DIP;
 - ainda não existe exportação global de toda a informação da plataforma num único fluxo administrativo;
 - o DIP atual é funcional para disseminação, mas não está alinhado com re-ingestão directa pelo mesmo `manifest.json` esperado no SIP;
-- os tipos de recurso continuam fixos em `enum`, pelo que ainda não há mecanismo real para acrescentar novos tipos sem mexer no código;
 - a homepage ainda não implementa o bloco de notícias pedido no enunciado;
 - o ranking existe no backend, mas a interface ainda não expõe de forma clara o acto de avaliar um recurso;
-- a pesquisa e filtragem na interface ainda estão abaixo do que a API já suporta;
+- a autorização por papéis está funcional no backend, mas ainda há fluxos de interface e de UX por fechar;
 - falta dataset realista com seed automatizada;
 - faltam testes automatizados;
 - falta fechar a documentação final orientada para a defesa e para a entrega.
@@ -73,24 +74,26 @@ A análise do código mostra que o projeto já está mais próximo de uma base f
 - ranking por estrelas ao nível da API;
 - ingestão SIP com validação e criação de AIP;
 - disseminação DIP com exportação por recurso;
-- distinção conceptual entre `SIP`, `AIP` e `DIP`.
+- distinção conceptual entre `SIP`, `AIP` e `DIP`;
+- pesquisa e ordenação expostas na interface em linha com os filtros da API;
+- gestão de tipos de recurso por `admin`, sem necessidade de alterar código.
 
 #### Requisitos parcialmente cumpridos
 
 - exportação: existe por recurso, por lote e para todos os recursos do utilizador, mas não para toda a plataforma;
-- pesquisa e classificação: a API suporta mais filtros do que a interface expõe;
-- autorização por papéis: a base está montada, mas ainda há fluxos de interface e de UX por fechar;
 - disseminação OAIS: existe exportação DIP, mas falta o fecho do ciclo “exportar e voltar a importar o mesmo pacote”.
+- autorização por papéis: a base está montada, mas ainda há fluxos de interface e de UX por fechar;
+
 
 #### Requisitos ainda em falta
 
 - importar pelo processo inverso o mesmo pacote exportado;
 - exportar toda a informação de forma administrativa/global;
-- permitir acrescentar novos tipos de recurso sem alterar código;
-- notícias na página principal;
-- dataset de demonstração com dezenas de entradas reais;
-- testes automatizados;
 - interface para ingestão SIP e consulta de AIPs.
+- notícias na página principal;
+- testes automatizados;
+
+- dataset de demonstração com dezenas de entradas reais;
 
 ## 3. Padrões das aulas que fazem sentido reutilizar
 
@@ -365,4 +368,4 @@ Esta ordem evita o erro clássico de começar pela ingestão avançada antes de 
 
 O projeto já tem uma base valiosa e mais avançada do que este plano assumia originalmente: separação por serviços, autenticação autónoma, CRUD do domínio, ingestão SIP funcional, AIPs registados, disseminação DIP funcional e interface Pug utilizável. O principal trabalho que resta já não está no “núcleo mínimo”, mas sim no fecho dos requisitos que faltam para cumprir o enunciado de forma forte.
 
-As prioridades reais passam agora por: re-ingestão do mesmo pacote exportado, exportação global da informação, interface de ingestão/AIPs, notícias, tipos de recurso extensíveis, dataset, testes e documentação final. Fechar estes pontos aproxima muito mais o projeto de uma defesa sólida do que continuar a expandir funcionalidades periféricas.
+As prioridades reais passam agora por: re-ingestão do mesmo pacote exportado, exportação global da informação, interface de ingestão/AIPs, notícias, dataset, testes e documentação final. Fechar estes pontos aproxima muito mais o projeto de uma defesa sólida do que continuar a expandir funcionalidades periféricas.

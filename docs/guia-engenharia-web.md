@@ -70,7 +70,7 @@ Ficheiros-chave:
 - `interface/app.js`: arranque da interface, middleware, Pug, cookie parsing e verificacao de autenticacao.
 - `interface/routes/index.js`: homepage.
 - `interface/routes/auth.js`: login, registo e logout.
-- `interface/routes/recursos.js`: listagem, detalhe, CRUD e proxy de exportacao DIP.
+- `interface/routes/recursos.js`: listagem, filtros, CRUD, gestao de tipos e proxy de exportacao DIP.
 - `interface/routes/posts.js`: envio de posts e comentarios a partir dos formularios.
 - `interface/routes/utilizadores.js`: listagem e detalhe de utilizadores.
 - `interface/views/`: templates Pug.
@@ -150,6 +150,7 @@ Regras importantes no estado atual:
 - quando um utilizador autenticado cria um recurso por `POST /recursos`, o sistema tenta promove-lo para `produtor`;
 - recursos privados so podem ser geridos pelo autor ou por `admin`;
 - exportacao de recursos privados tambem depende dessa permissao;
+- o catalogo de tipos de recurso e gerido por `admin`;
 - na interface, a publicacao de discussoes esta exposta sobretudo para `produtor` e `admin`.
 
 ## 7) Interface: o que faz e como ler
@@ -175,6 +176,7 @@ Em `interface/app.js`:
 - `POST /auth/registo`: cria conta no `auth`.
 - `GET /auth/logout`: limpa cookie.
 - `GET /recursos`: lista recursos.
+- `GET /recursos/tipos`: gestao de tipos de recurso para `admin`.
 - `GET /recursos/:id`: detalhe de um recurso, posts e opcoes de DIP.
 - `GET /recursos/:id/exportar-dip`: proxy para descarregar o ZIP do DIP.
 - `GET /utilizadores`: lista de utilizadores.
@@ -195,6 +197,7 @@ Em `api-dados/app.js`, a API regista estas areas:
 - `/posts`
 - `/ingestao`
 - `/disseminacao`
+- `/tipos-recurso`
 
 Tambem expõe Swagger em `/docs` e `/docs.json`.
 
@@ -216,6 +219,12 @@ Campos principais do modelo:
 - `ficheiro`
 - `ratings`
 - `mediaEstrelas`
+
+Nota sobre `tipo`:
+
+- o campo `tipo` guarda o `slug` do tipo de recurso;
+- o nome legivel e resolvido a partir da colecao `TipoRecurso`;
+- nas respostas da API aparece tambem `tipoNome` para facilitar a interface.
 
 Rotas principais:
 
@@ -240,6 +249,40 @@ Filtros que o backend ja suporta em `GET /recursos`:
 - `order`
 - `limit`
 - `page`
+
+Na interface, estes filtros estao expostos na pagina `/recursos` atraves de:
+
+- pesquisa livre `q`;
+- selecao de `tipo`;
+- filtro por `hashtag`;
+- filtro por `ano`;
+- filtro por `visibilidade`;
+- ordenacao por data, media de estrelas ou relevancia.
+
+### 8.1.1) Catalogo de tipos de recurso
+
+Para evitar hardcode no modelo `Recurso`, os tipos vivem agora numa colecao propria.
+
+Ficheiros principais:
+
+- `api-dados/models/tipoRecurso.js`
+- `api-dados/services/tiposRecursoService.js`
+- `api-dados/controllers/tiposRecursoController.js`
+- `api-dados/routes/tiposRecurso.js`
+
+O que isto faz:
+
+- no arranque da API, os tipos base sao garantidos automaticamente;
+- um `admin` pode criar novos tipos sem alterar codigo;
+- um `admin` pode ativar ou desativar tipos;
+- os formularios de recurso deixam de usar texto livre e passam a consumir esta lista.
+
+Rotas principais:
+
+- `GET /tipos-recurso`
+- `GET /tipos-recurso/todos`
+- `POST /tipos-recurso`
+- `PUT /tipos-recurso/:id`
 
 ### 8.2) Posts
 

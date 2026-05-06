@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 const setupSwagger = require('./swagger');
+const { ensureTiposRecursoBase } = require('./services/tiposRecursoService');
 
 var app = express();
 
@@ -14,7 +15,11 @@ const mongoURI = process.env.MONGO_URL || `mongodb://localhost:27017/${nomeBD}`;
 
 // MongoDB connection
 mongoose.connect(mongoURI)
-    .then(() => console.log(`MongoDB: Conectado à base de dados ${nomeBD}.`))
+    .then(async () => {
+        console.log(`MongoDB: Conectado à base de dados ${nomeBD}.`);
+        await ensureTiposRecursoBase();
+        console.log('MongoDB: Tipos de recurso base verificados.');
+    })
     .catch(err => {
         console.error('MongoDB: Erro crítico:', err.message);
         process.exit(1);
@@ -31,17 +36,20 @@ setupSwagger(app);
 require('./models/utilizador');
 require('./models/aip');
 require('./models/exportacao');
+require('./models/tipoRecurso');
 
 // Route modules
 const recursosRouter = require('./routes/recursos');
 const postsRouter    = require('./routes/posts');
 const ingestaoRouter = require('./routes/ingestao');
 const disseminacaoRouter = require('./routes/disseminacao');
+const tiposRecursoRouter = require('./routes/tiposRecurso');
 
 app.use('/recursos',     recursosRouter);
 app.use('/posts',        postsRouter);
 app.use('/ingestao',     ingestaoRouter);
 app.use('/disseminacao', disseminacaoRouter);
+app.use('/tipos-recurso', tiposRecursoRouter);
 
 // Health check
 app.get('/', (req, res) => {

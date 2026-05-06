@@ -1,0 +1,100 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .row.mb-6
+      .col-8
+        h1
+          i.fas.fa-tags(style='margin-right: 0.75rem; color: var(--primary);')
+          span Tipos de Recurso
+        p Gere os tipos disponiveis nos formularios sem alterar o codigo da aplicacao.
+      .col-4
+        a.btn.btn-outline.btn-block(href='/recursos')
+          i.fas.fa-arrow-left
+          span Voltar aos Recursos
+
+    if sucesso === 'tipo-criado'
+      .alert.alert-success
+        i.fas.fa-check-circle(style='margin-right: 0.5rem;')
+        strong Tipo criado com sucesso.
+
+    if sucesso === 'estado-atualizado'
+      .alert.alert-success
+        i.fas.fa-check-circle(style='margin-right: 0.5rem;')
+        strong Estado do tipo atualizado com sucesso.
+
+    if erro
+      .alert.alert-danger
+        i.fas.fa-exclamation-triangle(style='margin-right: 0.5rem;')
+        strong= erro
+
+    .row
+      .col-4
+        .card
+          .card-header
+            i.fas.fa-plus-circle
+            span  Novo Tipo
+          form(method='POST', action='/recursos/tipos/novo')
+            .card-body
+              .form-group
+                label(for='nome') Nome
+                input#nome.form-control(type='text', name='nome', placeholder='Ex: Videoaula', value=(formData && formData.nome) || '', required=true)
+
+              .form-group
+                label(for='descricao') Descricao
+                textarea#descricao.form-control(name='descricao', placeholder='Breve descricao para a equipa.')= (formData && formData.descricao) || ''
+
+              .form-group
+                label(for='ordem') Ordem
+                input#ordem.form-control(type='number', name='ordem', min='0', step='10', value=(formData && formData.ordem) || '0')
+
+            .card-footer
+              button.btn.btn-primary(type='submit')
+                i.fas.fa-save
+                span Criar Tipo
+      .col-8
+        .card
+          .card-header
+            i.fas.fa-list
+            span  Tipos Configurados
+          .card-body
+            if tiposRecurso && tiposRecurso.length
+              table.table
+                thead
+                  tr
+                    th Nome
+                    th Codigo
+                    th Estado
+                    th Ordem
+                    th Acoes
+                tbody
+                  each tipo in tiposRecurso
+                    tr
+                      td
+                        strong= tipo.nome
+                        if tipo.descricao
+                          br
+                          small.text-muted= tipo.descricao
+                      td
+                        code= tipo.slug
+                      td
+                        if tipo.ativo
+                          span.badge.badge-success Ativo
+                        else
+                          span.badge.badge-warning Inativo
+                      td= tipo.ordem
+                      td
+                        form(method='POST', action='/recursos/tipos/' + tipo._id + '/estado')
+                          input(type='hidden', name='ativo', value=tipo.ativo ? 'false' : 'true')
+                          button.btn.btn-sm(class=tipo.ativo ? 'btn-outline' : 'btn-secondary', type='submit')
+                            if tipo.ativo
+                              i.fas.fa-pause-circle
+                              span Desativar
+                            else
+                              i.fas.fa-play-circle
+                              span Ativar
+            else
+              .empty-state
+                i.fas.fa-inbox.empty-icon
+                h3.empty-title Sem tipos configurados
+                p.empty-text Crie o primeiro tipo de recurso para o disponibilizar nos formularios.
