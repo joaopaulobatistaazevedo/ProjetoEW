@@ -34,11 +34,27 @@ router.get('/:id', async (req, res) => {
 // POST /utilizadores/:id/editar — atualizar
 router.post('/:id/editar', async (req, res) => {
     try {
+        const isSelf = req.user && req.user.sub === req.params.id;
+        const isAdmin = req.user && req.user.role === 'admin';
+
+        if (!isSelf && !isAdmin) {
+            return res.status(403).render('erro', {
+                titulo: 'Sem permissao',
+                mensagem: 'Nao tem permissao para editar este utilizador.'
+            });
+        }
+
         const token = req.cookies[COOKIE_NAME];
         const dados = { ...req.body };
-        if (dados.password === '') {
-            delete dados.password;
+
+        // A interface nao permite alterar passwords por este formulario.
+        delete dados.password;
+
+        // Apenas administradores podem alterar role de outros utilizadores.
+        if (!isAdmin) {
+            delete dados.role;
         }
+
         await axios.put(`${AUTH}/${req.params.id}`, dados, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -51,6 +67,13 @@ router.post('/:id/editar', async (req, res) => {
 // POST /utilizadores/:id/apagar — remover
 router.post('/:id/apagar', async (req, res) => {
     try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).render('erro', {
+                titulo: 'Sem permissao',
+                mensagem: 'Apenas administradores podem apagar utilizadores.'
+            });
+        }
+
         const token = req.cookies[COOKIE_NAME];
         await axios.delete(`${AUTH}/${req.params.id}`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -64,6 +87,13 @@ router.post('/:id/apagar', async (req, res) => {
 // POST /utilizadores/:id/promover/admin — promover a admin
 router.post('/:id/promover/admin', async (req, res) => {
     try {
+        if (!req.user || req.user.role !== 'admin') {
+            return res.status(403).render('erro', {
+                titulo: 'Sem permissao',
+                mensagem: 'Apenas administradores podem promover utilizadores a admin.'
+            });
+        }
+
         const token = req.cookies[COOKIE_NAME];
         await axios.put(`${AUTH}/${req.params.id}/promote/admin`, {}, {
             headers: { Authorization: `Bearer ${token}` }

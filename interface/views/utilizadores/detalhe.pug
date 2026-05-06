@@ -9,6 +9,8 @@ block content
         span Voltar a Utilizadores
 
     if utilizador
+      - const isAdmin = user && user.role === 'admin'
+      - const isSelf = user && user.sub === utilizador._id
       .row
         .col-4
           // Perfil
@@ -53,8 +55,8 @@ block content
                   | Membro desde
                 p= utilizador.dataRegisto ? new Date(utilizador.dataRegisto).toLocaleDateString('pt-PT') : 'N/A'
           
-          // Editar utilizador (apenas admins)
-          if user && user.role === 'admin'
+          // Editar utilizador (admin ou o proprio utilizador)
+          if isAdmin || isSelf
             .card
               .card-header
                 i.fas.fa-edit
@@ -80,14 +82,15 @@ block content
                       span Email
                     input#email.form-control(type='email', name='email', value=utilizador.email, required=true)
                   
-                  .form-group
-                    label(for='role')
-                      i.fas.fa-certificate(style='margin-right: 0.5rem;')
-                      span Role
-                    select#role.form-control(name='role')
-                      option(value='admin' selected=utilizador.role === 'admin') Admin
-                      option(value='produtor' selected=utilizador.role === 'produtor') Produtor
-                      option(value='consumidor' selected=utilizador.role === 'consumidor') Consumidor
+                  if isAdmin
+                    .form-group
+                      label(for='role')
+                        i.fas.fa-certificate(style='margin-right: 0.5rem;')
+                        span Role
+                      select#role.form-control(name='role')
+                        option(value='admin' selected=utilizador.role === 'admin') Admin
+                        option(value='produtor' selected=utilizador.role === 'produtor') Produtor
+                        option(value='consumidor' selected=utilizador.role === 'consumidor') Consumidor
                   
                   .form-group
                     label(for='filiacao')
@@ -95,16 +98,19 @@ block content
                       span Instituição (opcional)
                     input#filiacao.form-control(type='text', name='filiacao', value=utilizador.filiacao || '')
                   
-                  .form-group
-                    label(for='password')
-                      i.fas.fa-lock(style='margin-right: 0.5rem;')
-                      span Nova Palavra-passe
-                    input#password.form-control(type='password', name='password', placeholder='Deixar em branco para manter a atual')
+                  .alert.alert-warning
+                    i.fas.fa-shield-alt(style='margin-right: 0.5rem;')
+                    strong A alteracao de palavra-passe nao e permitida neste formulario.
                 
                 .card-footer
                   button.btn.btn-primary(type='submit')
                     i.fas.fa-save
                     span Guardar Alterações
+                  if isAdmin
+                    form(method='POST', action='/utilizadores/' + utilizador._id + '/apagar', style='display: inline; margin-left: 0.5rem;')
+                      button.btn.btn-danger(type='submit', onclick='return confirm("Tem a certeza que deseja eliminar este utilizador?")')
+                        i.fas.fa-trash
+                        span Eliminar Utilizador
                   a.btn.btn-outline(href='/utilizadores')
                     i.fas.fa-arrow-left
                     span Voltar
@@ -114,7 +120,7 @@ block content
                 .alert.alert-warning
                   i.fas.fa-lock(style='margin-right: 0.5rem;')
                   strong Permissões Insuficientes
-                  p Apenas administradores podem editar informações de utilizadores.
+                  p Apenas administradores ou o proprio utilizador podem editar este perfil.
                 
                 a.btn.btn-outline(href='/utilizadores')
                   i.fas.fa-arrow-left
