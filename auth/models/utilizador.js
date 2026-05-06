@@ -7,7 +7,7 @@ const utilizadorSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['admin', 'produtor', 'consumidor'], default: 'consumidor' },
-  filiacao: { type: String, required: true },
+  filiacao: { type: String, default: '' },
   dataRegisto: { type: Date, default: Date.now },
   dataUltimoAcesso: { type: Date, default: null },
   ativo: { type: Boolean, default: true }
