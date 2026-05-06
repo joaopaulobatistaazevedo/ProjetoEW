@@ -103,11 +103,19 @@ router.put('/:id', auth.verificaAcesso, async (req, res) => {
     }
 });
 
-// DELETE /users/:id — apagar (apenas admin)
-router.delete('/:id', auth.verificaAcesso, auth.verificaAdmin, (req, res) => {
-    Utilizador.remove(req.params.id)
-        .then(dados => res.status(200).json({ status: "Removido", dados: toPublicUser(dados) }))
-        .catch(err => res.status(500).json({ erro: err.message }));
+// DELETE /users/:id — apagar (apenas admin, não pode apagar admin)
+router.delete('/:id', auth.verificaAcesso, auth.verificaAdmin, async (req, res) => {
+    try {
+        // Impedir remoção de usuarios admin
+        const user = await Utilizador.findById(req.params.id);
+        if (user && user.role === 'admin') {
+            return res.status(403).json({ erro: 'Nao pode eliminar usuarios com role admin.' });
+        }
+        const removed = await Utilizador.remove(req.params.id);
+        res.status(200).json({ status: "Removido", dados: toPublicUser(removed) });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
 // PUT /users/:id/promote/produtor — promover consumidor a produtor
