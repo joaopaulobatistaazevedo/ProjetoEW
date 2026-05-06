@@ -33,6 +33,20 @@ Na primeira versão deste sistema, **o DIP será estruturalmente idêntico ao SI
 
 **Nota**: Numa fase 2, o DIP poderia ser diferente (ex: HTML, PDF, formatos de exposição). Por enquanto, mantemos equivalência para permitir re-ciclos.
 
+### Flexibilidade do DIP face ao SIP
+
+No contexto do modelo OAIS, o DIP nao tem obrigatoriamente de ser igual ao SIP, nem tem de incluir todos os elementos originalmente submetidos. O DIP representa apenas a versao dos dados disponibilizada ao utilizador final no processo de disseminacao, podendo ser uma selecao parcial ou uma transformacao do conteudo preservado no AIP.
+
+Assim, o sistema deve permitir a extracao seletiva de conteudos a partir do AIP, possibilitando, por exemplo, a entrega de apenas um ficheiro individual pertencente ao SIP original, em vez do pacote completo. Desta forma, o DIP pode conter:
+
+- um unico ficheiro,
+- um subconjunto dos ficheiros originais,
+- ou uma versao transformada dos mesmos,
+
+dependendo do pedido do utilizador.
+
+Esta abordagem garante flexibilidade no acesso a informacao preservada, sem comprometer a integridade do AIP.
+
 ---
 
 ## Estrutura do DIP (ZIP com Metadados Enriquecidos)

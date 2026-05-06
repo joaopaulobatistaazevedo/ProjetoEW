@@ -1,172 +1,532 @@
-# Guia de Engenharia Web (Teoria + ProjetoEW)
+# Guia de Engenharia Web no ProjetoEW
 
-Este guia explica, em linguagem simples, os conceitos base e como eles aparecem no ProjetoEW. O foco e: compreender arquitetura web, autenticacao, rotas, estrutura de ficheiros e o ciclo SIP/AIP/DIP.
+Este guia foi reescrito para bater certo com o estado atual do projeto. A ideia e servir como mapa de leitura: o que existe, como as pecas comunicam, onde esta cada responsabilidade e como seguir os fluxos mais importantes sem te perderes.
 
-## 1) Ideia base de uma aplicacao web
+## 1) O que e este projeto
 
-Uma aplicacao web tem normalmente 3 partes:
+O `ProjetoEW` e uma plataforma de recursos educativos com tres areas principais:
 
-- **Interface (frontend)**: o que o utilizador ve e usa. Aqui e um servidor que rende paginas HTML com Pug.
-- **API (backend)**: regras de negocio e acesso a dados. Aqui existem 2 APIs: `api-dados` e `auth`.
-- **Base de dados**: onde os dados ficam. Aqui e MongoDB.
+- autenticacao e gestao de utilizadores;
+- gestao de recursos e discussoes;
+- ingestao e disseminacao de pacotes OAIS (`SIP`, `AIP`, `DIP`).
 
-O utilizador fala com a interface. A interface fala com as APIs. As APIs falam com a base de dados.
+Do ponto de vista tecnico, o projeto esta dividido em tres servicos Node.js e uma base de dados MongoDB:
 
-## 2) Cliente, servidor e HTTP
+- `interface/`: frontend server-side com Express + Pug;
+- `api-dados/`: API principal dos recursos, posts, ingestao e disseminacao;
+- `auth/`: servico de autenticacao e utilizadores;
+- `mongodb_api`: MongoDB usado pelos dois servicos backend.
 
-- **Cliente**: o browser.
-- **Servidor**: o Node.js a responder a pedidos.
-- **HTTP**: o protocolo que define pedidos e respostas.
+## 2) Arquitetura geral
 
-Cada pedido tem:
-- **Metodo**: GET, POST, PUT, DELETE.
-- **URL**: o caminho (rota).
-- **Headers**: metadados (ex: `Authorization`).
-- **Body**: dados enviados (ex: login, formularios).
+O fluxo normal de uma aplicacao aqui e este:
 
-## 3) O que e uma rota
+```text
+Browser
+  -> interface (renderiza paginas Pug)
+  -> auth (quando ha login/registo)
+  -> api-dados (quando ha recursos, posts, SIP, DIP)
+  -> MongoDB
+```
 
-Uma rota e um caminho que o servidor escuta. Exemplo:
+Ou seja:
 
-- `GET /auth/login` -> mostra a pagina de login
-- `POST /auth/login` -> recebe credenciais e tenta autenticar
-- `GET /recursos` -> lista recursos
+- o browser fala primeiro com a `interface`;
+- a `interface` chama os outros servicos por HTTP;
+- `auth` e `api-dados` falam com MongoDB;
+- o utilizador nao fala diretamente com MongoDB.
 
-Cada rota chama uma funcao que decide o que responder.
+## 3) Portas e servicos
 
-## 4) O que e autenticacao
+No `docker-compose.yml`, a configuracao principal e esta:
 
-Autenticacao e provar quem es. O sistema usa **JWT** (JSON Web Token):
+- `interface`: porta externa `3000`
+- `api-dados`: porta externa `3001`
+- `auth`: porta externa `3002`, mas no container corre na `2623`
+- `mongodb_api`: porta externa `27018`, mapeada para `27017` no container
 
-1. O utilizador faz login com username e password.
-2. O servidor `auth` valida e devolve um token (JWT).
-3. A interface guarda esse token num **cookie**.
-4. Em pedidos protegidos, esse token e enviado para a API.
-5. A API valida o token e permite ou bloqueia o acesso.
+Variaveis importantes:
 
-Sem token, nao ha acesso a rotas protegidas.
+- `API_URL=http://api-dados:3001`
+- `AUTH_URL=http://auth:2623/users`
+- `COOKIE_NAME=token`
+- `JWT_SECRET=jcr_secret_2026`
+- `MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos`
 
-## 5) Estrutura do ProjetoEW
+Isto significa que:
 
-### Servicos
+- a `interface` envia pedidos para `api-dados` e `auth`;
+- `auth` e `api-dados` partilham o mesmo `JWT_SECRET`;
+- o cookie de sessao usado no projeto chama-se `token`.
 
-- **interface/**: paginas e rotas do frontend.
-- **auth/**: autenticacao e gestao de utilizadores.
-- **api-dados/**: recursos, posts e ingestao/disseminacao.
-- **mongodb_api**: base de dados (via docker).
+## 4) Estrutura de pastas
 
-### Docker
+### `interface/`
 
-O `docker-compose.yml` liga os servicos e variaveis de ambiente:
+Responsavel por renderizar HTML no servidor e servir CSS.
 
-- `AUTH_URL`, `API_URL`, `COOKIE_NAME`, `JWT_SECRET`.
-- Isso garante que todos falam entre si.
+Ficheiros-chave:
 
-## 6) Interface (frontend)
+- `interface/app.js`: arranque da interface, middleware, Pug, cookie parsing e verificacao de autenticacao.
+- `interface/routes/index.js`: homepage.
+- `interface/routes/auth.js`: login, registo e logout.
+- `interface/routes/recursos.js`: listagem, detalhe, CRUD e proxy de exportacao DIP.
+- `interface/routes/posts.js`: envio de posts e comentarios a partir dos formularios.
+- `interface/routes/utilizadores.js`: listagem e detalhe de utilizadores.
+- `interface/views/`: templates Pug.
+- `interface/public/stylesheets/style.css`: CSS global.
 
-### Ficheiros principais
+### `api-dados/`
 
-- `interface/app.js`: arranque do servidor e middleware.
-- `interface/routes/*.js`: rotas da interface.
-- `interface/views/*.pug`: paginas HTML (templates).
-- `interface/public/`: CSS e assets.
+Responsavel pela logica de negocio principal.
 
-### Rotas principais
+Ficheiros-chave:
 
-- `GET /` -> pagina inicial.
-- `GET /auth/login` e `POST /auth/login`.
-- `GET /auth/registo` e `POST /auth/registo`.
-- `GET /auth/logout`.
-- `GET /recursos` e restantes CRUD.
-- `GET /utilizadores` (lista e detalhe).
+- `api-dados/app.js`: arranque da API, ligacao a MongoDB e registo das rotas.
+- `api-dados/routes/recursos.js`: rotas dos recursos.
+- `api-dados/routes/posts.js`: rotas dos posts.
+- `api-dados/routes/ingestao.js`: rotas SIP e consulta de AIPs.
+- `api-dados/routes/disseminacao.js`: rotas DIP e auditoria de exportacoes.
+- `api-dados/controllers/`: recebe o pedido HTTP e devolve resposta.
+- `api-dados/services/`: concentra logica de validacao, processamento, permissao e ZIP.
+- `api-dados/models/`: schemas Mongoose.
 
-### Middleware de autenticacao
+### `auth/`
 
-A interface valida o cookie JWT antes de permitir rotas protegidas (`/recursos`, `/posts`, `/utilizadores`). Se nao ha token, redireciona para `/auth/login`.
+Responsavel por utilizadores, login e emissao de JWT.
 
-## 7) Auth (servico de autenticacao)
+Ficheiros-chave:
 
-### O que faz
+- `auth/auth_server.js`: arranque do servico e criacao do admin base.
+- `auth/routes/users.js`: rotas `/users`.
+- `auth/controllers/utilizador.js`: acesso e operacoes sobre utilizadores.
+- `auth/auth/auth.js`: middleware para verificar token e permissao admin.
+- `auth/models/utilizador.js`: schema do utilizador.
 
-- Registo e login.
-- Emissao de JWT.
-- CRUD de utilizadores (com controlo por role).
+## 5) Como funciona a autenticacao
 
-### Rotas principais (auth)
+O projeto usa `JWT` e `cookies`.
 
-- `POST /users/register` -> cria conta.
-- `POST /users/login` -> autentica e devolve token.
-- `GET /users` -> lista (protegido).
-- `PUT /users/:id` -> atualiza (admin).
-- `DELETE /users/:id` -> remove (admin).
+Fluxo real:
 
-### Roles
+1. O utilizador abre `/auth/login` na `interface`.
+2. O formulario faz `POST /auth/login` na `interface`.
+3. A `interface` envia as credenciais para `auth` em `POST /users/login`.
+4. O `auth` valida as credenciais, gera um `JWT` e devolve o token.
+5. A `interface` guarda esse token no cookie `token`.
+6. Quando o utilizador entra numa rota protegida, a `interface` valida o cookie com `jsonwebtoken`.
+7. Quando precisa de chamar a `api-dados`, a `interface` envia o token em `Authorization: Bearer ...`.
+8. A `api-dados` valida o token no middleware `authenticate`.
 
-- `admin`: permissao total.
-- `produtor`: pode criar e gerir recursos.
-- `consumidor`: pode consultar.
+Isto e importante: a `interface` faz uma validacao local do cookie para proteger paginas, mas a validacao definitiva da autorizacao acontece tambem no backend que recebe o pedido.
 
-## 8) API de dados (recursos e posts)
+### O que o servico `auth` expoe
 
-### O que faz
+As rotas mais importantes do servico `auth` sao:
 
-- Guarda recursos, posts, AIPs e exportacoes.
-- Implementa ingestao (SIP) e disseminacao (DIP).
+- `POST /users/register`
+- `POST /users/login`
+- `GET /users/logout`
+- `GET /users`
+- `GET /users/:id`
+- `PUT /users/:id`
+- `DELETE /users/:id`
+- `PUT /users/:id/promote/produtor`
+- `PUT /users/:id/promote/admin`
 
-### Rotas principais
+No arranque, `auth/auth_server.js` tambem garante a existencia de um `admin` base. Por defeito, se nao existir nenhum admin na base de dados, cria um utilizador `admin` com password `admin`.
 
-- `GET /recursos` -> listar.
-- `POST /recursos` -> criar (protegido).
-- `GET /recursos/:id` -> detalhe.
-- `POST /posts` -> criar post (protegido).
-- `POST /posts/:id/comentarios` -> comentar.
+## 6) Roles no projeto
 
-## 9) SIP, AIP, DIP (teoria OAIS + aplicacao)
+Existem tres roles:
 
-### Conceitos simples
+- `admin`: permissao total;
+- `produtor`: utilizador com capacidade de produzir/gerir recursos;
+- `consumidor`: utilizador autenticado sem privilegios administrativos.
 
-- **SIP**: pacote que entra no sistema (submissao do produtor).
-- **AIP**: pacote interno e validado que o sistema guarda.
-- **DIP**: pacote que sai do sistema (download/disseminacao).
+Regras importantes no estado atual:
 
-No modelo **OAIS**, o **DIP** nao tem de ser igual ao **SIP**, nem tem de incluir tudo o que foi submetido. O **DIP** representa apenas a versao disponibilizada ao utilizador final no processo de disseminacao, podendo ser uma selecao parcial ou uma transformacao do conteudo preservado no **AIP**. Isso permite a extracao seletiva de conteudos a partir do **AIP**, por exemplo entregar apenas um ficheiro individual do SIP original, em vez do pacote completo. Assim, o **DIP** pode conter um unico ficheiro, um subconjunto dos ficheiros originais, ou uma versao transformada, conforme o pedido do utilizador. Esta abordagem garante flexibilidade no acesso, sem comprometer a integridade do **AIP**.
+- no registo, toda a gente entra como `consumidor`;
+- quando um utilizador autenticado cria um recurso por `POST /recursos`, o sistema tenta promove-lo para `produtor`;
+- recursos privados so podem ser geridos pelo autor ou por `admin`;
+- exportacao de recursos privados tambem depende dessa permissao;
+- na interface, a publicacao de discussoes esta exposta sobretudo para `produtor` e `admin`.
 
-### No ProjetoEW
+## 7) Interface: o que faz e como ler
 
-- **SIP**: um ZIP com `manifest.json` e pasta `data/`.
-- **AIP**: registo na BD + ficheiros guardados em `uploads/recursos/...`.
-- **DIP**: ZIP gerado a partir do AIP, com metadados e checksums.
+A `interface` nao e uma SPA. E um servidor Express que renderiza HTML com Pug.
 
-### Rota SIP
+### Middleware principal
 
-- `POST /ingestao/sip` (API de dados)
-- Recebe ZIP, valida, cria recurso e AIP.
+Em `interface/app.js`:
 
-### Rota DIP
+- ativa `logger`, `express.json`, `express.urlencoded` e `cookieParser`;
+- define `views` e `view engine`;
+- serve ficheiros estaticos de `public/`;
+- verifica se existe cookie JWT para aceder a `/recursos`, `/posts` e `/utilizadores`;
+- mete `res.locals.user` disponivel nas views.
 
+### Rotas principais da interface
+
+- `GET /`: pagina inicial com recursos publicos e top 3.
+- `GET /auth/login`: formulario de login.
+- `POST /auth/login`: envia credenciais ao servico `auth`.
+- `GET /auth/registo`: formulario de registo.
+- `POST /auth/registo`: cria conta no `auth`.
+- `GET /auth/logout`: limpa cookie.
+- `GET /recursos`: lista recursos.
+- `GET /recursos/:id`: detalhe de um recurso, posts e opcoes de DIP.
+- `GET /recursos/:id/exportar-dip`: proxy para descarregar o ZIP do DIP.
+- `GET /utilizadores`: lista de utilizadores.
+
+### Porque existe um proxy para o DIP na interface
+
+Na vista de detalhe do recurso, o browser faz download atraves da `interface`, nao diretamente da `api-dados`. Isso permite:
+
+- reutilizar o cookie da sessao;
+- transformar o cookie em header `Authorization`;
+- manter o fluxo consistente com o resto da aplicacao.
+
+## 8) API de dados: o coracao funcional
+
+Em `api-dados/app.js`, a API regista estas areas:
+
+- `/recursos`
+- `/posts`
+- `/ingestao`
+- `/disseminacao`
+
+Tambem expõe Swagger em `/docs` e `/docs.json`.
+
+### 8.1) Recursos
+
+A entidade `Recurso` representa o objeto principal da plataforma.
+
+Campos principais do modelo:
+
+- `titulo`
+- `subtitulo`
+- `descricao`
+- `tipo`
+- `dataCriacao`
+- `dataRegisto`
+- `visibilidade`
+- `autor`
+- `hashtags`
+- `ficheiro`
+- `ratings`
+- `mediaEstrelas`
+
+Rotas principais:
+
+- `GET /recursos`: lista com filtros
+- `GET /recursos/top3`: top por media de estrelas
+- `GET /recursos/:id`: detalhe
+- `GET /recursos/:id/download`: download do ficheiro principal do recurso
+- `POST /recursos`: criar recurso
+- `PUT /recursos/:id`: editar
+- `DELETE /recursos/:id`: apagar
+- `PATCH /recursos/:id/rate`: avaliar
+
+Filtros que o backend ja suporta em `GET /recursos`:
+
+- `q`
+- `tipo`
+- `hashtag`
+- `ano`
+- `visibilidade`
+- `autor` ou `produtor`
+- `sort`
+- `order`
+- `limit`
+- `page`
+
+### 8.2) Posts
+
+Os posts funcionam como discussoes associadas a recursos.
+
+Rotas principais:
+
+- `GET /posts`
+- `GET /posts/:id`
+- `POST /posts`
+- `PUT /posts/:id`
+- `DELETE /posts/:id`
+- `POST /posts/:id/comentarios`
+- `DELETE /posts/:id/comentarios/:cid`
+
+No backend:
+
+- criar post exige autenticacao;
+- editar/apagar post exige ser autor ou `admin`;
+- comentar exige autenticacao;
+- apagar comentario exige ser autor do comentario ou `admin`.
+
+## 9) OAIS no projeto: SIP, AIP e DIP
+
+Esta parte e a mais importante para o enunciado.
+
+### SIP
+
+`SIP` significa `Submission Information Package`.
+
+No projeto, e o pacote ZIP submetido na ingestao. Tipicamente contem:
+
+- `manifest.json`
+- `data/`
+- opcionalmente `bagit.txt`
+- opcionalmente `checksums.txt`
+
+### AIP
+
+`AIP` significa `Archival Information Package`.
+
+No projeto, o `AIP` nao e apenas um ZIP guardado. E a combinacao de:
+
+- um registo MongoDB na colecao `AIP`;
+- os ficheiros preservados em `api-dados/uploads/recursos/{recursoId}/data/`;
+- o manifesto original e o relatorio de validacao;
+- informacao de rastreabilidade como `checksumSIP`, `dataIngestao` e `produtor`.
+
+### DIP
+
+`DIP` significa `Dissemination Information Package`.
+
+No estado atual do projeto, o DIP ja segue a ideia OAIS mais flexivel:
+
+- nao tem de ser igual ao SIP;
+- nao tem de conter todos os ficheiros originais;
+- pode ser gerado a partir do AIP;
+- pode conter todos os ficheiros, um subconjunto, ou apenas um ficheiro;
+- pode entregar a representacao original ou, em certos casos, uma representacao transformada para texto.
+
+Isto e importante porque o AIP preserva tudo, mas o DIP so entrega o que faz sentido para o pedido do utilizador.
+
+## 10) Ingestao SIP no codigo
+
+O fluxo SIP esta repartido por varias pecas:
+
+- `api-dados/routes/ingestao.js`
+- `api-dados/controllers/ingestaoController.js`
+- `api-dados/services/validadorSIP.js`
+- `api-dados/services/sIPProcessor.js`
+- `api-dados/models/aip.js`
+
+### Endpoint principal
+
+- `POST /ingestao/sip`
+
+### O que acontece
+
+1. O utilizador autenticado envia um ZIP.
+2. O middleware `uploadZip` guarda o ficheiro temporariamente.
+3. O `validadorSIP` valida:
+   - estrutura;
+   - metadados;
+   - seguranca;
+   - consistencia.
+4. Se houver erro, o sistema devolve relatorio e pode registar um `AIP` com `status: erro`.
+5. Se tudo estiver bem, o `sIPProcessor`:
+   - cria um `Recurso`;
+   - move os ficheiros para `uploads/recursos/{recursoId}/data/`;
+   - cria um `AIP`;
+   - remove o ZIP temporario.
+
+### O que fica no AIP
+
+No modelo `AIP`, os campos mais importantes sao:
+
+- `sipId`
+- `recursoId`
+- `status`
+- `dataIngestao`
+- `produtor`
+- `manifesto`
+- `validacoes`
+- `storageLocal`
+- `relatorio`
+- `checksumSIP`
+- `downloadCount`
+
+## 11) Disseminacao DIP no codigo
+
+Aqui esta uma das partes mais interessantes do projeto atual.
+
+Ficheiros principais:
+
+- `api-dados/routes/disseminacao.js`
+- `api-dados/controllers/disseminacaoController.js`
+- `api-dados/services/disseminacaoService.js`
+- `api-dados/services/verificacaoPermissoes.js`
+- `api-dados/services/zipGenerator.js`
+- `api-dados/models/exportacao.js`
+
+### Rotas de disseminacao
+
+- `GET /disseminacao/recursos/:recursoId/opcoes`
 - `GET /disseminacao/recursos/:recursoId/exportar`
-- Verifica permissao, gera ZIP e devolve ao utilizador.
+- `GET /disseminacao/recursos/exportar-multiplos`
+- `GET /disseminacao/recursos/:recursoId/historico-exportacoes`
+- `GET /disseminacao/meus-recursos/exportar-todos`
 
-## 10) Fluxo completo (de ponta a ponta)
+### Exportacao seletiva
 
-1. Utilizador abre a interface.
-2. Faz login -> token JWT guardado em cookie.
-3. Interface usa token para chamar APIs.
-4. Produtor submete SIP (ZIP) -> API valida e cria AIP.
-5. Consumidor pede exportacao -> API gera DIP e devolve ZIP.
+O endpoint `GET /disseminacao/recursos/:recursoId/exportar` agora aceita opcoes de pedido, por exemplo:
 
-## 11) Como pensar como engenheiro web
+- sem parametros: exporta o DIP completo;
+- `?ficheiro=slides.pdf`: exporta apenas um ficheiro;
+- `?ficheiro=a.pdf&ficheiro=b.txt`: exporta um subconjunto;
+- `?transformacao=texto`: tenta gerar uma representacao textual quando o formato e compativel.
 
-- **Separacao de responsabilidades**: UI, API, dados.
-- **Seguranca**: autenticar, autorizar, validar input.
-- **Observabilidade**: logs e erros claros.
-- **Contratos**: rotas e respostas previsiveis.
-- **Resiliencia**: lidar com falhas sem crashar o sistema.
+Antes de gerar o DIP, o sistema:
 
-## 12) Checklist rapido para dominar este projeto
+1. carrega o `AIP`;
+2. carrega o `Recurso`;
+3. valida permissao de acesso;
+4. valida se os ficheiros pedidos existem no `manifesto`;
+5. filtra os ficheiros a incluir;
+6. prepara checksums e caminhos locais;
+7. chama o `zipGenerator` para montar:
+   - `manifest.json`
+   - `bagit.txt`
+   - `checksums.txt`
+   - `disseminacao.log`
+   - pasta `data/` com os ficheiros incluidos
+8. regista auditoria em `Exportacao`.
 
-- Entender o papel de cada servico.
-- Saber as rotas principais e o que cada uma faz.
-- Saber como funciona o JWT e os cookies.
-- Saber o que e SIP/AIP/DIP e o fluxo de ingestao/disseminacao.
-- Conseguir explicar o fluxo de dados do browser ate a base de dados.
+### O endpoint de opcoes
+
+`GET /disseminacao/recursos/:recursoId/opcoes` existe para a interface saber o que pode mostrar ao utilizador.
+
+Ele devolve informacao como:
+
+- lista de ficheiros preservados;
+- tamanhos;
+- tipos MIME;
+- se suportam transformacao para texto;
+- tipos de pedido suportados.
+
+## 12) Permissoes e visibilidade
+
+O projeto separa autenticacao de autorizacao.
+
+Autenticacao responde a:
+
+- "quem e o utilizador?"
+
+Autorizacao responde a:
+
+- "o que e que esse utilizador pode fazer?"
+
+Exemplos reais do projeto:
+
+- qualquer autenticado pode criar um recurso;
+- so o autor ou `admin` pode editar/apagar um recurso;
+- qualquer autenticado pode avaliar um recurso;
+- recursos privados nao podem ser descarregados por qualquer utilizador;
+- a disseminacao DIP passa por verificacao de permissao antes de tocar no AIP;
+- a visibilidade do `Recurso` influencia o que pode ser exportado.
+
+## 13) Base de dados: que colecoes existem
+
+As colecoes principais sao:
+
+- `Utilizador`
+- `Recurso`
+- `Post`
+- `AIP`
+- `Exportacao`
+
+### Ligacoes importantes entre modelos
+
+- um `Recurso` tem um `autor`;
+- um `Post` pertence a um `Recurso` e a um `autor`;
+- um `AIP` referencia um `Recurso` e um `produtor`;
+- uma `Exportacao` referencia o `AIP`, o `Recurso` e quem exportou.
+
+## 14) Fluxos completos que deves saber explicar
+
+### Fluxo A: login
+
+1. Utilizador submete credenciais na `interface`.
+2. `interface` chama `auth`.
+3. `auth` devolve JWT.
+4. `interface` guarda cookie `token`.
+5. Rotas protegidas passam a ficar disponiveis.
+
+### Fluxo B: criar recurso
+
+1. Utilizador autenticado abre o formulario.
+2. `interface` envia `POST /recursos` para `api-dados`.
+3. `api-dados` cria o `Recurso`.
+4. Se o utilizador era `consumidor`, a API tenta promove-lo para `produtor` via `auth`.
+
+### Fluxo C: ingerir SIP
+
+1. Utilizador autenticado envia ZIP.
+2. `api-dados` valida o pacote.
+3. Se falhar, devolve relatorio.
+4. Se passar, cria `Recurso` e `AIP`.
+5. Os ficheiros ficam guardados em `uploads/recursos/...`.
+
+### Fluxo D: exportar DIP
+
+1. Utilizador abre detalhe do recurso na `interface`.
+2. A `interface` pede a `api-dados` as opcoes de exportacao.
+3. O utilizador escolhe exportacao completa, parcial ou individual.
+4. A `interface` chama a rota de exportacao com o token.
+5. A `api-dados` gera o ZIP a partir do `AIP`.
+6. A `interface` devolve o ficheiro ao browser.
+
+## 15) Como ler o projeto sem te perderes
+
+Se quiseres perceber o projeto por camadas, esta ordem funciona bem:
+
+1. Ler `README.md` e `docker-compose.yml`.
+2. Ler `interface/app.js` para perceber o frontend server-side.
+3. Ler `interface/routes/auth.js` e `auth/routes/users.js` para perceber login.
+4. Ler `api-dados/routes/recursos.js` e `api-dados/controllers/recursosController.js`.
+5. Ler `api-dados/routes/posts.js` e `api-dados/controllers/postsController.js`.
+6. Ler `api-dados/routes/ingestao.js`, `validadorSIP.js` e `sIPProcessor.js`.
+7. Ler `api-dados/routes/disseminacao.js` e `disseminacaoService.js`.
+8. No fim, olhar para os modelos Mongoose para consolidar a estrutura dos dados.
+
+## 16) O que e importante perceber em Engenharia Web aqui
+
+Este projeto e um bom exemplo de varios conceitos classicos:
+
+- separacao entre interface, autenticacao e logica de negocio;
+- comunicacao HTTP entre servicos;
+- autenticacao com JWT;
+- autorizacao por roles;
+- persistencia com MongoDB;
+- server-side rendering com Pug;
+- organizacao por `routes`, `controllers`, `services` e `models`;
+- pipeline de ingestao e disseminacao inspirado em OAIS.
+
+## 17) Resumo final
+
+Se tiveres de explicar o projeto em poucas frases, a ideia certa e esta:
+
+- a `interface` mostra paginas e envia pedidos aos servicos;
+- o `auth` trata de utilizadores e JWT;
+- a `api-dados` trata de recursos, posts, SIP, AIP e DIP;
+- MongoDB guarda os metadados;
+- os ficheiros preservados ficam no filesystem em `api-dados/uploads/recursos`;
+- o OAIS aparece no fluxo `SIP -> AIP -> DIP`;
+- o DIP no estado atual ja pode ser seletivo e nao precisa de coincidir com o SIP original.
+
+## 18) Ficheiros que vale a pena abrir a seguir
+
+Se quiseres continuar a estudar, os melhores proximos ficheiros sao:
+
+- `interface/app.js`
+- `interface/routes/recursos.js`
+- `interface/views/recursos/detalhe.pug`
+- `api-dados/controllers/recursosController.js`
+- `api-dados/services/validadorSIP.js`
+- `api-dados/services/sIPProcessor.js`
+- `api-dados/services/disseminacaoService.js`
+- `api-dados/services/zipGenerator.js`
+- `api-dados/models/aip.js`
+- `api-dados/models/exportacao.js`
