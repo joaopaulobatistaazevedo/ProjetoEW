@@ -99,15 +99,29 @@ async function encaminharRecursoMultipart(req, metodo, endpoint) {
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
     try {
+        const filtros = { ...req.query };
+        const autorAtual = req.user && (req.user.sub || req.user.id);
+
+        // A lista geral só mostra recursos públicos.
+        // A vista "Meus Recursos" pode incluir privados apenas do próprio autor.
+        if (filtros.autor && autorAtual && String(filtros.autor) === String(autorAtual)) {
+            delete filtros.visibilidade;
+        } else {
+            filtros.visibilidade = 'publico';
+            if (filtros.autor && autorAtual && String(filtros.autor) !== String(autorAtual)) {
+                delete filtros.autor;
+            }
+        }
+
         const [recursosRes, tiposRecurso] = await Promise.all([
-            axios.get(`${API}/recursos`, { params: req.query }),
+            axios.get(`${API}/recursos`, { params: filtros }),
             obterTiposAtivos()
         ]);
 
         res.render('recursos/lista', {
             titulo: 'Recursos',
             recursos: recursosRes.data,
-            filtros: req.query,
+            filtros,
             tiposRecurso
         });
     } catch (err) {
