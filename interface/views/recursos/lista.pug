@@ -13,6 +13,13 @@ block content
           a.btn.btn-primary.btn-block(href='/recursos/novo')
             i.fas.fa-plus
             span Novo Recurso
+          // novos botoes para acessar recursos e AIPs do utilizador
+          a.btn.btn-outline.btn-block.mt-2(href='/recursos?autor=' + (user.sub || ''))
+            i.fas.fa-folder-open
+            |  Meus Recursos
+          a.btn.btn-outline.btn-block.mt-2(href='/recursos/aips')
+            i.fas.fa-archive
+            |  Ver os meus AIPs
     
     // Alerta de erro (se houver)
     if erro

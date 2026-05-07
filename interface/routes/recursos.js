@@ -203,6 +203,121 @@ router.post('/tipos/:id/estado', async (req, res) => {
     }
 });
 
+// GET /recursos/aips — listar AIPs do utilizador
+router.get('/aips', async (req, res) => {
+    try {
+        const resposta = await axios.get(`${API}/ingestao/aips`, {
+            headers: obterHeadersAutorizacao(req),
+            params: req.query
+        });
+
+        res.render('recursos/aips', {
+            titulo: 'AIPs',
+            aips: resposta.data.aips || [],
+            paginacao: resposta.data.paginacao || {}
+        });
+    } catch (err) {
+        res.render('recursos/aips', {
+            titulo: 'AIPs',
+            aips: [],
+            erro: obterMensagemErroAPI(err, 'Nao foi possivel carregar os AIPs.')
+        });
+    }
+});
+
+// GET /recursos/aips/:sipId — detalhe de um AIP
+router.get('/aips/:sipId', async (req, res) => {
+    try {
+        const resposta = await axios.get(`${API}/ingestao/aips/${req.params.sipId}`, {
+            headers: obterHeadersAutorizacao(req)
+        });
+
+        res.render('recursos/aip_detalhe', {
+            titulo: `AIP ${req.params.sipId}`,
+            aip: resposta.data.aip
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel obter o detalhe do AIP.')
+        });
+    }
+});
+
+// GET /recursos/ingestoes — vista administrativa para Ingestões (AIPs)
+router.get('/ingestoes', async (req, res) => {
+    if (!utilizadorEhAdmin(req)) {
+        return res.status(403).render('erro', {
+            titulo: 'Sem permissao',
+            mensagem: 'Apenas administradores podem aceder a esta página.'
+        });
+    }
+
+    try {
+
+// GET /recursos/ingestao — alias para a vista administrativa de Ingestões (AIPs)
+router.get('/ingestao', async (req, res) => {
+    if (!utilizadorEhAdmin(req)) {
+        return res.status(403).render('erro', {
+            titulo: 'Sem permissao',
+            mensagem: 'Apenas administradores podem aceder a esta página.'
+        });
+    }
+
+    try {
+        const resposta = await axios.get(`${API}/ingestao/aips`, {
+            headers: obterHeadersAutorizacao(req),
+            params: req.query
+        });
+
+        res.render('recursos/aips', {
+            titulo: 'Ingestões (AIPs)',
+            aips: resposta.data.aips || [],
+            paginacao: resposta.data.paginacao || {},
+            admin: true
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar as ingestões.')
+        });
+    }
+});
+        // A API actualmente devolve os AIPs do utilizador autenticado.
+        // Como admin, chamamos com o token do admin e mostramos os AIPs associados.
+        const resposta = await axios.get(`${API}/ingestao/aips`, {
+            headers: obterHeadersAutorizacao(req),
+            params: req.query
+        });
+
+        res.render('recursos/aips', {
+            titulo: 'Ingestões (AIPs)',
+            aips: resposta.data.aips || [],
+            paginacao: resposta.data.paginacao || {},
+            admin: true
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar as ingestões.')
+        });
+    }
+});
+
+// GET /recursos/admin — hub de administração
+router.get('/admin', async (req, res) => {
+    if (!utilizadorEhAdmin(req)) {
+        return res.status(403).render('erro', {
+            titulo: 'Sem permissao',
+            mensagem: 'Apenas administradores podem aceder a esta página.'
+        });
+    }
+
+    res.render('recursos/admin', {
+        titulo: 'Administração'
+    });
+});
+
 // GET /recursos/:id — detalhe + posts
 router.get('/:id', async (req, res) => {
     try {
