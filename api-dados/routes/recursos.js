@@ -30,7 +30,7 @@ router.post('/', authenticate, conditionalUpload, recursosController.createRecur
 router.get('/:id', recursosController.getRecursoById);
 
 // PUT /recursos/:id — editar (admin ou produtor dono)
-router.put('/:id', authenticate, recursosController.updateRecurso);
+router.put('/:id', authenticate, conditionalUpload, recursosController.updateRecurso);
 
 // DELETE /recursos/:id — apagar (admin ou produtor dono)
 router.delete('/:id', authenticate, recursosController.deleteRecurso);

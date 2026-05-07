@@ -176,7 +176,7 @@ const recursosController = {
             }
 
             // Sanitizar e validar campos atualizaveis
-            const allowed = ['titulo','subtitulo','descricao','tipo','dataCriacao','visibilidade','hashtags','ficheiro'];
+            const allowed = ['titulo','subtitulo','descricao','tipo','dataCriacao','visibilidade','hashtags'];
             const update = {};
             for (const k of allowed) {
                 if (req.body[k] !== undefined) update[k] = req.body[k];
@@ -194,6 +194,11 @@ const recursosController = {
                 }
 
                 update.tipo = tipoPermitido.slug;
+            }
+
+            // Atualizar ficheiro se um novo foi enviado
+            if (req.file) {
+                update.ficheiro = req.file.path;
             }
 
             const atualizado = await Recurso.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });

@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
+var FormData = require('form-data');
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
+const { uploadRecursoSingle } = require('../middleware/uploadRecurso');
 
 function obterToken(req) {
     return req.cookies[COOKIE_NAME];
@@ -53,6 +55,46 @@ function obterMensagemErroAPI(err, fallback = 'Ocorreu um erro ao contactar a AP
     return data.mensagem || data.erro || data.error || fallback;
 }
 
+async function encaminharRecursoMultipart(req, metodo, endpoint) {
+    const form = new FormData();
+
+    Object.entries(req.body || {}).forEach(([chave, valor]) => {
+        if (valor === undefined || valor === null) {
+            return;
+        }
+
+        if (Array.isArray(valor)) {
+            valor.forEach(item => form.append(chave, item));
+            return;
+        }
+
+        form.append(chave, valor);
+    });
+
+    // Adicionar ficheiro único se existir
+    if (req.file) {
+        form.append('ficheiro', req.file.buffer, {
+            filename: req.file.originalname || req.file.filename || 'ficheiro',
+            contentType: req.file.mimetype || 'application/octet-stream'
+        });
+    }
+
+    const config = {
+        headers: {
+            ...obterHeadersAutorizacao(req),
+            ...form.getHeaders()
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity
+    };
+
+    if (metodo === 'put') {
+        return axios.put(`${API}${endpoint}`, form, config);
+    }
+
+    return axios.post(`${API}${endpoint}`, form, config);
+}
+
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
     try {
@@ -95,12 +137,10 @@ router.get('/novo', async (req, res) => {
     }
 });
 
-// POST /recursos/novo — submeter recurso (forward token)
-router.post('/novo', async (req, res) => {
+// POST /recursos/novo — submeter recurso com upload
+router.post('/novo', uploadRecursoSingle, async (req, res) => {
     try {
-        await axios.post(`${API}/recursos`, req.body, {
-            headers: obterHeadersAutorizacao(req)
-        });
+        await encaminharRecursoMultipart(req, 'post', '/recursos');
         res.redirect('/recursos');
     } catch (err) {
         let tiposRecurso = [];
@@ -244,18 +284,7 @@ router.get('/aips/:sipId', async (req, res) => {
     }
 });
 
-// GET /recursos/ingestoes — vista administrativa para Ingestões (AIPs)
-router.get('/ingestoes', async (req, res) => {
-    if (!utilizadorEhAdmin(req)) {
-        return res.status(403).render('erro', {
-            titulo: 'Sem permissao',
-            mensagem: 'Apenas administradores podem aceder a esta página.'
-        });
-    }
-
-    try {
-
-// GET /recursos/ingestao — alias para a vista administrativa de Ingestões (AIPs)
+// GET /recursos/ingestao — vista administrativa para Ingestões (AIPs)
 router.get('/ingestao', async (req, res) => {
     if (!utilizadorEhAdmin(req)) {
         return res.status(403).render('erro', {
@@ -265,26 +294,6 @@ router.get('/ingestao', async (req, res) => {
     }
 
     try {
-        const resposta = await axios.get(`${API}/ingestao/aips`, {
-            headers: obterHeadersAutorizacao(req),
-            params: req.query
-        });
-
-        res.render('recursos/aips', {
-            titulo: 'Ingestões (AIPs)',
-            aips: resposta.data.aips || [],
-            paginacao: resposta.data.paginacao || {},
-            admin: true
-        });
-    } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar as ingestões.')
-        });
-    }
-});
-        // A API actualmente devolve os AIPs do utilizador autenticado.
-        // Como admin, chamamos com o token do admin e mostramos os AIPs associados.
         const resposta = await axios.get(`${API}/ingestao/aips`, {
             headers: obterHeadersAutorizacao(req),
             params: req.query
@@ -401,12 +410,10 @@ router.get('/:id/editar', async (req, res) => {
     }
 });
 
-// POST /recursos/:id/editar — atualizar
-router.post('/:id/editar', async (req, res) => {
+// POST /recursos/:id/editar — atualizar com upload
+router.post('/:id/editar', uploadRecursoSingle, async (req, res) => {
     try {
-        await axios.put(`${API}/recursos/${req.params.id}`, req.body, {
-            headers: obterHeadersAutorizacao(req)
-        });
+        await encaminharRecursoMultipart(req, 'put', `/recursos/${req.params.id}`);
         res.redirect(`/recursos/${req.params.id}`);
     } catch (err) {
         try {

@@ -18,7 +18,7 @@ block content
                 strong= erro
             
             // Formulario de criar/editar
-            form(method='POST', action=isEdit ? ('/recursos/' + recurso._id + '/editar') : '/recursos/novo')
+            form(method='POST', action=isEdit ? ('/recursos/' + recurso._id + '/editar') : '/recursos/novo', enctype='multipart/form-data')
               .row
                 .col-12
                   .form-group
@@ -78,6 +78,13 @@ block content
                     small.text-muted(style='display: block; margin-top: 0.5rem;')
                       i.fas.fa-info-circle(style='margin-right: 0.25rem;')
                       | Pode separar varias hashtags por virgulas.
+
+                .col-12
+                  .form-group
+                    label(for='ficheiro')
+                      i.fas.fa-file-upload(style='margin-right: 0.5rem;')
+                      span Ficheiro do Recurso
+                    input#ficheiro.form-control(type='file', name='ficheiro', style='padding: 0.5rem;')
 
               .card-footer
                 button.btn.btn-primary(type='submit')
