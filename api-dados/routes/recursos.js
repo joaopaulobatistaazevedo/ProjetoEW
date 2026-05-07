@@ -14,6 +14,9 @@ router.get('/top3', recursosController.getTop3Recursos);
 // GET /recursos/:id/download — autenticado, respeita visibilidade
 router.get('/:id/download', authenticate, recursosController.downloadRecurso);
 
+// GET /recursos/:id/preview — devolve o ficheiro para visualização inline
+router.get('/:id/preview', recursosController.previewRecurso);
+
 // Conditional upload middleware: only invoke multer for multipart/form-data
 function conditionalUpload(req, res, next) {
 	const ct = (req.headers['content-type'] || '').toLowerCase();

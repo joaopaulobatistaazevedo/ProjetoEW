@@ -44,6 +44,32 @@ block content
             if recurso.descricao
               h3 Descrição
               p!= recurso.descricao
+
+            if recurso.ficheiro
+              .card(style='margin-top: 1.5rem; border: 1px solid var(--light-gray);')
+                .card-body
+                  h3(style='margin-top: 0;') Ficheiro associado
+                  p(style='margin-bottom: 0.75rem;')
+                    strong Nome:
+                    |  #{recurso.ficheiroNome || recurso.ficheiro.split('/').pop()}
+                  p(style='margin-bottom: 1rem;')
+                    strong Path:
+                    |  #{recurso.ficheiro}
+
+                  - const ficheiroNome = (recurso.ficheiroNome || recurso.ficheiro.split('/').pop() || '').toLowerCase();
+                  - const podeMostrarImagem = /\.(png|jpe?g|gif|webp)$/i.test(ficheiroNome);
+                  - const podeMostrarPdf = /\.pdf$/i.test(ficheiroNome);
+
+                  if recurso.ficheiroPreviewUrl && podeMostrarImagem
+                    .file-preview
+                      img(src=recurso.ficheiroPreviewUrl, alt=recurso.ficheiroNome || 'Pré-visualização do ficheiro', style='max-width: 100%; height: auto; border-radius: 0.5rem; border: 1px solid var(--light-gray);')
+                  else if recurso.ficheiroPreviewUrl && podeMostrarPdf
+                    .file-preview
+                      iframe(src=recurso.ficheiroPreviewUrl, title=recurso.ficheiroNome || 'Pré-visualização do PDF', style='width: 100%; min-height: 520px; border: 1px solid var(--light-gray); border-radius: 0.5rem;')
+                  else
+                    .alert.alert-info(style='margin-bottom: 0;')
+                      i.fas.fa-info-circle(style='margin-right: 0.5rem;')
+                      | Não há pré-visualização inline para este tipo de ficheiro. O caminho acima identifica o ficheiro guardado.
             
             if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
               .card-footer

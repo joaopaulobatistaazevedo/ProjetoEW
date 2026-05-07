@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 var FormData = require('form-data');
+var path = require('path');
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
@@ -369,13 +370,45 @@ router.get('/:id', async (req, res) => {
             axios.get(`${API}/posts?recurso=${req.params.id}`)
         ]);
 
+        const recurso = recursoRes.data || {};
+        if (recurso.ficheiro) {
+            recurso.ficheiroNome = path.basename(recurso.ficheiro);
+            recurso.ficheiroExt = path.extname(recurso.ficheiroNome).toLowerCase();
+            recurso.ficheiroPreviewUrl = `/recursos/${req.params.id}/ficheiro`;
+        }
+
         res.render('recursos/detalhe', {
-            titulo: recursoRes.data.titulo,
-            recurso: recursoRes.data,
+            titulo: recurso.titulo,
+            recurso,
             posts: postsRes.data
         });
     } catch (err) {
         res.status(404).render('erro', { titulo: 'Erro', mensagem: 'Recurso não encontrado' });
+    }
+});
+
+// GET /recursos/:id/ficheiro — proxy autenticado para preview do ficheiro associado
+router.get('/:id/ficheiro', async (req, res) => {
+    try {
+        const token = req.cookies[COOKIE_NAME];
+        const resposta = await axios.get(`${API}/recursos/${req.params.id}/preview`, {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: 'arraybuffer'
+        });
+
+        const headersPassThrough = ['content-type', 'content-length', 'content-disposition'];
+        headersPassThrough.forEach(nome => {
+            if (resposta.headers[nome]) {
+                res.setHeader(nome, resposta.headers[nome]);
+            }
+        });
+
+        res.send(Buffer.from(resposta.data));
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar o ficheiro.')
+        });
     }
 });
 

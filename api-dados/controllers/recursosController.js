@@ -118,6 +118,20 @@ const recursosController = {
         }
     },
 
+    // GET /recursos/:id/preview — devolve o ficheiro para visualização inline
+    previewRecurso: async (req, res) => {
+        try {
+            const recurso = await Recurso.findById(req.params.id);
+            if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
+            if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
+
+            const ficheiroPath = path.resolve(recurso.ficheiro);
+            res.sendFile(ficheiroPath);
+        } catch (err) {
+            res.status(500).json({ erro: err.message });
+        }
+    },
+
     // POST /recursos — criar (qualquer autenticado, será promovido a produtor)
     createRecurso: async (req, res) => {
         try {
