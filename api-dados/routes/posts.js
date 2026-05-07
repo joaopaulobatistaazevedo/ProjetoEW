@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const postsController = require('../controllers/postsController');
+// Auth guard for write operations
 const { authenticate } = require('../middleware/auth');
 
 // GET /posts — público

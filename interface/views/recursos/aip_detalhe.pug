@@ -1,0 +1,43 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .row.mb-6
+      .col-8
+        h1
+          i.fas.fa-file-archive(style='margin-right: 0.75rem; color: var(--primary);')
+          span Detalhe AIP
+      .col-4
+        a.btn.btn-outline.btn-block(href='/recursos/aips')
+          i.fas.fa-arrow-left
+          span Voltar aos AIPs
+
+    if erro
+      .alert.alert-danger
+        strong= erro
+
+    if aip
+      .card
+        .card-body
+          h3= aip.sipId || aip.aipId
+          p
+            strong Recurso: 
+            if aip.recursoId
+              a(href='/recursos/' + (aip.recursoId._id || aip.recursoId))= aip.recursoId.titulo || aip.recursoId
+            else
+              | —
+          p
+            strong Produtor: 
+            if aip.produtor
+              = aip.produtor.nome || aip.produtor.email
+            else
+              | —
+          p
+            strong Estado: 
+            = aip.status
+          if aip.relatorio
+            h4 Relatório de Validação
+            pre= JSON.stringify(aip.relatorio, null, 2)
+    else
+      .empty-state
+        h3.empty-title AIP não encontrado

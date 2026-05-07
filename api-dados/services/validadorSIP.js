@@ -9,6 +9,7 @@ const EXTENSOES_WHITELIST = ['.pdf', '.txt', '.docx', '.xlsx', '.jpg', '.png', '
 const TAMANHO_MAX_ZIP = 100 * 1024 * 1024; // 100MB
 const TAMANHO_MAX_FICHEIRO = 50 * 1024 * 1024; // 50MB
 
+// Valida estrutura, metadados, seguranca e consistencia do SIP
 class ValidadorSIP {
     constructor() {
         this.erros = [];

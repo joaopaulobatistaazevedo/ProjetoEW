@@ -15,7 +15,8 @@ const ingestaoController = {
         }
 
         const caminhoZip = req.file.path;
-        const utilizadorId = req.user.id; // Do middleware de autenticação
+        // Do middleware de autenticacao
+        const utilizadorId = req.user.id;
 
         try {
             // Instanciar validador
@@ -37,7 +38,7 @@ const ingestaoController = {
                     resultadoValidacao.relatorio.avisos
                 );
 
-                // Limpar ficheiro temporário
+                // Limpar ficheiro temporario
                 try {
                     await fs.unlink(caminhoZip);
                 } catch (err) {
@@ -62,7 +63,7 @@ const ingestaoController = {
                 });
             }
 
-            // Validação passou — processar SIP
+            // Validacao passou — processar SIP
             const processor = new SIPProcessor();
             const resultadoProcessamento = await processor.processarSIP(
                 resultadoValidacao.manifesto,

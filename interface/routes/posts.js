@@ -5,7 +5,7 @@ var axios = require('axios');
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
-// POST /posts — criar post
+// POST /posts — criar post (forward token)
 router.post('/', async (req, res) => {
     try {
         const token = req.cookies[COOKIE_NAME];
@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// POST /posts/:id/comentarios
+// POST /posts/:id/comentarios — adicionar comentario
 router.post('/:id/comentarios', async (req, res) => {
     try {
         const token = req.cookies[COOKIE_NAME];
@@ -31,7 +31,7 @@ router.post('/:id/comentarios', async (req, res) => {
     }
 });
 
-// POST /posts/:id/apagar
+// POST /posts/:id/apagar — remover post
 router.post('/:id/apagar', async (req, res) => {
     try {
         const token = req.cookies[COOKIE_NAME];

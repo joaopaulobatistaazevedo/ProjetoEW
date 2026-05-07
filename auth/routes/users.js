@@ -2,9 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Utilizador = require('../controllers/utilizador');
 const auth = require('../auth/auth');
+const jwt = require('jsonwebtoken');
 
+// Cookie onde o token e guardado
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
+const JWT_SECRET = process.env.JWT_SECRET || "jcr_secret_2026";
 
+// Remover campos sensiveis do output
 function toPublicUser(userDoc) {
     if (!userDoc) return null;
 
@@ -41,6 +45,7 @@ router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         const dados = await Utilizador.login(username, password);
+        // Cookie HTTP-only para sessao
         res.cookie(COOKIE_NAME, dados.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -77,18 +82,42 @@ router.get('/:id', auth.verificaAcesso, (req, res) => {
         .catch(err => res.status(500).json({ erro: err.message }));
 });
 
-// PUT /users/:id — atualizar (apenas admin)
-router.put('/:id', auth.verificaAcesso, auth.verificaAdmin, (req, res) => {
-    Utilizador.update(req.params.id, req.body)
-        .then(dados => res.status(200).json(toPublicUser(dados)))
-        .catch(err => res.status(500).json({ erro: err.message }));
+// PUT /users/:id — atualizar (admin ou o proprio utilizador)
+router.put('/:id', auth.verificaAcesso, async (req, res) => {
+    try {
+        const isSelf = req.user.sub === req.params.id;
+        const isAdmin = req.user.role === 'admin';
+
+        // Só o próprio utilizador ou um admin podem atualizar o registo
+        if (!isSelf && !isAdmin) {
+            return res.status(403).json({ erro: 'Sem permissão' });
+        }
+
+        // Impedir que um admin altere a password de outro utilizador
+        if (!isSelf && req.body && req.body.password) {
+            delete req.body.password;
+        }
+
+        const updated = await Utilizador.update(req.params.id, req.body);
+        res.status(200).json(toPublicUser(updated));
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
-// DELETE /users/:id — apagar (apenas admin)
-router.delete('/:id', auth.verificaAcesso, auth.verificaAdmin, (req, res) => {
-    Utilizador.remove(req.params.id)
-        .then(dados => res.status(200).json({ status: "Removido", dados: toPublicUser(dados) }))
-        .catch(err => res.status(500).json({ erro: err.message }));
+// DELETE /users/:id — apagar (apenas admin, não pode apagar admin)
+router.delete('/:id', auth.verificaAcesso, auth.verificaAdmin, async (req, res) => {
+    try {
+        // Impedir remoção de usuarios admin
+        const user = await Utilizador.findById(req.params.id);
+        if (user && user.role === 'admin') {
+            return res.status(403).json({ erro: 'Nao pode eliminar usuarios com role admin.' });
+        }
+        const removed = await Utilizador.remove(req.params.id);
+        res.status(200).json({ status: "Removido", dados: toPublicUser(removed) });
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
 });
 
 // PUT /users/:id/promote/produtor — promover consumidor a produtor
@@ -99,7 +128,24 @@ router.put('/:id/promote/produtor', auth.verificaAcesso, async (req, res) => {
             return res.status(403).json({ erro: "Pode apenas promover-se a si próprio" });
         }
         const promovido = await Utilizador.promoteToProdutor(req.params.id);
-        res.status(200).json(toPublicUser(promovido));
+        const token = jwt.sign(
+            {
+                sub: promovido._id.toString(),
+                username: promovido.username,
+                nome: promovido.nome,
+                role: promovido.role
+            },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.cookie(COOKIE_NAME, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000
+        });
+
+        res.status(200).json({ user: toPublicUser(promovido), token });
     } catch (err) {
         res.status(400).json({ erro: err.message });
     }

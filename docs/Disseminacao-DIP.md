@@ -21,17 +21,31 @@ O OAIS define o DIP como um pacote de informação criado específicamente para 
 
 Na primeira versão deste sistema, **o DIP será estruturalmente idêntico ao SIP**, mas com diferenças importantes:
 
-| Aspecto | SIP | DIP |
-|--------|-----|-----|
-| **Origem** | Produtor submete | Sistema extrai |
-| **Validação** | Rigorosa (rejeita se erro) | Não aplicável (já validado) |
-| **Metadados** | Submissão original | Enriquecidos (IDs gerados, checksums, datas) |
-| **Ficheiros** | Os que o produtor incluiu | Apenas os que a visibilidade permite |
-| **Manifesto** | Simples (entrada) | Completo (saída + rastreabilidade) |
-| **Checksums** | Opcionais | Sempre presentes |
-| **Uso** | Ingestão | Re-ingestão ou preservação |
+| Aspecto       | SIP                        | DIP                                          |
+| ------------- | -------------------------- | -------------------------------------------- |
+| **Origem**    | Produtor submete           | Sistema extrai                               |
+| **Validação** | Rigorosa (rejeita se erro) | Não aplicável (já validado)                  |
+| **Metadados** | Submissão original         | Enriquecidos (IDs gerados, checksums, datas) |
+| **Ficheiros** | Os que o produtor incluiu  | Apenas os que a visibilidade permite         |
+| **Manifesto** | Simples (entrada)          | Completo (saída + rastreabilidade)           |
+| **Checksums** | Opcionais                  | Sempre presentes                             |
+| **Uso**       | Ingestão                   | Re-ingestão ou preservação                   |
 
 **Nota**: Numa fase 2, o DIP poderia ser diferente (ex: HTML, PDF, formatos de exposição). Por enquanto, mantemos equivalência para permitir re-ciclos.
+
+### Flexibilidade do DIP face ao SIP
+
+No contexto do modelo OAIS, o DIP nao tem obrigatoriamente de ser igual ao SIP, nem tem de incluir todos os elementos originalmente submetidos. O DIP representa apenas a versao dos dados disponibilizada ao utilizador final no processo de disseminacao, podendo ser uma selecao parcial ou uma transformacao do conteudo preservado no AIP.
+
+Assim, o sistema deve permitir a extracao seletiva de conteudos a partir do AIP, possibilitando, por exemplo, a entrega de apenas um ficheiro individual pertencente ao SIP original, em vez do pacote completo. Desta forma, o DIP pode conter:
+
+- um unico ficheiro,
+- um subconjunto dos ficheiros originais,
+- ou uma versao transformada dos mesmos,
+
+dependendo do pedido do utilizador.
+
+Esta abordagem garante flexibilidade no acesso a informacao preservada, sem comprometer a integridade do AIP.
 
 ---
 
@@ -57,7 +71,7 @@ recurso-disseminado-2026.zip
   "versao_dip": "1.0",
   "aipId": "AIP-2026-00001",
   "recursoId": "507f1f77bcf86cd799439011",
-  
+
   "metadados_originais": {
     "titulo": "Título do Recurso",
     "subtitulo": "Subtítulo opcional",
@@ -67,7 +81,7 @@ recurso-disseminado-2026.zip
     "dataCriacao": "2026-03-01",
     "descricao": "Descrição do recurso"
   },
-  
+
   "metadados_enriquecidos": {
     "dataIngestao": "2026-04-15T10:30:00Z",
     "dataExportacao": "2026-05-03T14:25:00Z",
@@ -76,7 +90,7 @@ recurso-disseminado-2026.zip
     "versionAIP": "1",
     "estadoArmazenamento": "ativo"
   },
-  
+
   "ficheiros": [
     {
       "name": "file1.pdf",
@@ -106,14 +120,14 @@ recurso-disseminado-2026.zip
       "motivo_exclusao": "visibilidade: privado"
     }
   ],
-  
+
   "politica_visibilidade_aplicada": {
     "usuario": "utilizador456",
     "nivel_acesso": "publico",
     "ficheiros_excluidos": 1,
     "ficheiros_incluidos": 2
   },
-  
+
   "validacao": {
     "estrutura_valida": true,
     "checksums_validados": true,
@@ -191,48 +205,48 @@ Sistema devolve ZIP para download
 
 ### 1. **Origem e Direção**
 
-| SIP | DIP |
-|-----|-----|
+| SIP                                       | DIP                                       |
+| ----------------------------------------- | ----------------------------------------- |
 | Fluxo de **entrada** (produtor → sistema) | Fluxo de **saída** (sistema → utilizador) |
-| Submissão | Disponibilização |
+| Submissão                                 | Disponibilização                          |
 
 ### 2. **Validação e Processamento**
 
-| SIP | DIP |
-|-----|-----|
+| SIP                                         | DIP                                 |
+| ------------------------------------------- | ----------------------------------- |
 | Validações rigorosas (rejeita SIP inválido) | Sem validação (AIP já foi validado) |
-| Transforma em AIP | Cria a partir do AIP |
-| Pode conter erros (que são reportados) | Sempre válido (já passou filtros) |
+| Transforma em AIP                           | Cria a partir do AIP                |
+| Pode conter erros (que são reportados)      | Sempre válido (já passou filtros)   |
 
 ### 3. **Contenção de Ficheiros**
 
-| SIP | DIP |
-|-----|-----|
+| SIP                                       | DIP                                              |
+| ----------------------------------------- | ------------------------------------------------ |
 | Todos os ficheiros que o produtor incluiu | Apenas os que a política de visibilidade permite |
-| Pode incluir metadados privados | Remove metadados sensíveis se necessário |
+| Pode incluir metadados privados           | Remove metadados sensíveis se necessário         |
 
 ### 4. **Metadados**
 
-| SIP | DIP |
-|-----|-----|
-| Metadados originais do produtor | Metadados originais + enriquecidos |
-| Sem checksums (opcionais) | Checksums obrigatórios (rastreabilidade) |
-| Sem IDs de sistema | Inclui AIP ID, Recurso ID, versão |
+| SIP                             | DIP                                      |
+| ------------------------------- | ---------------------------------------- |
+| Metadados originais do produtor | Metadados originais + enriquecidos       |
+| Sem checksums (opcionais)       | Checksums obrigatórios (rastreabilidade) |
+| Sem IDs de sistema              | Inclui AIP ID, Recurso ID, versão        |
 
 ### 5. **Rastreabilidade**
 
-| SIP | DIP |
-|-----|-----|
-| Relatório de ingestão | Log de exportação |
-| Quem submeteu | Quem descarregou, quando, que filtros foram aplicados |
+| SIP                   | DIP                                                   |
+| --------------------- | ----------------------------------------------------- |
+| Relatório de ingestão | Log de exportação                                     |
+| Quem submeteu         | Quem descarregou, quando, que filtros foram aplicados |
 
 ### 6. **Estrutura (prática na v1)**
 
-| SIP | DIP |
-|-----|-----|
+| SIP                                     | DIP                                    |
+| --------------------------------------- | -------------------------------------- |
 | BagIt simplificado (bagit.txt opcional) | BagIt completo (bagit.txt obrigatório) |
-| Checksums opcionais | Checksums obrigatórios |
-| Manifesto simples | Manifesto enriquecido |
+| Checksums opcionais                     | Checksums obrigatórios                 |
+| Manifesto simples                       | Manifesto enriquecido                  |
 
 ---
 
@@ -260,33 +274,33 @@ function podeExportarRecurso(utilizadorId, recurso) {
   if (recurso.visibilidade === "publico") {
     return true; // Qualquer utilizador autenticado
   }
-  
+
   // Caso 2: Recurso privado
   if (recurso.visibilidade === "privado") {
     return utilizadorId === recurso.produtorId || ehAdministrador(utilizadorId);
   }
-  
+
   return false;
 }
 
 function construirDIP(aip, utilizadorId, filtros = {}) {
   const dip = {
-    manifesto: {...aip.manifesto},
+    manifesto: { ...aip.manifesto },
     ficheirosIncluidos: [],
-    ficheirosExcluidos: []
+    ficheirosExcluidos: [],
   };
-  
+
   for (const ficheiro of aip.ficheiros) {
     if (ficheiro.visibilidade === "privado" && !ehProdutor(utilizadorId, aip)) {
       dip.ficheirosExcluidos.push({
         nome: ficheiro.nome,
-        motivo: "política de visibilidade: privado"
+        motivo: "política de visibilidade: privado",
       });
     } else {
       dip.ficheirosIncluidos.push(ficheiro);
     }
   }
-  
+
   return dip;
 }
 ```
@@ -300,17 +314,20 @@ function construirDIP(aip, utilizadorId, filtros = {}) {
 Inicia o processo de exportação e devolve o DIP como ZIP.
 
 **Request:**
+
 ```
 GET /recursos/507f1f77bcf86cd799439011/exportar
 Authorization: Bearer <token>
 ```
 
 **Query Parameters (opcionais):**
+
 - `formato`: `zip` (default), `json`, `html` (para futuras versões)
 - `incluir_metadados`: `true` (default) ou `false`
 - `apenas_publica`: `true` para filtrar apenas recursos públicos
 
 **Response (200 - Sucesso):**
+
 ```
 Content-Type: application/zip
 Content-Disposition: attachment; filename="recurso-2026-05-03.zip"
@@ -319,6 +336,7 @@ Content-Disposition: attachment; filename="recurso-2026-05-03.zip"
 ```
 
 **Response (403 - Sem Permissão):**
+
 ```json
 {
   "status": "erro",
@@ -329,6 +347,7 @@ Content-Disposition: attachment; filename="recurso-2026-05-03.zip"
 ```
 
 **Response (404 - Não Encontrado):**
+
 ```json
 {
   "status": "erro",
@@ -344,12 +363,14 @@ Content-Disposition: attachment; filename="recurso-2026-05-03.zip"
 Exporta vários recursos numa única operação.
 
 **Request:**
+
 ```
 GET /recursos/exportar-multiplos?ids=507f,508a,509c
 Authorization: Bearer <token>
 ```
 
 **Response (200 - Sucesso):**
+
 ```
 Content-Type: application/zip
 Content-Disposition: attachment; filename="recursos-lote-2026-05-03.zip"
@@ -358,6 +379,7 @@ Content-Disposition: attachment; filename="recursos-lote-2026-05-03.zip"
 ```
 
 **Estrutura no ZIP:**
+
 ```
 recursos-lote.zip
 ├── recurso-507f1f77bcf86cd799439011/
@@ -385,18 +407,18 @@ async function verificarPermissaoExportacao(recursoId, utilizadorId, token) {
   // 1. Valida JWT
   const usuario = verificarToken(token);
   if (!usuario) throw new Error("Token inválido");
-  
+
   // 2. Carrega recurso da BD
   const recurso = await Recurso.findById(recursoId);
   if (!recurso) throw new Error("Recurso não encontrado");
-  
+
   // 3. Verifica política de visibilidade
   if (recurso.visibilidade === "publico") {
     return true;
   } else if (recurso.visibilidade === "privado") {
     return recurso.produtorId === usuario.id || usuario.papel === "admin";
   }
-  
+
   return false;
 }
 ```
@@ -407,11 +429,12 @@ async function verificarPermissaoExportacao(recursoId, utilizadorId, token) {
 // disseminacaoService.js
 async function construirDIP(aip, utilizadorId, opcoes = {}) {
   // 1. Filtra ficheiros por visibilidade
-  const ficheirosIncluidos = aip.ficheiros.filter(f => {
-    return f.visibilidade === "publico" || 
-           f.propriedadeRestritaA === utilizadorId;
+  const ficheirosIncluidos = aip.ficheiros.filter((f) => {
+    return (
+      f.visibilidade === "publico" || f.propriedadeRestritaA === utilizadorId
+    );
   });
-  
+
   // 2. Prepara manifesto enriquecido
   const manifesto = {
     tipo_pacote: "DIP",
@@ -423,23 +446,23 @@ async function construirDIP(aip, utilizadorId, opcoes = {}) {
       dataIngestao: aip.dataIngestao,
       dataExportacao: new Date().toISOString(),
       exportadoPor: utilizadorId,
-      versionAIP: aip.versao
+      versionAIP: aip.versao,
     },
-    ficheiros: ficheirosIncluidos.map(f => ({
+    ficheiros: ficheirosIncluidos.map((f) => ({
       name: f.nome,
       size: f.tamanho,
       type: f.mimetype,
-      checksum_sha256: f.checksum
-    }))
+      checksum_sha256: f.checksum,
+    })),
   };
-  
+
   // 3. Calcula checksums se não existirem
   for (const ficheiro of ficheirosIncluidos) {
     if (!ficheiro.checksum) {
       ficheiro.checksum = await calcularChecksum(ficheiro.caminho);
     }
   }
-  
+
   return { manifesto, ficheirosIncluidos };
 }
 ```
@@ -450,31 +473,34 @@ async function construirDIP(aip, utilizadorId, opcoes = {}) {
 // zipGenerator.js
 async function gerarDIPZip(dip, recursoId) {
   const zip = new JSZip();
-  
+
   // 1. Adiciona manifesto
   zip.file("manifest.json", JSON.stringify(dip.manifesto, null, 2));
-  
+
   // 2. Adiciona bagit.txt
-  zip.file("bagit.txt", "BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8");
-  
+  zip.file(
+    "bagit.txt",
+    "BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8",
+  );
+
   // 3. Adiciona ficheiros
   const dataFolder = zip.folder("data");
   for (const ficheiro of dip.ficheirosIncluidos) {
     const conteudo = fs.readFileSync(ficheiro.caminho);
     dataFolder.file(ficheiro.nome, conteudo);
   }
-  
+
   // 4. Gera checksums.txt
   let checksumContent = "";
   for (const ficheiro of dip.ficheirosIncluidos) {
     checksumContent += `${ficheiro.checksum}  data/${ficheiro.nome}\n`;
   }
   zip.file("checksums.txt", checksumContent);
-  
+
   // 5. Cria log de disseminação
   const log = gerarLogDisseminacao(dip, recursoId);
   zip.file("disseminacao.log", log);
-  
+
   // 6. Gera o ZIP final
   return await zip.generateAsync({ type: "nodebuffer" });
 }
@@ -488,53 +514,52 @@ router.get("/recursos/:recursoId/exportar", async (req, res) => {
   try {
     const { recursoId } = req.params;
     const usuario = req.usuario; // Do middleware de autenticação
-    
+
     // 1. Verifica permissão
     const temPermissao = await verificarPermissaoExportacao(
-      recursoId, 
-      usuario.id, 
-      req.headers.authorization
+      recursoId,
+      usuario.id,
+      req.headers.authorization,
     );
-    
+
     if (!temPermissao) {
       return res.status(403).json({
         status: "erro",
         codigo: "acesso_negado",
-        mensagem: "Não tem permissão para exportar este recurso"
+        mensagem: "Não tem permissão para exportar este recurso",
       });
     }
-    
+
     // 2. Carrega AIP
     const aip = await AIP.findOne({ recursoId });
     if (!aip) {
       return res.status(404).json({
         status: "erro",
-        codigo: "recurso_nao_encontrado"
+        codigo: "recurso_nao_encontrado",
       });
     }
-    
+
     // 3. Constrói DIP
     const dip = await construirDIP(aip, usuario.id);
-    
+
     // 4. Gera ZIP
     const zipBuffer = await gerarDIPZip(dip, recursoId);
-    
+
     // 5. Regista exportação (auditoria)
     await registarExportacao(recursoId, usuario.id, new Date());
-    
+
     // 6. Devolve ZIP
     res.setHeader("Content-Type", "application/zip");
     res.setHeader(
-      "Content-Disposition", 
-      `attachment; filename="recurso-${recursoId}-${Date.now()}.zip"`
+      "Content-Disposition",
+      `attachment; filename="recurso-${recursoId}-${Date.now()}.zip"`,
     );
     res.send(zipBuffer);
-    
   } catch (erro) {
     console.error("Erro na exportação:", erro);
     res.status(500).json({
       status: "erro",
-      mensagem: "Erro ao exportar recurso"
+      mensagem: "Erro ao exportar recurso",
     });
   }
 });
@@ -560,19 +585,19 @@ Uma das vantagens de manter o DIP estruturalmente similar ao SIP é permitir re-
 // Quando um DIP é re-ingerido:
 async function re_ingerirDIP(zipfile, sipOrigem) {
   const novoAIP = await processarSIP(zipfile);
-  
+
   // Opção 1: Criar nova versão do mesmo recurso
   if (novoAIP.recursoId === sipOrigem.recursoId) {
     novoAIP.versao = sipOrigem.versao + 1;
     novoAIP.recursoDerivado = sipOrigem.aipId;
   }
-  
+
   // Opção 2: Criar recurso novo (por defeito)
   else {
     novoAIP.recursoDerivado = sipOrigem.aipId;
     novoAIP.versao = 1;
   }
-  
+
   return novoAIP;
 }
 ```
@@ -635,6 +660,7 @@ Na versão 1, mantemos **DIP ≈ SIP** por simplicidade. Porém, uma segunda ver
 ### Opção A: Manter DIP = SIP (Status Quo)
 
 **Estrutura:**
+
 ```
 recurso-2026.zip
 ├── manifest.json
@@ -644,12 +670,14 @@ recurso-2026.zip
 ```
 
 **Vantagens:**
+
 - ✅ Simplicidade máxima
 - ✅ Re-ingestão trivial (DIP é novo SIP)
 - ✅ Sem mudanças no pipeline
 - ✅ Compatibilidade com ferramentas BagIt padrão
 
 **Desvantagens:**
+
 - ❌ Não otimizado para diferentes tipos de consumo
 - ❌ Ficheiros grandes no ZIP (não é exposição web)
 - ❌ Sem diferenciação entre arquivamento e disseminação
@@ -694,7 +722,7 @@ Metadados + referências aos ficheiros (streaming ou links):
   "versao_dip": "2.0",
   "aipId": "AIP-2026-00001",
   "recursoId": "507f1f77bcf86cd799439011",
-  
+
   "metadados": {
     "titulo": "Título do Recurso",
     "tipo": "artigo",
@@ -702,7 +730,7 @@ Metadados + referências aos ficheiros (streaming ou links):
     "dataIngestao": "2026-04-15T10:30:00Z",
     "dataExportacao": "2026-05-03T14:25:00Z"
   },
-  
+
   "ficheiros": [
     {
       "id": "file-1",
@@ -721,7 +749,7 @@ Metadados + referências aos ficheiros (streaming ou links):
       "checksum_sha256": "5d41402abc4b2a..."
     }
   ],
-  
+
   "_links": {
     "self": {
       "href": "https://api.exemplo.pt/recursos/507f1f77bcf86cd799439011/exportar?formato=json"
@@ -746,37 +774,39 @@ recurso-2026.html
 ```
 
 Conteúdo HTML:
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Recurso: Título do Recurso</title>
-  <style>
-    /* Bootstrap inline styles */
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Título do Recurso</h1>
-    <div class="metadata">
-      <p><strong>Tipo:</strong> artigo</p>
-      <p><strong>Data:</strong> 2026-03-01</p>
-      <p><strong>Hashtags:</strong> web, programacao</p>
-    </div>
-    
-    <h2>Ficheiros</h2>
-    <ul>
-      <li><a href="#download-file1">file1.pdf</a> (2 MB)</li>
-      <li><a href="#download-file2">file2.txt</a> (5 KB)</li>
-    </ul>
-    
-    <h2>Manifesto Técnico</h2>
-    <pre id="manifest">
+  <head>
+    <meta charset="utf-8" />
+    <title>Recurso: Título do Recurso</title>
+    <style>
+      /* Bootstrap inline styles */
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Título do Recurso</h1>
+      <div class="metadata">
+        <p><strong>Tipo:</strong> artigo</p>
+        <p><strong>Data:</strong> 2026-03-01</p>
+        <p><strong>Hashtags:</strong> web, programacao</p>
+      </div>
+
+      <h2>Ficheiros</h2>
+      <ul>
+        <li><a href="#download-file1">file1.pdf</a> (2 MB)</li>
+        <li><a href="#download-file2">file2.txt</a> (5 KB)</li>
+      </ul>
+
+      <h2>Manifesto Técnico</h2>
+      <pre id="manifest">
       { "metadados": { ... } }
-    </pre>
-  </div>
-</body>
+    </pre
+      >
+    </div>
+  </body>
 </html>
 ```
 
@@ -814,11 +844,13 @@ recurso-2026-dip/
 ```
 
 **Vantagens:**
+
 - ✅ Versioning independente (DIP v2 ≠ SIP v1)
 - ✅ Otimizado para consumo (sem dependências BagIt)
 - ✅ Reduz tamanho (sem ficheiros redundantes)
 
 **Desvantagens:**
+
 - ❌ Re-ingestão complexa (DIP não é mais válido como SIP)
 - ❌ Requires custom tools (sem conformidade com BagIt)
 - ❌ Quebra ciclo OAIS fechado
@@ -831,18 +863,20 @@ recurso-2026-dip/
 
 Diferentes estruturas dependendo de `recurso.tipo`:
 
-| Tipo | Formato de DIP | Estrutura |
-|------|---|---|
-| `artigo`, `tese` | ZIP (BagIt) + PDF (opcional) | Documentação padrão |
-| `aplicacao` | JSON + links | API-first |
-| `dados`, `dataset` | CSV/JSON tabulado | Análise de dados |
-| `multimédia` | Pasta com metadados + stream | Vídeo/áudio |
+| Tipo               | Formato de DIP               | Estrutura           |
+| ------------------ | ---------------------------- | ------------------- |
+| `artigo`, `tese`   | ZIP (BagIt) + PDF (opcional) | Documentação padrão |
+| `aplicacao`        | JSON + links                 | API-first           |
+| `dados`, `dataset` | CSV/JSON tabulado            | Análise de dados    |
+| `multimédia`       | Pasta com metadados + stream | Vídeo/áudio         |
 
 **Vantagens:**
+
 - ✅ Otimizado por domínio
 - ✅ Melhor UX para cada caso
 
 **Desvantagens:**
+
 - ❌ Complexidade extrema
 - ❌ Difícil de manter
 
@@ -855,6 +889,7 @@ Diferentes estruturas dependendo de `recurso.tipo`:
 ### Razão
 
 A **Opção B** oferece o melhor compromisso entre:
+
 - **Compatibilidade**: Mantém ZIP/BagIt (preservação clássica)
 - **Flexibilidade**: Oferece JSON (APIs) e HTML (web)
 - **Escalabilidade**: Fácil adicionar PDF ou outros formatos
@@ -862,15 +897,18 @@ A **Opção B** oferece o melhor compromisso entre:
 
 ### Implementação em Fases
 
-**v1 (Atual)**: 
+**v1 (Atual)**:
+
 - ✅ DIP-ZIP (BagIt, idêntico a SIP)
 
 **v2 (Próxima)**:
+
 - ✅ DIP-ZIP (mantém)
 - ✅ DIP-JSON (novo, para APIs)
 - ✅ DIP-HTML (novo, para exposição web)
 
 **v3+ (Futuro)**:
+
 - ✅ DIP-PDF (para arquivos institucionais)
 - ✅ Formatos específicos por tipo
 
@@ -881,9 +919,9 @@ A **Opção B** oferece o melhor compromisso entre:
 router.get("/recursos/:recursoId/exportar", async (req, res) => {
   const { formato = "zip" } = req.query;
   const recurso = await Recurso.findById(recursoId);
-  
+
   const dip = await construirDIP(recurso, usuario.id);
-  
+
   switch (formato) {
     case "zip":
       return disseminacaoService.exportarZIP(dip, res);
@@ -917,21 +955,21 @@ api-dados/services/
 ## Conclusão
 
 Para **manter estabilidade na v1**, recomenda-se:
+
 - **Não mudar** DIP = SIP (ZIP BagIt)
 - **Planear** evolução para múltiplos formatos em v2
 - **Documentar** interface `IDIPFormatter` para extensibilidade
 
 A estrutura em **Opção B** permite crescimento sem quebrar o ciclo OAIS ou forçar re-implementação do pipeline de ingestão.
 
-
-
-| Pacote | Fase | Origem | Destino | Validação | Uso |
-|--------|------|--------|---------|-----------|-----|
-| **SIP** | Ingestão | Produtor | Sistema | Rigorosa | Submissão |
-| **AIP** | Armazenamento | Sistema | Sistema | N/A | Preservação |
-| **DIP** | Disseminação | Sistema | Utilizador | N/A | Download, re-ciclo |
+| Pacote  | Fase          | Origem   | Destino    | Validação | Uso                |
+| ------- | ------------- | -------- | ---------- | --------- | ------------------ |
+| **SIP** | Ingestão      | Produtor | Sistema    | Rigorosa  | Submissão          |
+| **AIP** | Armazenamento | Sistema  | Sistema    | N/A       | Preservação        |
+| **DIP** | Disseminação  | Sistema  | Utilizador | N/A       | Download, re-ciclo |
 
 Na **primeira versão**, DIP ≈ SIP estruturalmente, mas com:
+
 - Metadados enriquecidos (IDs, datas, versão)
 - Checksums obrigatórios
 - Filtros de visibilidade aplicados

@@ -1,23 +1,45 @@
 extends ../layout
 
 block content
-  .w3-container.w3-padding-32
-    .w3-card-4.w3-white(style='max-width: 520px; margin: 0 auto;')
-      .w3-container.w3-blue
-        h2 Login
-      .w3-container.w3-padding-16
-        if erro
-          .w3-panel.w3-pale-red.w3-border.w3-border-red
-            p= erro
-        form(method='POST', action='/auth/login')
-          p
-            label(for='username') Username
-            input#username.w3-input.w3-border(type='text', name='username', required=true)
-          p
-            label(for='password') Password
-            input#password.w3-input.w3-border(type='password', name='password', required=true)
-          p
-            button.w3-button.w3-blue.w3-block(type='submit') Entrar
-        p.w3-small
-          | Ainda nao tens conta?
-          a(href='/auth/registo')  Regista-te aqui
+  .container.container-md.py-8
+    .row
+      .col-12
+        .card
+          .card-header
+            h2
+              i.fas.fa-sign-in-alt(style='margin-right: 0.75rem;')
+              span Entrar na Plataforma
+          
+          .card-body
+            if erro
+              .alert.alert-danger
+                i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+                strong= erro
+            
+            // Formulario de login
+            form(method='POST', action='/auth/login')
+              .form-group
+                label(for='username')
+                  i.fas.fa-user(style='margin-right: 0.5rem;')
+                  span Nome de Utilizador
+                input#username.form-control(type='text', name='username', placeholder='Seu nome de utilizador...', required=true)
+              
+              .form-group
+                label(for='password')
+                  i.fas.fa-lock(style='margin-right: 0.5rem;')
+                  span Palavra-passe
+                input#password.form-control(type='password', name='password', placeholder='Sua palavra-passe...', required=true)
+              
+              button.btn.btn-primary.btn-block(type='submit')
+                i.fas.fa-sign-in-alt
+                span Entrar
+            
+            hr(style='margin: 2rem 0; border: none; border-top: 1px solid var(--light-gray);')
+            
+            // Link para registo
+            .text-center(style='text-align: center;')
+              p.text-muted(style='color: var(--gray); margin-bottom: 1rem;')
+                | Ainda não tem conta?
+              a.btn.btn-secondary.btn-block(href='/auth/registo')
+                i.fas.fa-user-plus
+                span Criar Conta Agora

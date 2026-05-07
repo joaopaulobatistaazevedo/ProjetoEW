@@ -10,6 +10,8 @@ services:
       - INTERFACE_URL=http://interface:3000
     depends_on:
       - mongodb_api
+    volumes:
+      - api_dados_uploads:/app/uploads
     networks:
       - app-network
 
@@ -59,6 +61,7 @@ services:
 
 volumes:
   mongodb_api_data:
+  api_dados_uploads:
 
 networks:
   app-network:

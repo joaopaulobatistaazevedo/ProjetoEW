@@ -1,6 +1,5 @@
 const disseminacaoService = require('../services/disseminacaoService');
 const verificacaoPermissoes = require('../services/verificacaoPermissoes');
-const Recurso = require('../models/recurso');
 
 const disseminacaoController = {
     
@@ -12,19 +11,19 @@ const disseminacaoController = {
         try {
             const { recursoId } = req.params;
             const utilizadorId = req.user.id;
-            const papelUtilizador = req.user.papel || 'consumidor';
+            const papelUtilizador = req.user.role || 'consumidor';
             
             // A verificação de permissão já foi feita pelo middleware
             // O recurso está em req.recurso
             
             // Exportar
-            const { zipBuffer, metadata, dip } = await disseminacaoService.exportarRecurso(
+            const { zipBuffer, metadata } = await disseminacaoService.exportarRecurso(
                 recursoId,
                 utilizadorId,
                 papelUtilizador
             );
             
-            // Registar na auditoria (não falhar se falhar auditoria)
+            // Registar na auditoria (melhor esforco)
             try {
                 await disseminacaoService.registarExportacao(
                     metadata.aipId,
@@ -37,8 +36,8 @@ const disseminacaoController = {
                 console.warn('Aviso: Falha ao registar auditoria:', auditErr.message);
             }
             
-            // Preparar response
-            const nomeArquivo = `recurso-${recursoId}-${Date.now()}.zip`;
+            // Response com headers de metadados
+            const nomeArquivo = `dip-${recursoId}-${Date.now()}.zip`;
             
             res.setHeader('Content-Type', 'application/zip');
             res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
@@ -50,9 +49,9 @@ const disseminacaoController = {
             
         } catch (err) {
             console.error('Erro ao exportar recurso:', err);
-            res.status(500).json({
+            res.status(err.statusCode || 500).json({
                 status: 'erro',
-                mensagem: 'Erro ao exportar recurso',
+                mensagem: err.message || 'Erro ao exportar recurso',
                 erro: err.message
             });
         }
@@ -66,7 +65,7 @@ const disseminacaoController = {
         try {
             const { ids } = req.query;
             const utilizadorId = req.user.id;
-            const papelUtilizador = req.user.papel || 'consumidor';
+            const papelUtilizador = req.user.role || 'consumidor';
             
             if (!ids) {
                 return res.status(400).json({
@@ -92,7 +91,7 @@ const disseminacaoController = {
                 });
             }
             
-            // Verificar permissões para cada recurso
+            // Verificar permissao para cada recurso
             const recursosPermitidos = [];
             for (const recursoId of recursoIds) {
                 try {
@@ -196,7 +195,7 @@ const disseminacaoController = {
     exportarTodosRecursos: async (req, res) => {
         try {
             const utilizadorId = req.user.id;
-            const papelUtilizador = req.user.papel;
+            const papelUtilizador = req.user.role || 'consumidor';
             
             // Buscar todos os recursos do utilizador
             const recursos = await Recurso.find({ autor: utilizadorId })

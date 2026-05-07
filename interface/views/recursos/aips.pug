@@ -1,0 +1,62 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .row.mb-6
+      .col-8
+        h1
+          i.fas.fa-archive(style='margin-right: 0.75rem; color: var(--primary);')
+          span AIPs
+      .col-4
+        a.btn.btn-outline.btn-block(href='/recursos')
+          i.fas.fa-arrow-left
+          span Voltar aos Recursos
+
+    if erro
+      .alert.alert-danger
+        i.fas.fa-exclamation-triangle(style='margin-right: 0.5rem;')
+        strong= erro
+
+    if aips && aips.length
+      .card
+        .card-body
+          table.table.table-striped
+            thead
+              tr
+                th SIP ID
+                th Recurso
+                th Produtor
+                th Estado
+                th Data Ingestão
+                th Ações
+            tbody
+              each item in aips
+                tr
+                  td= item.sipId || (item.aipId || '—')
+                  td
+                    if item.recursoId
+                      a(href='/recursos/' + (item.recursoId._id || item.recursoId))= item.recursoId.titulo || item.recursoId
+                    else
+                      | —
+                  td
+                    if item.produtor
+                      = item.produtor.nome || item.produtor.email || item.produtor
+                    else
+                      | —
+                  td
+                    if item.status === 'ok'
+                      span.badge.badge-success OK
+                    else if item.status === 'erro'
+                      span.badge.badge-danger Erro
+                    else
+                      span.badge.badge-warning= item.status
+                  td= item.dataIngestao ? new Date(item.dataIngestao).toLocaleString() : '—'
+                  td
+                    a.btn.btn-sm.btn-primary(href='/recursos/aips/' + (item.sipId || ''))
+                      i.fas.fa-eye
+                      | Ver
+    else
+      .empty-state
+        i.fas.fa-inbox.empty-icon
+        h3.empty-title Sem AIPs encontrados
+        p.empty-text Ainda não foi realizada nenhuma ingestão para este utilizador.

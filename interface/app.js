@@ -1,3 +1,4 @@
+// Core deps
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -17,13 +18,14 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+// Middleware pipeline
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware de verificação de autenticação
+// Middleware de verificacao de autenticacao
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 const JWT_SECRET  = process.env.JWT_SECRET  || 'jcr_secret_2026';
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || '/auth/login';
@@ -44,7 +46,7 @@ function verificarAutenticacao(req, res, next) {
     });
 }
 
-// Tornar o user disponível em todas as views (fallback)
+// Tornar o user disponivel em todas as views (fallback)
 app.use((req, res, next) => {
     if (!res.locals.user && req.cookies[COOKIE_NAME]) {
         try {
@@ -57,7 +59,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Rotas públicas
+// Rotas publicas
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 

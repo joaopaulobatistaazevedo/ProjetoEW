@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// AIP: snapshot de ingestao e validacoes
 const aipSchema = new mongoose.Schema({
     sipId: {
         type: String,

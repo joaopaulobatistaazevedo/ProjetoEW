@@ -4,6 +4,7 @@ const AdmZip = require('adm-zip');
 const Recurso = require('../models/recurso');
 const AIP = require('../models/aip');
 
+// Orquestra ingestao: cria Recurso, move ficheiros e cria AIP
 class SIPProcessor {
     constructor() {
         this.recursoId = null;

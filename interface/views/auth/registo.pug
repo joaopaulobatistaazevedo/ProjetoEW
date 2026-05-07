@@ -1,32 +1,63 @@
 extends ../layout
 
 block content
-  .w3-container.w3-padding-32
-    .w3-card-4.w3-white(style='max-width: 640px; margin: 0 auto;')
-      .w3-container.w3-green
-        h2 Registo
-      .w3-container.w3-padding-16
-        if erro
-          .w3-panel.w3-pale-red.w3-border.w3-border-red
-            p= erro
-        form(method='POST', action='/auth/registo')
-          p
-            label(for='username') Username
-            input#username.w3-input.w3-border(type='text', name='username', required=true)
-          p
-            label(for='nome') Nome
-            input#nome.w3-input.w3-border(type='text', name='nome', required=true)
-          p
-            label(for='email') Email
-            input#email.w3-input.w3-border(type='email', name='email', required=true)
-          p
-            label(for='password') Password
-            input#password.w3-input.w3-border(type='password', name='password', required=true)
-
-          p
-            label(for='filiacao') Filiacao
-            input#filiacao.w3-input.w3-border(type='text', name='filiacao')
-          p
-            button.w3-button.w3-green.w3-block(type='submit') Criar conta
-        p.w3-small
-          a(href='/auth/login') Voltar ao login
+  .container.container-md.py-8
+    .row
+      .col-12
+        .card
+          .card-header
+            h2
+              i.fas.fa-user-plus(style='margin-right: 0.75rem;')
+              span Criar Conta
+          
+          .card-body
+            if erro
+              .alert.alert-danger
+                i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+                strong= erro
+            
+            // Formulario de registo
+            form(method='POST', action='/auth/registo')
+              .form-group
+                label(for='username')
+                  i.fas.fa-at(style='margin-right: 0.5rem;')
+                  span Nome de Utilizador
+                input#username.form-control(type='text', name='username', placeholder='Escolha um nome de utilizador...', required=true)
+              
+              .form-group
+                label(for='nome')
+                  i.fas.fa-id-card(style='margin-right: 0.5rem;')
+                  span Nome Completo
+                input#nome.form-control(type='text', name='nome', placeholder='Seu nome completo...', required=true)
+              
+              .form-group
+                label(for='email')
+                  i.fas.fa-envelope(style='margin-right: 0.5rem;')
+                  span Email
+                input#email.form-control(type='email', name='email', placeholder='seu.email@exemplo.com', required=true)
+              
+              .form-group
+                label(for='password')
+                  i.fas.fa-lock(style='margin-right: 0.5rem;')
+                  span Palavra-passe
+                input#password.form-control(type='password', name='password', placeholder='Escolha uma palavra-passe forte...', required=true)
+              
+              .form-group
+                label(for='filiacao')
+                  i.fas.fa-building(style='margin-right: 0.5rem;')
+                  span Instituição (opcional)
+                input#filiacao.form-control(type='text', name='filiacao', placeholder='Sua escola, universidade ou instituição...')
+              
+              button.btn.btn-secondary.btn-block(type='submit')
+                i.fas.fa-check-circle
+                span Criar Conta
+            
+            hr(style='margin: 2rem 0; border: none; border-top: 1px solid var(--light-gray);')
+            
+            // Link para login
+            .text-center(style='text-align: center;')
+              p.text-muted(style='color: var(--gray); margin-bottom: 1rem;')
+                | Já tem conta?
+              a.btn.btn-primary.btn-block(href='/auth/login')
+                i.fas.fa-sign-in-alt
+                span Voltar ao Login

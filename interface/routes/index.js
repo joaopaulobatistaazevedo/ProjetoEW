@@ -2,8 +2,10 @@ var express = require('express');
 var router = express.Router();
 var axios = require('axios');
 
+// API base URL
 const API = process.env.API_URL || 'http://localhost:3001';
 
+// Home: lista recursos publicos + top3
 router.get('/', async (req, res) => {
     try {
         const [recursosRes, top3Res] = await Promise.all([

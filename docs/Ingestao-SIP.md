@@ -10,7 +10,7 @@ Estes conceitos vêm do OAIS (Open Archival Information System), um modelo de re
 
 - **AIP (Archival Information Package)**: o que o sistema *armazena* internamente após validação e normalização. É a versão "canónica" (limpa, validada, com checksums, etc.). Garante preservação de longo prazo.
 
-- **DIP (Dissemination Information Package)**: o que o sistema *disponibiliza* para download. O enunciado diz que numa fase inicial DIP = SIP (simplificação).
+- **DIP (Dissemination Information Package)**: o que o sistema *disponibiliza* para download. Nesta fase inicial, estamos a seguir a simplificação do enunciado: `DIP = SIP` na prática, isto é, o pacote exportado mantém a mesma estrutura base do pacote submetido.
 
 ### Fluxo no Projeto
 
@@ -22,8 +22,19 @@ Sistema valida estrutura, manifesto, metadados
 Se OK: transforma em AIP (guarda no storage, regista BD)
 Se erro: devolve relatório
     ↓
-Produtor pode depois descarregar como DIP (que é o AIP)
+Utilizador pode depois descarregar um DIP equivalente ao SIP
 ```
+
+### Estado actual da ingestão no projeto
+
+Neste momento, a parte **backend** da ingestão SIP está implementada:
+
+- existe `POST /ingestao/sip`;
+- existe validação em camadas;
+- existe criação de `Recurso` e `AIP`;
+- existem endpoints para listar AIPs e consultar relatórios de validação.
+
+O que ainda não está fechado é sobretudo a **camada de interface** da ingestão e a integração completa com o ciclo inverso de exportação/importação do mesmo pacote.
 
 ---
 
@@ -236,33 +247,43 @@ api-dados/
 
 ---
 
-## Tarefas de Implementação
+## Estado de Implementação
 
 ### Fase 4.1: Validador SIP
 
-- [ ] Verificar integridade do ZIP
-- [ ] Extrair e ler `manifest.json`
-- [ ] Validar em camadas (estrutura, metadados, segurança, consistência)
-- [ ] Gerar relatório de erros categorizados
+- [x] Verificar integridade do ZIP
+- [x] Extrair e ler `manifest.json`
+- [x] Validar em camadas (estrutura, metadados, segurança, consistência)
+- [x] Gerar relatório de erros categorizados
 
 ### Fase 4.2: Processador SIP → AIP
 
-- [ ] Criar Recurso na BD a partir do manifesto
-- [ ] Mover ficheiros para storage permanente
-- [ ] Registar AIP na BD
-- [ ] Limpar temporários
+- [x] Criar `Recurso` na BD a partir do manifesto
+- [x] Mover ficheiros para storage permanente
+- [x] Registar `AIP` na BD
+- [x] Limpar temporários
 
 ### Fase 4.3: Endpoint da API
 
-- [ ] `POST /ingestao/sip` com multipart form
-- [ ] Autenticação obrigatória
-- [ ] Resposta padronizada (sucesso/erro)
+- [x] `POST /ingestao/sip` com multipart form
+- [x] Autenticação obrigatória
+- [x] Resposta padronizada (sucesso/erro)
+- [x] `GET /ingestao/aips` para listar AIPs do utilizador
+- [x] `GET /ingestao/aips/:sipId` para detalhe
+- [x] `GET /ingestao/aips/:sipId/relatorio` para relatório de validação
 
 ### Fase 4.4: Interface (opcional para Fase 4)
 
 - [ ] Formulário de submissão de ZIP
 - [ ] Historial de AIPs por utilizador
-- [ ] Download de DIP
+- [ ] Consulta visual do relatório de validação de um AIP
+- [ ] Integração do fluxo SIP na navegação principal
+
+### Fase 4.5: Fecho do ciclo OAIS
+
+- [ ] Garantir que um pacote exportado pode voltar a ser importado pela mesma estrutura
+- [ ] Definir um modo de exportação compatível com re-ingestão completa
+- [ ] Ligar ingestão SIP e disseminação DIP num fluxo demonstrável de ponta a ponta
 
 ---
 

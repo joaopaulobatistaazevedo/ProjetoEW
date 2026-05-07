@@ -1,7 +1,9 @@
+// Swagger UI setup
 const swaggerUi = require('swagger-ui-express');
 
 const PORT = process.env.PORT || 3001;
 
+// OpenAPI spec object
 const swaggerSpec = {
     openapi: '3.0.3',
     info: {
@@ -29,10 +31,17 @@ const swaggerSpec = {
             get: {
                 summary: 'Listar recursos',
                 parameters: [
+                    { name: 'q', in: 'query', schema: { type: 'string' }, description: 'Pesquisa textual em titulo, subtitulo, descricao e hashtags.' },
                     { name: 'tipo', in: 'query', schema: { type: 'string' } },
                     { name: 'hashtag', in: 'query', schema: { type: 'string' } },
                     { name: 'ano', in: 'query', schema: { type: 'string' } },
-                    { name: 'visibilidade', in: 'query', schema: { type: 'string' } }
+                    { name: 'visibilidade', in: 'query', schema: { type: 'string' } },
+                    { name: 'autor', in: 'query', schema: { type: 'string' } },
+                    { name: 'produtor', in: 'query', schema: { type: 'string' } },
+                    { name: 'sort', in: 'query', schema: { type: 'string', enum: ['dataRegisto', 'mediaEstrelas', 'relevancia'] } },
+                    { name: 'order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] } },
+                    { name: 'limit', in: 'query', schema: { type: 'integer' } },
+                    { name: 'page', in: 'query', schema: { type: 'integer' } }
                 ],
                 responses: { '200': { description: 'Lista de recursos' } }
             },
@@ -127,6 +136,94 @@ const swaggerSpec = {
                 responses: { '200': { description: 'Avaliacao registada' }, '400': { description: 'Dados invalidos' } }
             }
         },
+        '/tipos-recurso': {
+            get: {
+                summary: 'Listar tipos de recurso ativos',
+                responses: { '200': { description: 'Lista de tipos ativos' } }
+            },
+            post: {
+                summary: 'Criar tipo de recurso',
+                security: [{ bearerAuth: [] }],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    nome: { type: 'string' },
+                                    descricao: { type: 'string' },
+                                    ordem: { type: 'integer' }
+                                },
+                                required: ['nome']
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '201': { description: 'Tipo criado' },
+                    '401': { description: 'Nao autenticado' },
+                    '403': { description: 'Sem permissao' },
+                    '409': { description: 'Tipo ja existente' }
+                }
+            }
+        },
+        '/tipos-recurso/todos': {
+            get: {
+                summary: 'Listar todos os tipos de recurso',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    '200': { description: 'Lista completa de tipos' },
+                    '401': { description: 'Nao autenticado' },
+                    '403': { description: 'Sem permissao' }
+                }
+            }
+        },
+        '/tipos-recurso/{id}': {
+            put: {
+                summary: 'Atualizar tipo de recurso',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    nome: { type: 'string' },
+                                    descricao: { type: 'string' },
+                                    ordem: { type: 'integer' },
+                                    ativo: { type: 'boolean' }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '200': { description: 'Tipo atualizado' },
+                    '401': { description: 'Nao autenticado' },
+                    '403': { description: 'Sem permissao' },
+                    '404': { description: 'Tipo nao encontrado' }
+                }
+            }
+        },
+        '/disseminacao/recursos/{recursoId}/exportar': {
+            get: {
+                summary: 'Exportar DIP de um recurso',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'recursoId', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                responses: {
+                    '200': { description: 'DIP gerado com sucesso' },
+                    '403': { description: 'Sem permissao' },
+                    '404': { description: 'AIP ou recurso nao encontrado' }
+                }
+            }
+        },
         '/posts': {
             get: {
                 summary: 'Listar posts',
@@ -214,6 +311,7 @@ const swaggerSpec = {
     }
 };
 
+// Mount swagger UI and raw spec
 function setupSwagger(app) {
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     app.get('/docs.json', (req, res) => {

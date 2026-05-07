@@ -1,6 +1,8 @@
 const path = require('path');
 const Recurso = require('../models/recurso');
+const { obterTipoAtivoPorSlug, enriquecerComTipos } = require('../services/tiposRecursoService');
 
+// Normalize hashtags input into array of strings
 function normalizarHashtags(valor) {
     if (!valor) return [];
     if (Array.isArray(valor)) return valor.map(tag => String(tag).trim()).filter(Boolean);
@@ -37,7 +39,7 @@ const recursosController = {
                 $lte: new Date(`${ano}-12-31`)
             };
 
-            // Ordenação: aceitar 'dataRegisto', 'mediaEstrelas' ou 'relevancia' (relevancia = mediaEstrelas desc, dataRegisto desc)
+            // Ordenacao com ranking opcional por relevancia
             let sortObj = { dataRegisto: -1 };
             const ord = order === 'asc' ? 1 : -1;
             if (sort === 'mediaEstrelas') sortObj = { mediaEstrelas: ord };
@@ -50,6 +52,7 @@ const recursosController = {
             const pg = parseInt(page) > 0 ? parseInt(page) : 1;
             const skip = (pg - 1) * lim;
 
+            // Query base com populate e pagina
             const query = Recurso.find(filtro)
                 .populate('autor', 'nome email')
                 .sort(sortObj)
@@ -62,7 +65,7 @@ const recursosController = {
 
             const recursos = await query;
 
-            res.json(recursos);
+            res.json(await enriquecerComTipos(recursos));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -76,7 +79,7 @@ const recursosController = {
                 .limit(3)
                 .populate('autor', 'nome');
 
-            res.json(top3);
+            res.json(await enriquecerComTipos(top3));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -89,7 +92,7 @@ const recursosController = {
                 .populate('autor', 'nome email');
 
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
-            res.json(recurso);
+            res.json(await enriquecerComTipos(recurso));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -102,6 +105,7 @@ const recursosController = {
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
             if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
 
+            // Privado: apenas admin ou autor
             if (recurso.visibilidade === 'privado') {
                 if (req.user.role !== 'admin' && req.user.id !== recurso.autor.toString()) {
                     return res.status(403).json({ erro: 'Sem permissão' });
@@ -109,6 +113,20 @@ const recursosController = {
             }
 
             res.download(path.resolve(recurso.ficheiro));
+        } catch (err) {
+            res.status(500).json({ erro: err.message });
+        }
+    },
+
+    // GET /recursos/:id/preview — devolve o ficheiro para visualização inline
+    previewRecurso: async (req, res) => {
+        try {
+            const recurso = await Recurso.findById(req.params.id);
+            if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
+            if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
+
+            const ficheiroPath = path.resolve(recurso.ficheiro);
+            res.sendFile(ficheiroPath);
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -122,13 +140,18 @@ const recursosController = {
             // Validações básicas
             if (!titulo || !tipo) return res.status(400).json({ erro: 'Titulo e tipo são obrigatórios' });
 
+            const tipoPermitido = await obterTipoAtivoPorSlug(tipo);
+            if (!tipoPermitido) {
+                return res.status(400).json({ erro: 'Tipo de recurso invalido ou inativo.' });
+            }
+
             const tags = normalizarHashtags(hashtags);
 
             const recurso = await Recurso.create({
                 titulo,
                 subtitulo,
                 descricao: req.body.descricao,
-                tipo,
+                tipo: tipoPermitido.slug,
                 dataCriacao: dataCriacao ? new Date(dataCriacao) : undefined,
                 visibilidade,
                 hashtags: tags,
@@ -136,7 +159,7 @@ const recursosController = {
                 ficheiro: req.file ? req.file.path : null
             });
 
-            // Promover utilizador a produtor se consumidor (call assíncrono, não bloqueia resposta)
+            // Promover utilizador a produtor se consumidor (nao bloqueia resposta)
             if (req.user.role === 'consumidor') {
                 const axios = require('axios');
                 const AUTH_SERVICE_URL = process.env.AUTH_URL || 'http://localhost:2623';
@@ -149,8 +172,9 @@ const recursosController = {
                 ).catch(err => console.error('Erro ao promover para produtor:', err.message));
             }
 
-            res.status(201).json(recurso);
+            res.status(201).json(await enriquecerComTipos(recurso));
         } catch (err) {
+            console.error('Erro em createRecurso:', err && err.stack ? err.stack : err);
             res.status(500).json({ erro: err.message });
         }
     },
@@ -165,8 +189,8 @@ const recursosController = {
                 return res.status(403).json({ erro: 'Sem permissão' });
             }
 
-            // Sanitizar e validar campos atualizáveis
-            const allowed = ['titulo','subtitulo','descricao','tipo','dataCriacao','visibilidade','hashtags','ficheiro'];
+            // Sanitizar e validar campos atualizaveis
+            const allowed = ['titulo','subtitulo','descricao','tipo','dataCriacao','visibilidade','hashtags'];
             const update = {};
             for (const k of allowed) {
                 if (req.body[k] !== undefined) update[k] = req.body[k];
@@ -177,8 +201,22 @@ const recursosController = {
 
             if (update.dataCriacao) update.dataCriacao = new Date(update.dataCriacao);
 
+            if (update.tipo !== undefined) {
+                const tipoPermitido = await obterTipoAtivoPorSlug(update.tipo);
+                if (!tipoPermitido) {
+                    return res.status(400).json({ erro: 'Tipo de recurso invalido ou inativo.' });
+                }
+
+                update.tipo = tipoPermitido.slug;
+            }
+
+            // Atualizar ficheiro se um novo foi enviado
+            if (req.file) {
+                update.ficheiro = req.file.path;
+            }
+
             const atualizado = await Recurso.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
-            res.json(atualizado);
+            res.json(await enriquecerComTipos(atualizado));
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -211,6 +249,7 @@ const recursosController = {
             const recurso = await Recurso.findById(req.params.id);
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
 
+            // Atualiza rating existente ou cria novo
             const indice = recurso.ratings.findIndex(r => r.utilizador.toString() === req.user.id);
             if (indice >= 0) {
                 recurso.ratings[indice].estrelas = estrelas;

@@ -1,5 +1,20 @@
 const Recurso = require('../models/recurso');
 
+function normalizarListaFicheiros(ficheirosSolicitados) {
+    const lista = Array.isArray(ficheirosSolicitados)
+        ? ficheirosSolicitados
+        : typeof ficheirosSolicitados === 'string'
+            ? ficheirosSolicitados.split(',')
+            : [ficheirosSolicitados];
+
+    return [...new Set(
+        lista
+            .filter(Boolean)
+            .map(item => item.trim())
+            .filter(Boolean)
+    )];
+}
+
 /**
  * Serviço: Verificação de Permissões para Disseminação
  * Verifica se um utilizador pode exportar um recurso baseado na política de visibilidade
@@ -60,13 +75,14 @@ class VerificacaoPermissoes {
     }
     
     /**
-     * Filtra ficheiros baseado na visibilidade (DIP v1 ≈ SIP)
+     * Filtra ficheiros acessíveis e aplica seleção opcional do pedido DIP
      * @param {object} aip - AIP com ficheiros
      * @param {string} utilizadorId - ID do utilizador
      * @param {string} papelUtilizador - Papel do utilizador
+     * @param {object} opcoes - Opções do pedido de disseminação
      * @returns {Promise<{ficheirosIncluidos: array, ficheirosExcluidos: array}>}
      */
-    async filtrarFicheirosParaDIP(aip, utilizadorId, papelUtilizador) {
+    async filtrarFicheirosParaDIP(aip, utilizadorId, papelUtilizador, opcoes = {}) {
         try {
             const recurso = await Recurso.findById(aip.recursoId);
             
@@ -74,26 +90,46 @@ class VerificacaoPermissoes {
                 throw new Error('Recurso não encontrado');
             }
             
-            // v1: Todos os ficheiros são incluídos se utilizador tem acesso ao recurso
             const manifesto = aip.manifesto || {};
             const ficheirosManifesto = manifesto.files || [];
+            const ficheirosSolicitados = normalizarListaFicheiros(opcoes.ficheirosSolicitados);
+            const temSelecaoExplicita = ficheirosSolicitados.length > 0;
+            const nomesSolicitados = new Set(ficheirosSolicitados);
             
-            const ficheirosIncluidos = ficheirosManifesto.map(f => ({
-                name: f.name,
-                size: f.size,
-                type: f.type,
-                required: f.required,
-                checksum_sha256: f.checksum_sha256 || 'pendente',
-                incluido_no_dip: true
-            }));
-            
+            const ficheirosIncluidos = [];
             const ficheirosExcluidos = [];
+
+            for (const ficheiro of ficheirosManifesto) {
+                const base = {
+                    name: ficheiro.name,
+                    size: ficheiro.size,
+                    type: ficheiro.type,
+                    required: ficheiro.required,
+                    checksum_sha256: ficheiro.checksum_sha256 || 'pendente'
+                };
+
+                if (temSelecaoExplicita && !nomesSolicitados.has(ficheiro.name)) {
+                    ficheirosExcluidos.push({
+                        ...base,
+                        motivo_exclusao: 'Nao solicitado no pedido de disseminacao'
+                    });
+                    continue;
+                }
+
+                ficheirosIncluidos.push({
+                    ...base,
+                    incluido_no_dip: true
+                });
+            }
             
             return {
                 ficheirosIncluidos,
                 ficheirosExcluidos,
                 politicaAplicada: {
                     visibilidade: recurso.visibilidade,
+                    temSelecaoExplicita,
+                    ficheirosSolicitados,
+                    totalDisponiveis: ficheirosManifesto.length,
                     ficheirosIncluidos: ficheirosIncluidos.length,
                     ficheirosExcluidos: ficheirosExcluidos.length
                 }

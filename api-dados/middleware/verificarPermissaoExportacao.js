@@ -6,10 +6,12 @@ const verificacaoPermissoes = require('../services/verificacaoPermissoes');
  */
 async function verificarPermissaoExportacao(req, res, next) {
     try {
+        // Inputs from route and auth context
         const { recursoId } = req.params;
         const utilizadorId = req.user.id;
-        const papelUtilizador = req.user.papel || 'consumidor';
+        const papelUtilizador = req.user.role || 'consumidor';
         
+        // Delegate policy check to service
         const { temPermissao, motivo } = await verificacaoPermissoes.podeExportarRecurso(
             recursoId,
             utilizadorId,
@@ -24,6 +26,7 @@ async function verificarPermissaoExportacao(req, res, next) {
             });
         }
         
+        // Authorized
         next();
         
     } catch (err) {

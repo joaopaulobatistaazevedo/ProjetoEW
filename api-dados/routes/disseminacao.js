@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const disseminacaoController = require('../controllers/disseminacaoController');
-const { authenticate, authorize } = require('../middleware/auth');
+// Auth + permissao para exportacao
+const { authenticate } = require('../middleware/auth');
 const verificarPermissaoExportacao = require('../middleware/verificarPermissaoExportacao');
 
 /**
