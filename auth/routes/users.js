@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Utilizador = require('../controllers/utilizador');
 const auth = require('../auth/auth');
+const jwt = require('jsonwebtoken');
 
 // Cookie onde o token e guardado
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
+const JWT_SECRET = process.env.JWT_SECRET || "jcr_secret_2026";
 
 // Remover campos sensiveis do output
 function toPublicUser(userDoc) {
@@ -126,7 +128,24 @@ router.put('/:id/promote/produtor', auth.verificaAcesso, async (req, res) => {
             return res.status(403).json({ erro: "Pode apenas promover-se a si próprio" });
         }
         const promovido = await Utilizador.promoteToProdutor(req.params.id);
-        res.status(200).json(toPublicUser(promovido));
+        const token = jwt.sign(
+            {
+                sub: promovido._id.toString(),
+                username: promovido.username,
+                nome: promovido.nome,
+                role: promovido.role
+            },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.cookie(COOKIE_NAME, token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000
+        });
+
+        res.status(200).json({ user: toPublicUser(promovido), token });
     } catch (err) {
         res.status(400).json({ erro: err.message });
     }

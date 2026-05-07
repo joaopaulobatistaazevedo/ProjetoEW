@@ -4,6 +4,7 @@ var axios = require('axios');
 var FormData = require('form-data');
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
+const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 const { uploadRecursoSingle } = require('../middleware/uploadRecurso');
 
@@ -140,7 +141,26 @@ router.get('/novo', async (req, res) => {
 // POST /recursos/novo — submeter recurso com upload
 router.post('/novo', uploadRecursoSingle, async (req, res) => {
     try {
-        await encaminharRecursoMultipart(req, 'post', '/recursos');
+        const resposta = await encaminharRecursoMultipart(req, 'post', '/recursos');
+
+        const roleAtual = req.user && req.user.role;
+        const ehConsumidor = roleAtual === 'consumidor';
+
+        if (ehConsumidor && req.user && req.user.sub) {
+            const token = obterToken(req);
+            const promovido = await axios.put(`${AUTH}/${req.user.sub}/promote/produtor`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (promovido.data && promovido.data.token) {
+                res.cookie(COOKIE_NAME, promovido.data.token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    maxAge: 3600000
+                });
+            }
+        }
+
         res.redirect('/recursos');
     } catch (err) {
         let tiposRecurso = [];
