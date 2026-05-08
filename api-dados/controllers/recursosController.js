@@ -1,5 +1,6 @@
 const path = require('path');
 const Recurso = require('../models/recurso');
+const Noticia = require('../models/noticia');
 const { obterTipoAtivoPorSlug, enriquecerComTipos } = require('../services/tiposRecursoService');
 
 // Normalize hashtags input into array of strings
@@ -172,6 +173,20 @@ const recursosController = {
                 ).catch(err => console.error('Erro ao promover para produtor:', err.message));
             }
 
+            // Criar notícia de nova submissão (melhor esforço)
+            try {
+                const autorNome = req.user && (req.user.nome || req.user.username) ? (req.user.nome || req.user.username) : 'Um utilizador';
+                await Noticia.create({
+                    titulo: `Nova submissão: ${autorNome} - ${recurso.titulo}`,
+                    conteudo: `O produtor ${autorNome} submeteu o recurso "${recurso.titulo}".`,
+                    tipo: 'sistema',
+                    link: `/recursos/${recurso._id}`,
+                    autorNome
+                });
+            } catch (e) {
+                console.warn('Não foi possível registar notícia de submissão:', e.message);
+            }
+
             res.status(201).json(await enriquecerComTipos(recurso));
         } catch (err) {
             console.error('Erro em createRecurso:', err && err.stack ? err.stack : err);
@@ -258,6 +273,29 @@ const recursosController = {
             }
 
             await recurso.save();
+
+            // Gerar notícia automática do top3 após mudança de ranking
+            try {
+                const top3 = await Recurso.find({ visibilidade: 'publico' })
+                    .sort({ mediaEstrelas: -1 })
+                    .limit(3)
+                    .populate('autor', 'nome');
+
+                const resumo = top3
+                    .map((r, index) => `${index + 1}. ${r.titulo}`)
+                    .join(' | ');
+
+                await Noticia.create({
+                    titulo: 'O novo top3 de recursos mais requisitados é ...',
+                    conteudo: resumo || 'Ainda não existem recursos suficientes para construir o top3.',
+                    tipo: 'sistema',
+                    link: '/recursos?sort=mediaEstrelas',
+                    autorNome: 'Sistema'
+                });
+            } catch (noticiaErr) {
+                console.warn('Não foi possível registar notícia do top3:', noticiaErr.message);
+            }
+
             res.json({ mediaEstrelas: recurso.mediaEstrelas, totalVotos: recurso.ratings.length });
         } catch (err) {
             res.status(500).json({ erro: err.message });

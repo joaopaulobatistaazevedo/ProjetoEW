@@ -3,10 +3,13 @@ const router = express.Router();
 const Utilizador = require('../controllers/utilizador');
 const auth = require('../auth/auth');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 // Cookie onde o token e guardado
 const COOKIE_NAME = process.env.COOKIE_NAME || "auth_token_alunos";
 const JWT_SECRET = process.env.JWT_SECRET || "jcr_secret_2026";
+const API_URL = process.env.API_URL || 'http://localhost:3001';
+const INTERNAL_NEWS_SECRET = process.env.INTERNAL_NEWS_SECRET || 'internal_news_secret_2026';
 
 // Remover campos sensiveis do output
 function toPublicUser(userDoc) {
@@ -34,6 +37,21 @@ router.post('/register', async (req, res) => {
         // Forçar role a 'consumidor' independentemente do input
         const data = { ...req.body, role: 'consumidor' };
         const novo = await Utilizador.insert(data);
+
+        // Criar notícia automática sobre o novo registo (melhor esforço)
+        try {
+            await axios.post(`${API_URL}/noticias/internal`, {
+                titulo: `Novo utilizador registado: ${novo.nome || novo.username}`,
+                conteudo: `Foi registado mais um utilizador, o sistema tem agora ${novo.username}.`,
+                tipo: 'sistema',
+                autorNome: novo.nome || novo.username
+            }, {
+                headers: { 'X-Internal-News-Secret': INTERNAL_NEWS_SECRET }
+            });
+        } catch (noticiaErr) {
+            console.warn('Não foi possível registar notícia de novo utilizador:', noticiaErr.message);
+        }
+
         res.status(201).json(toPublicUser(novo));
     } catch (err) {
         res.status(400).json({ erro: err.message });

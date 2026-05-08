@@ -37,6 +37,7 @@ require('./models/utilizador');
 require('./models/aip');
 require('./models/exportacao');
 require('./models/tipoRecurso');
+require('./models/noticia');
 
 // Route modules
 const recursosRouter = require('./routes/recursos');
@@ -44,12 +45,14 @@ const postsRouter    = require('./routes/posts');
 const ingestaoRouter = require('./routes/ingestao');
 const disseminacaoRouter = require('./routes/disseminacao');
 const tiposRecursoRouter = require('./routes/tiposRecurso');
+const noticiasRouter = require('./routes/noticias');
 
 app.use('/recursos',     recursosRouter);
 app.use('/posts',        postsRouter);
 app.use('/ingestao',     ingestaoRouter);
 app.use('/disseminacao', disseminacaoRouter);
 app.use('/tipos-recurso', tiposRecursoRouter);
+app.use('/noticias',     noticiasRouter);
 
 // Health check
 app.get('/', (req, res) => {
