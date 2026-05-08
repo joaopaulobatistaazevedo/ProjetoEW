@@ -47,3 +47,19 @@ block content
           a.btn.btn-secondary(href="/auth/registo")
             i.fas.fa-user-plus
             span Registar-se
+  // Mostrar noticias recentes na homepage (sidebar)
+  if noticias && noticias.length
+    .container.py-6
+      h2
+        i.fas.fa-newspaper(style='color: var(--primary); margin-right: 0.5rem;')
+        span Últimas Notícias
+      .row
+        each n in noticias
+          .col-4
+            .card.mb-3
+              .card-body
+                h4= n.titulo
+                small.text-muted= new Date(n.dataCriacao).toLocaleString('pt-PT')
+                if n.link
+                  p
+                    a(href=n.link) Ver recurso

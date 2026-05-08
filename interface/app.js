@@ -11,6 +11,7 @@ var recursosRouter     = require('./routes/recursos');
 var postsRouter        = require('./routes/posts');
 var utilizadoresRouter = require('./routes/utilizadores');
 var authRouter         = require('./routes/auth');
+var noticiasRouter     = require('./routes/noticias');
 
 var app = express();
 
@@ -62,6 +63,7 @@ app.use((req, res, next) => {
 // Rotas publicas
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
+app.use('/noticias', noticiasRouter);
 
 // Rotas protegidas
 app.use('/recursos',     verificarAutenticacao, recursosRouter);

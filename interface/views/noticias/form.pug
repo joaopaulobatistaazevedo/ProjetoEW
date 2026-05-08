@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  .container.py-6
+    h1 Nova Notícia
+    form(method='POST', action='/noticias/novo')
+      .form-group
+        label(for='titulo') Título
+        input#titulo.form-control(type='text', name='titulo', required=true)
+      .form-group
+        label(for='conteudo') Conteúdo
+        textarea#conteudo.form-control(name='conteudo')
+      .form-group
+        label(for='link') Link (opcional)
+        input#link.form-control(type='text', name='link')
+      .form-actions
+        button.btn.btn-primary(type='submit') Criar

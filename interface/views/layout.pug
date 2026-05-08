@@ -19,6 +19,9 @@ html(lang='pt-PT')
             a.navbar-item(href='/recursos')
               i.fas.fa-book
               span Recursos
+            a.navbar-item(href='/noticias')
+              i.fas.fa-newspaper
+              span Notícias
             if user.role === 'admin'
               a.navbar-item(href='/recursos/admin')
                 i.fas.fa-shield-halved

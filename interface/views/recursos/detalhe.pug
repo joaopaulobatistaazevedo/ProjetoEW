@@ -38,6 +38,56 @@ block content
               span
                 i.fas.fa-star(style='color: var(--warning);')
                 strong Média: #{recurso.mediaEstrelas || '0'}
+
+            // Avaliação por estrelas (utilizador autenticado)
+            if user
+              .mt-3
+                form(method='POST', action='/recursos/' + recurso._id + '/rate', id='rating-form')
+                  input(type='hidden', name='estrelas', id='estrelas-input', value=(currentUserRating || ''))
+                  .rating-actions
+                    - var currentUserRating = 0
+                    if recurso.ratings
+                      - for (var r of recurso.ratings)
+                        if user && r.utilizador && (r.utilizador._id ? String(r.utilizador._id) === String(user.sub) : String(r.utilizador) === String(user.sub))
+                          - currentUserRating = r.estrelas
+
+                    .stars(style='margin-bottom:0.5rem;')
+                      - for (var i = 1; i <= 5; i++)
+                        if i <= (currentUserRating || Math.round(recurso.mediaEstrelas || 0))
+                          button(type='button', class='star-btn btn-star', data-value=i, title='Avaliar ' + i + ' estrelas', style='background:none; border:none; padding:0; margin-right:0.25rem;')
+                            i.fas.fa-star(style='color: var(--warning);')
+                        else
+                          button(type='button', class='star-btn btn-star', data-value=i, title='Avaliar ' + i + ' estrelas', style='background:none; border:none; padding:0; margin-right:0.25rem;')
+                            i.far.fa-star(style='color: var(--light-gray);')
+
+                    button.btn.btn-sm.btn-primary(type='submit')
+                      i.fas.fa-star
+                      |  Avaliar
+
+                // Script mínimo para gerir clique nas estrelas
+                script.
+                  document.addEventListener('DOMContentLoaded', function(){
+                    var stars = Array.from(document.querySelectorAll('.star-btn'));
+                    var input = document.getElementById('estrelas-input');
+                    if(!stars.length || !input) return;
+                    function colorize(active){
+                      stars.forEach(function(s, idx){
+                        var icon = s.querySelector('i');
+                        if(idx < active){ icon.classList.remove('far'); icon.classList.add('fas'); icon.style.color = 'var(--warning)'; }
+                        else { icon.classList.remove('fas'); icon.classList.add('far'); icon.style.color = 'var(--light-gray)'; }
+                      });
+                    }
+                    // inicializar com valor actual se houver
+                    var inicial = parseInt(input.value,10) || 0;
+                    if(inicial) colorize(inicial);
+                    stars.forEach(function(s, idx){
+                      s.addEventListener('click', function(e){
+                        var v = parseInt(this.dataset.value,10);
+                        input.value = v;
+                        colorize(v);
+                      });
+                    });
+                  });
             
             hr(style='margin: 1.5rem 0; border: none; border-top: 1px solid var(--light-gray);')
             

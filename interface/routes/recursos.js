@@ -519,4 +519,19 @@ router.post('/:id/apagar', async (req, res) => {
     }
 });
 
+// POST /recursos/:id/rate — encaminhar avaliação para a API
+router.post('/:id/rate', async (req, res) => {
+    try {
+        const estrelas = parseInt(req.body.estrelas, 10);
+        await axios.patch(`${API}/recursos/${req.params.id}/rate`, { estrelas }, {
+            headers: obterHeadersAutorizacao(req)
+        });
+        res.redirect(`/recursos/${req.params.id}`);
+    } catch (err) {
+        // Se houver erro, redirecionar para detalhe com mensagem simples via query
+        const msg = err.response && err.response.data && err.response.data.erro ? err.response.data.erro : 'Erro ao registar avaliação.';
+        res.redirect(`/recursos/${req.params.id}?erro=${encodeURIComponent(msg)}`);
+    }
+});
+
 module.exports = router;

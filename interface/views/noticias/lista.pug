@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .row.mb-4
+      .col-8
+        h1
+          i.fas.fa-newspaper(style='margin-right: 0.5rem; color: var(--primary);')
+          span Notícias
+      .col-4
+        if user && user.role === 'admin'
+          a.btn.btn-primary.btn-block(href='/noticias/novo')
+            i.fas.fa-plus
+            span Nova Notícia
+
+    if erro
+      .alert.alert-danger= erro
+
+    if noticias && noticias.length
+      each n in noticias
+        .card.mb-3
+          .card-body
+            h3= n.titulo
+            small.text-muted= new Date(n.dataCriacao).toLocaleString('pt-PT')
+            if n.autorNome
+              span.text-muted(style='margin-left:0.5rem;') por #{n.autorNome}
+            if n.conteudo
+              p= n.conteudo
+            if n.link
+              a.btn.btn-outline.btn-sm(href=n.link) Ver
+    else
+      .empty-state
+        h3 Nenhuma notícia encontrada
+        p Ainda não existem notícias.

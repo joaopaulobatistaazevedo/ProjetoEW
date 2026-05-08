@@ -111,10 +111,17 @@ block content
                       i.fas.fa-user
                       | #{recurso.autor.nome}
                 
-                p(style='color: #64748b; font-size: 0.9rem;')
-                  i.fas.fa-star(style='color: var(--warning); margin-right: 0.25rem;')
-                  span Média: 
-                  strong #{recurso.mediaEstrelas || 'N/A'}
+                p(style='color: #64748b; font-size: 0.9rem; display:flex; align-items:center; gap:0.5rem;')
+                  // Mostrar estrelas com base na média (arredondada)
+                  - var filled = Math.round(recurso.mediaEstrelas || 0);
+                  .stars-mini
+                    - for (var i = 1; i <= 5; i++)
+                      if i <= filled
+                        i.fas.fa-star(style='color: var(--warning); margin-right: 0.125rem;')
+                      else
+                        i.far.fa-star(style='color: var(--light-gray); margin-right: 0.125rem;')
+                  span(style='margin-left:0.25rem; font-weight:600;') #{recurso.mediaEstrelas ? recurso.mediaEstrelas.toFixed(1) : 'N/A'}
+                  span.text-muted(style='margin-left:0.25rem; font-size:0.85rem;') (#{recurso.ratings ? recurso.ratings.length : 0} votos)
               
               .card-footer
                 a.btn.btn-primary.btn-sm(href='/recursos/' + recurso._id)
