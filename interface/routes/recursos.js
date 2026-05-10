@@ -602,15 +602,12 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// GET /recursos/:id/ficheiros/:indice/download — proxy para download de um ficheiro do DIP
+// GET /recursos/:id/ficheiros/:indice/download — download de um ficheiro individual do DIP
 router.get('/:id/ficheiros/:indice/download', async (req, res) => {
     try {
-        const recursoRes = await axios.get(`${API}/recursos/${req.params.id}`);
-        const recurso = recursoRes.data || {};
-        const ficheiros = recurso.ficheiros || [];
         const indice = Number(req.params.indice);
 
-        if (!Number.isInteger(indice) || indice < 0 || indice >= ficheiros.length) {
+        if (!Number.isInteger(indice) || indice < 0) {
             return res.status(404).render('erro', {
                 titulo: 'Ficheiro não encontrado',
                 mensagem: 'O ficheiro pedido não existe neste recurso.',
@@ -619,20 +616,15 @@ router.get('/:id/ficheiros/:indice/download', async (req, res) => {
             });
         }
 
-        const ficheiro = ficheiros[indice];
         const resposta = await axios.get(
-            `${API}/disseminacao/recursos/${req.params.id}/exportar-flexivel`,
+            `${API}/disseminacao/recursos/${req.params.id}/ficheiros/${indice}/exportar`,
             {
-                params: {
-                    modo: 'individual',
-                    ficheiros: ficheiro.nome
-                },
                 headers: obterHeadersAutorizacao(req),
                 responseType: 'arraybuffer'
             }
         );
 
-        ['content-type', 'content-disposition', 'content-length', 'x-dip-modo'].forEach(nome => {
+        ['content-type', 'content-disposition', 'content-length', 'x-dip-checksum', 'x-dip-size'].forEach(nome => {
             if (resposta.headers[nome]) {
                 res.setHeader(nome, resposta.headers[nome]);
             }
