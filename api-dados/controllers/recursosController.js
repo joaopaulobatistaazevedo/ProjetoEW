@@ -226,9 +226,9 @@ const recursosController = {
             try {
                 const autorNome = req.user && (req.user.nome || req.user.username) ? (req.user.nome || req.user.username) : 'Um utilizador';
                 await Noticia.create({
-                    titulo: `Nova submissão: ${autorNome} - ${recurso.titulo}`,
+                    titulo: 'Novo recurso adicionado',
                     conteudo: `O produtor ${autorNome} submeteu o recurso "${recurso.titulo}".`,
-                    tipo: 'sistema',
+                    tipo: 'novo_recurso',
                     link: `/recursos/${recurso._id}`,
                     autorNome
                 });
@@ -387,7 +387,7 @@ const recursosController = {
                 await Noticia.create({
                     titulo: 'O novo top3 de recursos mais requisitados é ...',
                     conteudo: resumo || 'Ainda não existem recursos suficientes para construir o top3.',
-                    tipo: 'sistema',
+                    tipo: 'trending',
                     link: '/recursos?sort=mediaEstrelas',
                     autorNome: 'Sistema'
                 });

@@ -58,7 +58,8 @@ const ingestaoController = {
                 resultadoValidacao.manifesto,
                 utilizadorId,
                 caminhoZip,
-                checksumZip
+                checksumZip,
+                req.user
             );
 
             return res.status(201).json({
@@ -327,7 +328,8 @@ const ingestaoController = {
                 resultadoValidacao.manifesto,
                 utilizadorId,
                 caminhoZipGerado,
-                checksumZip
+                checksumZip,
+                req.user
             );
 
             // 5. Retornar sucesso

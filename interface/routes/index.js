@@ -4,6 +4,8 @@ var axios = require('axios');
 
 // API base URL
 const API = process.env.API_URL || 'http://localhost:3001';
+const LIMITE_NOTICIAS_HOME = 5;
+const DIAS_NOTICIAS_HOME = 3;
 
 // Home: lista recursos publicos + top3
 router.get('/', async (req, res) => {
@@ -11,7 +13,7 @@ router.get('/', async (req, res) => {
         const [recursosRes, top3Res, noticiasRes] = await Promise.all([
             axios.get(`${API}/recursos?visibilidade=publico`),
             axios.get(`${API}/recursos/top3`),
-            axios.get(`${API}/noticias`, { params: { limit: 5 } })
+            axios.get(`${API}/noticias/latest`, { params: { limit: LIMITE_NOTICIAS_HOME, dias: DIAS_NOTICIAS_HOME } })
         ]);
         res.render('index', {
             titulo: 'Recursos Educativos',

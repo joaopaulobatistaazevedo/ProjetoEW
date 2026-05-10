@@ -3,6 +3,7 @@ const path = require('path');
 const AdmZip = require('adm-zip');
 const Recurso = require('../models/recurso');
 const AIP = require('../models/aip');
+const Noticia = require('../models/noticia');
 
 // Orquestra ingestao: cria Recurso, move ficheiros e cria AIP
 class SIPProcessor {
@@ -23,7 +24,7 @@ class SIPProcessor {
     }
 
     // Processar SIP: criar Recurso + mover ficheiros + criar AIP
-    async processarSIP(manifesto, utilizadorId, caminhoZipTemp, checksumZip) {
+    async processarSIP(manifesto, utilizadorId, caminhoZipTemp, checksumZip, utilizador = {}) {
         try {
             // 1. Criar Recurso a partir do manifesto
             const novoRecurso = new Recurso({
@@ -163,6 +164,22 @@ class SIPProcessor {
             });
 
             await novoAIP.save();
+
+            try {
+                const autorNome = utilizador && (utilizador.nome || utilizador.username)
+                    ? (utilizador.nome || utilizador.username)
+                    : 'Um utilizador';
+
+                await Noticia.create({
+                    titulo: 'Novo recurso adicionado',
+                    conteudo: `O produtor ${autorNome} submeteu o recurso "${recursoGuardado.titulo}".`,
+                    tipo: 'novo_recurso',
+                    link: `/recursos/${recursoGuardado._id}`,
+                    autorNome
+                });
+            } catch (noticiaErr) {
+                console.warn('Não foi possível registar notícia de submissão SIP:', noticiaErr.message);
+            }
 
             // 6. Limpar ficheiro temporário
             try {

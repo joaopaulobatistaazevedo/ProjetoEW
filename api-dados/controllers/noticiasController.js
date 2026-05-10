@@ -3,84 +3,117 @@ const Recurso = require('../models/recurso');
 const Post = require('../models/post');
 const TipoRecurso = require('../models/tipoRecurso');
 
-function formatarData(data) {
-    return data instanceof Date ? data : new Date(data);
+const TIPOS_NOTICIA = [
+    'sistema',
+    'admin',
+    'novo_recurso',
+    'trending',
+    'comentarios',
+    'tipo_destaque',
+    'stats',
+    'milestone'
+];
+
+function parsePositiveInt(value) {
+    const parsed = parseInt(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
-async function gerarNoticiasAutomaticas(limit = 10) {
-    const noticias = [];
+function inicioDoDia(data) {
+    const inicio = new Date(data);
+    inicio.setHours(0, 0, 0, 0);
+    return inicio;
+}
+
+async function criarNoticiaSeNaoExistir(noticia, filtro = null) {
+    const existe = await Noticia.exists(filtro || {
+        titulo: noticia.titulo,
+        tipo: noticia.tipo,
+        link: noticia.link
+    });
+
+    if (existe) return null;
+    return Noticia.create(noticia);
+}
+
+async function gerarNoticiasAutomaticas(diasAnalise = null) {
     const agora = new Date();
-    const seteDiasAtras = new Date(agora.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const desde = diasAnalise ? new Date(agora.getTime() - diasAnalise * 24 * 60 * 60 * 1000) : null;
+    const hoje = inicioDoDia(agora);
 
-    const recursosRecentes = await Recurso.find({ dataRegisto: { $gte: seteDiasAtras } })
-        .sort({ dataRegisto: -1 })
-        .limit(3)
-        .select('titulo tipo dataRegisto mediaEstrelas ratings visibilidade');
-
-    for (const recurso of recursosRecentes) {
-        noticias.push({
-            titulo: 'Novo recurso adicionado',
-            conteudo: `Foi adicionado "${recurso.titulo}" (${recurso.tipo}).`,
-            tipo: 'novo_recurso',
-            link: `/recursos/${recurso._id}`,
-            dataCriacao: formatarData(recurso.dataRegisto),
-            origem: 'sistema'
-        });
-    }
-
-    const trending = await Recurso.find({ mediaEstrelas: { $gt: 0 } })
+    const trending = await Recurso.find({ mediaEstrelas: { $gt: 0 }, visibilidade: 'publico' })
         .sort({ mediaEstrelas: -1, dataRegisto: -1 })
-        .limit(2)
         .select('titulo mediaEstrelas ratings dataRegisto');
 
     for (const recurso of trending) {
-        noticias.push({
+        await criarNoticiaSeNaoExistir({
             titulo: 'Trending agora',
             conteudo: `"${recurso.titulo}" está com ${Number(recurso.mediaEstrelas || 0).toFixed(1)} estrelas e ${recurso.ratings ? recurso.ratings.length : 0} votos.`,
             tipo: 'trending',
             link: `/recursos/${recurso._id}`,
-            dataCriacao: formatarData(recurso.dataRegisto || agora),
-            origem: 'sistema'
+            dataCriacao: agora,
+            autorNome: 'Sistema'
+        }, {
+            titulo: 'Trending agora',
+            tipo: 'trending',
+            link: `/recursos/${recurso._id}`,
+            dataCriacao: { $gte: hoje }
         });
     }
 
     const maisComentado = await Post.aggregate([
         { $project: { recurso: 1, numComentarios: { $size: { $ifNull: ['$comentarios', []] } } } },
+        { $match: { numComentarios: { $gt: 0 } } },
         { $group: { _id: '$recurso', totalComentarios: { $sum: '$numComentarios' } } },
         { $sort: { totalComentarios: -1 } },
         { $limit: 1 }
     ]);
 
     if (maisComentado.length > 0 && maisComentado[0]._id) {
-        const recurso = await Recurso.findById(maisComentado[0]._id).select('titulo dataRegisto');
+        const recurso = await Recurso.findById(maisComentado[0]._id).select('titulo');
         if (recurso) {
-            noticias.push({
+            await criarNoticiaSeNaoExistir({
                 titulo: 'Recurso mais comentado',
                 conteudo: `"${recurso.titulo}" tem ${maisComentado[0].totalComentarios} comentários.`,
                 tipo: 'comentarios',
                 link: `/recursos/${recurso._id}`,
-                dataCriacao: formatarData(recurso.dataRegisto || agora),
-                origem: 'sistema'
+                dataCriacao: agora,
+                autorNome: 'Sistema'
+            }, {
+                titulo: 'Recurso mais comentado',
+                tipo: 'comentarios',
+                link: `/recursos/${recurso._id}`,
+                dataCriacao: { $gte: hoje }
             });
         }
     }
 
-    const destaqueTipo = await Recurso.aggregate([
-        { $match: { dataRegisto: { $gte: seteDiasAtras } } },
+    const destaqueTipoPipeline = [];
+    if (desde) {
+        destaqueTipoPipeline.push({ $match: { dataRegisto: { $gte: desde } } });
+    }
+    destaqueTipoPipeline.push(
         { $group: { _id: '$tipo', total: { $sum: 1 } } },
         { $sort: { total: -1 } },
         { $limit: 1 }
-    ]);
+    );
+
+    const destaqueTipo = await Recurso.aggregate(destaqueTipoPipeline);
 
     if (destaqueTipo.length > 0) {
         const tipo = await TipoRecurso.findOne({ slug: destaqueTipo[0]._id }).select('nome slug');
-        noticias.push({
+        await criarNoticiaSeNaoExistir({
             titulo: 'Tipo em destaque',
             conteudo: `${tipo ? tipo.nome : destaqueTipo[0]._id} lidera com ${destaqueTipo[0].total} novos recursos esta semana.`,
             tipo: 'tipo_destaque',
             link: '/recursos',
             dataCriacao: agora,
-            origem: 'sistema'
+            autorNome: 'Sistema'
+        }, {
+            titulo: 'Tipo em destaque',
+            tipo: 'tipo_destaque',
+            link: '/recursos',
+            dataCriacao: { $gte: hoje }
         });
     }
 
@@ -90,37 +123,66 @@ async function gerarNoticiasAutomaticas(limit = 10) {
         { $group: { _id: null, media: { $avg: '$mediaEstrelas' } } }
     ]);
 
-    noticias.push({
+    await criarNoticiaSeNaoExistir({
         titulo: 'Estatísticas da plataforma',
         conteudo: `${totalRecursos} recursos publicados em ${totalTipos} tipos ativos. Média global de ${Number(mediaEstrelas[0]?.media || 0).toFixed(1)} estrelas.`,
         tipo: 'stats',
         link: '/recursos',
         dataCriacao: agora,
-        origem: 'sistema'
+        autorNome: 'Sistema'
+    }, {
+        titulo: 'Estatísticas da plataforma',
+        tipo: 'stats',
+        dataCriacao: { $gte: hoje }
     });
 
     if (totalRecursos > 0 && totalRecursos % 10 === 0) {
-        noticias.push({
+        await criarNoticiaSeNaoExistir({
             titulo: 'Marco da plataforma',
             conteudo: `A plataforma atingiu ${totalRecursos} recursos.`,
             tipo: 'milestone',
             link: '/recursos',
             dataCriacao: agora,
-            origem: 'sistema'
+            autorNome: 'Sistema'
+        }, {
+            titulo: 'Marco da plataforma',
+            tipo: 'milestone',
+            conteudo: `A plataforma atingiu ${totalRecursos} recursos.`
         });
     }
-
-    return noticias
-        .sort((a, b) => new Date(b.dataCriacao) - new Date(a.dataCriacao))
-        .slice(0, limit);
 }
 
 const noticiasController = {
     // GET /noticias
     getAllNoticias: async (req, res) => {
         try {
-            const limit = parseInt(req.query.limit) || 20;
-            const noticias = await gerarNoticiasAutomaticas(limit);
+            await gerarNoticiasAutomaticas(parsePositiveInt(req.query.dias));
+
+            const noticias = await Noticia.find({})
+                .sort({ dataCriacao: -1 });
+            res.json(noticias);
+        } catch (err) {
+            res.status(500).json({ erro: err.message });
+        }
+    },
+
+    // GET /noticias/latest
+    getLatestNoticias: async (req, res) => {
+        try {
+            const dias = parsePositiveInt(req.query.dias);
+            if (!dias) return res.status(400).json({ erro: 'Parametro dias obrigatório' });
+
+            await gerarNoticiasAutomaticas(dias);
+
+            const limit = parsePositiveInt(req.query.limit);
+            const desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);
+
+            const query = Noticia.find({ dataCriacao: { $gte: desde } })
+                .sort({ dataCriacao: -1 });
+            if (limit) query.limit(limit);
+
+            const noticias = await query;
+
             res.json(noticias);
         } catch (err) {
             res.status(500).json({ erro: err.message });
@@ -132,7 +194,13 @@ const noticiasController = {
         try {
             const { titulo, conteudo, tipo, link, autorNome } = req.body;
             if (!titulo) return res.status(400).json({ erro: 'Titulo obrigatório' });
-            const noticia = await Noticia.create({ titulo, conteudo, tipo, link, autorNome });
+
+            const tipoNoticia = tipo || (req.user && req.user.role === 'admin' ? 'admin' : 'sistema');
+            if (!TIPOS_NOTICIA.includes(tipoNoticia)) {
+                return res.status(400).json({ erro: 'Tipo de notícia inválido' });
+            }
+
+            const noticia = await Noticia.create({ titulo, conteudo, tipo: tipoNoticia, link, autorNome });
             res.status(201).json(noticia);
         } catch (err) {
             res.status(500).json({ erro: err.message });
