@@ -38,4 +38,26 @@ const uploadZip = multer({
     }
 });
 
-module.exports = uploadZip;
+// Middleware para upload de múltiplos ficheiros 
+const storageMultiple = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dir = path.join(__dirname, '..', 'uploads', 'temp');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+
+const uploadMultiple = multer({
+    storage: storageMultiple,
+});
+
+module.exports = {
+    uploadSipZip: uploadZip,
+    uploadMultipleFiles: uploadMultiple
+};

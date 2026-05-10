@@ -248,7 +248,9 @@ const disseminacaoService = {
     },
 
     carregarContextoRecurso: async function(recursoId) {
+        //  Carregar versão mais recente do AIP (compatível com versionamento)
         const aip = await AIP.findOne({ recursoId: recursoId })
+            .sort({ versao: -1 })  // Obter versão mais alta
             .populate('recursoId', 'titulo visibilidade autor');
 
         if (!aip) {
@@ -265,6 +267,26 @@ const disseminacaoService = {
             recurso,
             manifesto: aip.manifesto || {}
         };
+    },
+
+    // Método para extrair lista de ficheiros (apenas array novo)
+    obterListaFicheiros: function(recurso, manifesto) {
+        // Prioridade: usar array novo `ficheiros` se existir
+        if (Array.isArray(recurso.ficheiros) && recurso.ficheiros.length > 0) {
+            // Novo formato: array de ficheiros com metadados
+            return recurso.ficheiros.map(f => ({
+                name: f.nome,
+                path: f.caminho,
+                size: f.tamanho,
+                type: f.tipo,
+                checksum_sha256: f.checksum,
+                versaoAIP: f.versaoAIP
+            }));
+        } else if (Array.isArray(manifesto.files) && manifesto.files.length > 0) {
+            // Formato alternativo: ficheiros do manifesto
+            return manifesto.files;
+        }
+        return [];
     },
 
     prepararFicheirosParaExportacao: async function(aip, ficheirosIncluidos, transformacao) {
@@ -317,6 +339,9 @@ const disseminacaoService = {
             } else {
                 enriquecido.size = conteudoOriginal.length;
                 enriquecido.checksum_sha256 = checksumOriginal;
+                if (!caminhoLocal) {
+                    enriquecido.conteudoBuffer = conteudoOriginal;
+                }
             }
 
             ficheirosPreparados.push(enriquecido);
@@ -633,6 +658,126 @@ const disseminacaoService = {
                 compression: 'DEFLATE',
                 compressionOptions: { level: 9 }
             });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    /**
+     * Exportar recurso com opções (modo: completo, subconjunto, individual)
+     */
+    exportarRecursoComOpcoes: async function(recursoId, utilizadorId, papelUtilizador, opcoes = {}) {
+        try {
+            // 1. Carregar contexto
+            const contexto = await this.carregarContextoRecurso(recursoId);
+            
+            if (!contexto.aip) {
+                const erro = new Error(`AIP não encontrado para recurso ${recursoId}`);
+                erro.statusCode = 404;
+                throw erro;
+            }
+
+            // 2. Verificar permissões
+            const temPermissao = await verificacaoPermissoes.podeExportarRecurso(
+                recursoId,
+                utilizadorId,
+                papelUtilizador
+            );
+
+            if (!temPermissao.temPermissao) {
+                const erro = new Error('Sem permissão para exportar este recurso');
+                erro.statusCode = 403;
+                throw erro;
+            }
+
+            // 3. Filtrar ficheiros conforme modo
+            const { ficheirosIncluidos, ficheirosExcluidos } = 
+                await verificacaoPermissoes.filtrarFicheirosParaDIP(
+                    contexto.aip,
+                    utilizadorId,
+                    papelUtilizador,
+                    opcoes
+                );
+
+            // 4. Exportar conforme modo
+            let zipBuffer;
+            let contentType = 'application/zip';
+            let nomeArquivo = `dip-${recursoId}`;
+
+            const modo = opcoes.modo || 'completo';
+
+            if (modo === 'individual' && ficheirosIncluidos.length === 1) {
+                // Modo individual: retorna ficheiro raw
+                const preparados = await this.prepararFicheirosParaExportacao(
+                    contexto.aip,
+                    ficheirosIncluidos,
+                    'original'
+                );
+                const ficheiro = preparados[0];
+                zipBuffer = ficheiro.conteudoBuffer || await fs.readFile(ficheiro.caminhoLocal);
+                contentType = ficheiro.type || 'application/octet-stream';
+                nomeArquivo = ficheiro.name;
+            } else if (modo === 'subconjunto' || modo === 'completo') {
+                // Modo subconjunto ou completo: retorna ZIP
+                const JSZip = require('jszip');
+                const zip = new JSZip();
+                const preparados = await this.prepararFicheirosParaExportacao(
+                    contexto.aip,
+                    ficheirosIncluidos,
+                    'original'
+                );
+
+                // Adicionar ficheiros
+                for (const ficheiro of preparados) {
+                    const conteudo = ficheiro.conteudoBuffer || await fs.readFile(ficheiro.caminhoLocal);
+                    zip.file(ficheiro.name, conteudo);
+                }
+
+                // Adicionar metadados
+                const metadadosDIP = {
+                    recursoId: contexto.recurso._id.toString(),
+                    titulo: contexto.recurso.titulo,
+                    modo: modo,
+                    dataExportacao: new Date().toISOString(),
+                    ficheirosIncluidos: preparados.map(f => ({
+                        nome: f.name,
+                        tamanho: f.size,
+                        tipo: f.type,
+                        checksum: f.checksum_sha256
+                    })),
+                    ficheirosExcluidos: ficheirosExcluidos.map(f => f.name || f),
+                    totalFicheiros: ficheirosIncluidos.length
+                };
+
+                zip.file('METADADOS-DIP.json', JSON.stringify(metadadosDIP, null, 2));
+
+                zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+                nomeArquivo = `dip-${recursoId}-${modo}`;
+            } else {
+                throw new Error(`Modo desconhecido: ${modo}`);
+            }
+
+            // 5. Calcular checksum
+            const crypto = require('crypto');
+            const checksumDIP = crypto.createHash('sha256').update(zipBuffer).digest('hex');
+
+            // 6. Preparar metadados de resposta
+            const metadata = {
+                recursoId: recursoId,
+                aipId: contexto.aip._id.toString(),
+                sipId: contexto.aip.sipId,
+                tamanhoZIP: zipBuffer.length,
+                checksumDIP: checksumDIP,
+                nomeArquivo: modo === 'individual'
+                    ? nomeArquivo
+                    : `${nomeArquivo}-${Date.now()}.zip`,
+                contentType: contentType,
+                modo: modo,
+                ficheirosIncluidos: ficheirosIncluidos.length
+            };
+
+            return { zipBuffer, metadata };
+
         } catch (err) {
             throw err;
         }

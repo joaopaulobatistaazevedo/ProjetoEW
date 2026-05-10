@@ -36,7 +36,7 @@ class SIPProcessor {
                 visibilidade: manifesto.visibilidade || 'publico',
                 autor: utilizadorId,
                 hashtags: manifesto.hashtags || [],
-                ficheiro: '', // Será preenchido com path de storage
+                ficheiros: [],  // Será preenchido durante processamento
                 ratings: [],
                 mediaEstrelas: 0
             });
@@ -95,10 +95,45 @@ class SIPProcessor {
             await fs.mkdir(sourceDir, { recursive: true });
             await fs.copyFile(caminhoZipTemp, path.join(sourceDir, 'sip-original.zip'));
 
-            // 4. Atualizar recurso com path do ficheiro principal (primeiro em data/)
+            // 4. Atualizar recurso com ficheiros 
+            const crypto = require('crypto');
+            const ficheirosList = [];
+            
             if (manifesto.files && manifesto.files.length > 0) {
-                const primeiroFicheiro = manifesto.files[0].name;
-                recursoGuardado.ficheiro = path.join('/uploads/recursos', String(recursoGuardado._id), 'data', primeiroFicheiro);
+                // Iterar sobre todos os ficheiros e extrair metadados
+                for (let idx = 0; idx < manifesto.files.length; idx++) {
+                    const metadadosManifesto = manifesto.files[idx];
+                    const caminhoCompleto = path.join(dataDir, metadadosManifesto.name);
+                    
+                    let tamanhoFicheiro = 0;
+                    let checksumFicheiro = null;
+                    
+                    try {
+                        // Obter tamanho do ficheiro escrito
+                        const stats = await fs.stat(caminhoCompleto);
+                        tamanhoFicheiro = stats.size;
+                        
+                        // Calcular checksum (SHA256)
+                        const conteudo = await fs.readFile(caminhoCompleto);
+                        checksumFicheiro = crypto.createHash('sha256').update(conteudo).digest('hex');
+                    } catch (err) {
+                        console.warn(`Aviso ao calcular checksum para ${metadadosManifesto.name}:`, err.message);
+                    }
+                    
+                    // Adicionar à array de ficheiros
+                    ficheirosList.push({
+                        nome: metadadosManifesto.name,
+                        caminho: path.join('/uploads/recursos', String(recursoGuardado._id), 'data', metadadosManifesto.name),
+                        tamanho: tamanhoFicheiro,
+                        tipo: metadadosManifesto.type || 'application/octet-stream',
+                        checksum: checksumFicheiro || metadadosManifesto.checksum_sha256,
+                        dataAdicionado: new Date(),
+                        versaoAIP: 1  // Versão do AIP que o adicionou
+                    });
+                }
+                
+                // Atualizar recurso com array — sempre primeiro ficheiro como principal
+                recursoGuardado.ficheiros = ficheirosList;
                 await recursoGuardado.save();
             }
 
@@ -197,6 +232,83 @@ class SIPProcessor {
 
         await novoAIP.save();
         return aipId;
+    }
+
+    // Criar novo AIP versão quando ficheiro é atualizado via PUT
+    async criarNovaVersaoAIP(recursoId, utilizadorId, novoFicheiro, motivoAtualizacao = 'ficheiro_corrigido') {
+        try {
+            // 1. Obter AIP atual (versão mais alta)
+            const aipAtual = await AIP.findOne({ recursoId })
+                .sort({ versao: -1 })
+                .lean();
+            
+            if (!aipAtual) {
+                throw new Error('Nenhum AIP existente para este recurso');
+            }
+            
+            const novaVersao = (aipAtual.versao || 1) + 1;
+            const crypto = require('crypto');
+            
+            // 2. Calcular checksum do novo ficheiro
+            let checksumNovoFicheiro = null;
+            let tamanhoNovoFicheiro = 0;
+            try {
+                const conteudo = await fs.readFile(novoFicheiro);
+                checksumNovoFicheiro = crypto.createHash('sha256').update(conteudo).digest('hex');
+                tamanhoNovoFicheiro = conteudo.length;
+            } catch (err) {
+                console.warn('Aviso ao calcular checksum do novo ficheiro:', err.message);
+            }
+            
+            // 3. Criar novo manifesto com ficheiro atualizado
+            const novoManifesto = JSON.parse(JSON.stringify(aipAtual.manifesto));
+            novoManifesto.ficheirosAtualizados = [{
+                nome: path.basename(novoFicheiro),
+                caminho: novoFicheiro,
+                checksum: checksumNovoFicheiro,
+                tamanho: tamanhoNovoFicheiro,
+                dataAtualizacao: new Date()
+            }];
+            
+            // 4. Gerar novo SIP ID com versão
+            const novaSipId = `${aipAtual.sipId}-v${novaVersao}`;
+            
+            // 5. Criar novo AIP (versão incrementada)
+            const novoAIP = new AIP({
+                sipId: novaSipId,
+                recursoId: recursoId,
+                versao: novaVersao,
+                aipAnterior: aipAtual._id,
+                motivoAtualizacao: motivoAtualizacao,
+                status: 'ok',
+                dataIngestao: new Date(),
+                produtor: utilizadorId,
+                manifesto: novoManifesto,
+                validacoes: {
+                    estrutura: { ok: true },
+                    metadados: { ok: true },
+                    seguranca: { ok: true },
+                    consistencia: { ok: true }
+                },
+                storageLocal: aipAtual.storageLocal,
+                relatorio: {
+                    dataValidacao: new Date(),
+                    erros: [],
+                    avisos: [`Actualização de ficheiro via PUT — versão ${novaVersao}`]
+                }
+            });
+            
+            await novoAIP.save();
+            
+            return {
+                aipId: novoAIP._id,
+                versao: novaVersao,
+                sipId: novaSipId,
+                aipAnterior: aipAtual._id
+            };
+        } catch (err) {
+            throw new Error(`Erro ao criar nova versão AIP: ${err.message}`);
+        }
     }
 }
 

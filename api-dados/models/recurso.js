@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 
+// Schema de ficheiro individual dentro do recurso
+const ficheiroSchema = new mongoose.Schema({
+    nome: { type: String, required: true },
+    caminho: { type: String, required: true },
+    tamanho: { type: Number, default: 0 },
+    tipo: { type: String, default: 'application/octet-stream' },
+    checksum: String,
+    dataAdicionado: { type: Date, default: Date.now },
+    versaoAIP: { type: Number, default: 1 }  // Qual AIP versão adicionou este ficheiro
+}, { _id: true });
+
 // Recurso educativo publicado na plataforma
 const recursoSchema = new mongoose.Schema({
     titulo:       { type: String, required: true },
@@ -11,7 +22,10 @@ const recursoSchema = new mongoose.Schema({
     visibilidade: { type: String, enum: ['publico', 'privado'], default: 'publico' },
     autor:        { type: mongoose.Schema.Types.ObjectId, ref: 'Utilizador', required: true },
     hashtags:     [String],
-    ficheiro:     String,
+    
+    // Array de ficheiros (novo modelo)
+    ficheiros: [ficheiroSchema],
+    
     ratings: [{
         utilizador: { type: mongoose.Schema.Types.ObjectId, ref: 'Utilizador' },
         estrelas:   { type: Number, min: 1, max: 5 }

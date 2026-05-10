@@ -1,17 +1,37 @@
 const mongoose = require('mongoose');
 
 // AIP: snapshot de ingestao e validacoes
+// Suporta versionamento para histórico completo
 const aipSchema = new mongoose.Schema({
     sipId: {
         type: String,
         required: true,
-        unique: true,
         index: true
+        // Nota: sipId pode não ser único se houver múltiplas versões
+        // Chave composta única: { recursoId, versao }
     },
     recursoId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Recurso',
-        index: true
+        index: true,
+        required: true
+    },
+    // Versionamento de AIP
+    versao: {
+        type: Number,
+        default: 1,
+        required: true
+    },
+    // Referência ao AIP anterior para rastreabilidade
+    aipAnterior: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'AIP'
+    },
+    // Motivo da atualização
+    motivoAtualizacao: {
+        type: String,
+        enum: ['ingestao_inicial', 'ficheiro_corrigido', 'metadados_atualizados', 'manutencao_sistema'],
+        default: 'ingestao_inicial'
     },
     status: {
         type: String,
@@ -69,5 +89,8 @@ const aipSchema = new mongoose.Schema({
         default: 0
     }
 });
+
+// Índice composto único para versionamento: { recursoId, versao }
+aipSchema.index({ recursoId: 1, versao: 1 }, { unique: true });
 
 module.exports = mongoose.model('AIP', aipSchema);

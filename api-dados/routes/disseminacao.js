@@ -57,4 +57,15 @@ router.get(
     disseminacaoController.exportarTodosRecursos
 );
 
+/**
+ * GET /disseminacao/recursos/:recursoId/exportar-flexivel
+ * Exporta com opções: ?modo=completo|subconjunto|individual&ficheiros=file1.pdf,file2.docx
+ */
+router.get(
+    '/recursos/:recursoId/exportar-flexivel',
+    authenticate,
+    verificarPermissaoExportacao,
+    disseminacaoController.exportarComOpcoes
+);
+
 module.exports = router;

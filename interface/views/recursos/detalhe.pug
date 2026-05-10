@@ -95,31 +95,38 @@ block content
               h3 Descrição
               p!= recurso.descricao
 
-            if recurso.ficheiro
+            if recurso.ficheirosList && recurso.ficheirosList.length > 0
               .card(style='margin-top: 1.5rem; border: 1px solid var(--light-gray);')
                 .card-body
-                  h3(style='margin-top: 0;') Ficheiro associado
-                  p(style='margin-bottom: 0.75rem;')
-                    strong Nome:
-                    |  #{recurso.ficheiroNome || recurso.ficheiro.split('/').pop()}
-                  p(style='margin-bottom: 1rem;')
-                    strong Path:
-                    |  #{recurso.ficheiro}
-
-                  - const ficheiroNome = (recurso.ficheiroNome || recurso.ficheiro.split('/').pop() || '').toLowerCase();
-                  - const podeMostrarImagem = /\.(png|jpe?g|gif|webp)$/i.test(ficheiroNome);
-                  - const podeMostrarPdf = /\.pdf$/i.test(ficheiroNome);
-
-                  if recurso.ficheiroPreviewUrl && podeMostrarImagem
-                    .file-preview
-                      img(src=recurso.ficheiroPreviewUrl, alt=recurso.ficheiroNome || 'Pré-visualização do ficheiro', style='max-width: 100%; height: auto; border-radius: 0.5rem; border: 1px solid var(--light-gray);')
-                  else if recurso.ficheiroPreviewUrl && podeMostrarPdf
-                    .file-preview
-                      iframe(src=recurso.ficheiroPreviewUrl, title=recurso.ficheiroNome || 'Pré-visualização do PDF', style='width: 100%; min-height: 520px; border: 1px solid var(--light-gray); border-radius: 0.5rem;')
-                  else
-                    .alert.alert-info(style='margin-bottom: 0;')
-                      i.fas.fa-info-circle(style='margin-right: 0.5rem;')
-                      | Não há pré-visualização inline para este tipo de ficheiro. O caminho acima identifica o ficheiro guardado.
+                  h3(style='margin-top: 0;') Ficheiros associados (#{recurso.ficheirosList.length})
+                  
+                  .list-group
+                    - for (var i = 0; i < recurso.ficheirosList.length; i++)
+                      - var f = recurso.ficheirosList[i];
+                      .list-group-item(style='padding: 1rem; border-bottom: 1px solid var(--light-gray);')
+                        .row
+                          .col-8
+                            p(style='margin-bottom: 0.5rem;')
+                              strong= f.nome
+                            p(style='margin-bottom: 0.25rem; color: var(--gray);')
+                              small
+                                i.fas.fa-file
+                                |  Tamanho: #{(f.tamanho / 1024).toFixed(2)} KB
+                            p(style='margin-bottom: 0.25rem; color: var(--gray);')
+                              small
+                                i.fas.fa-calendar
+                                |  Adicionado: #{new Date(f.dataAdicionado).toLocaleDateString('pt-PT')}
+                            p(style='margin-bottom: 0; color: var(--gray);')
+                              small
+                                i.fas.fa-fingerprint
+                                |  Versão AIP: #{f.versaoAIP}
+                          .col-4(style='text-align: right;')
+                            a.btn.btn-sm.btn-outline-primary(href=f.downloadUrl, title='Descarregar este ficheiro')
+                              i.fas.fa-download
+                              |  Ficheiro
+                            button.btn.btn-sm.btn-outline-secondary(type='button', onclick='alert("Ver lista completa de ficheiros e metadados");', title='Ver detalhes completos')
+                              i.fas.fa-info-circle
+                              |  Info
             
             - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
             - const podeExportar = user && (user.role === 'admin' || recurso.visibilidade === 'publico' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));

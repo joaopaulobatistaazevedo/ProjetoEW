@@ -76,7 +76,7 @@ block content
                   }
             
             // Formulario simples - apenas upload
-            form(method='POST', action='/recursos/novo', enctype='multipart/form-data')
+            form(method='POST', action='/recursos/form', enctype='multipart/form-data')
               .form-group
                 label(for='ficheiro')
                   i.fas.fa-file-archive(style='margin-right: 0.5rem;')
@@ -90,6 +90,6 @@ block content
                 button.btn.btn-primary(type='submit')
                   i.fas.fa-upload
                   span Submeter
-                a.btn.btn-outline(href='/recursos')
+                a.btn.btn-outline(href='/recursos/novo')
                   i.fas.fa-arrow-left
-                  span Cancelar
+                  span Voltar

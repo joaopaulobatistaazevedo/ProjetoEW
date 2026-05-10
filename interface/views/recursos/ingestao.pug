@@ -5,9 +5,9 @@ block content
     .row.mb-6
       .col-8
         h1
-          i.fas.fa-box-open(style='margin-right: 0.75rem; color: var(--primary);')
-          span Submeter SIP
-        p.text-muted Envie um pacote ZIP com manifesto e ficheiros associados.
+          i.fas.fa-inbox(style='margin-right: 0.75rem; color: var(--primary);')
+          span Submeter Recurso
+        p.text-muted Escolha uma das opções abaixo para submeter um novo recurso educativo.
       .col-4.text-right
         a.btn.btn-outline(href='/recursos/aips')
           i.fas.fa-archive
@@ -23,35 +23,54 @@ block content
       .alert.alert-success
         strong= sucesso
 
-    .card
-      .card-body
-        form(method='POST', action='/recursos/ingestao-sip', enctype='multipart/form-data')
-          .form-group
-            label(for='ficheiro')
-              i.fas.fa-file-archive(style='margin-right: 0.5rem;')
-              | Ficheiro ZIP
-            input#ficheiro.form-control(type='file', name='ficheiro', accept='.zip', required=true, style='padding: 0.5rem;')
-            small.text-muted O ficheiro deve seguir a estrutura SIP definida pelo manifesto.
+    .row.mb-6
+      .col-6
+        .card
+          .card-header
+            i.fas.fa-form
+            span  Opção 1: Formulário Assistido
+          .card-body
+            p Preecha um formulário simples e carregue múltiplos ficheiros. Ideal para submissões rápidas e diretas.
+            ul.list-unstyled
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Preenchimento de metadados em forma
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Upload de múltiplos ficheiros
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Processamento automático de SIP
+            a.btn.btn-primary.mt-3(href='/recursos/ingestao-form')
+              i.fas.fa-arrow-right
+              span Usar Formulário
 
-          .form-group
-            label(for='descricao')
-              i.fas.fa-align-left(style='margin-right: 0.5rem;')
-              | Observações (opcional)
-            textarea#descricao.form-control(name='descricao', rows='4', placeholder='Notas adicionais para a submissão...')
-
-          .form-actions
-            button.btn.btn-primary(type='submit')
-              i.fas.fa-upload
-              span Submeter SIP
-            a.btn.btn-outline(href='/recursos')
-              i.fas.fa-arrow-left
-              span Voltar
+      .col-6
+        .card
+          .card-header
+            i.fas.fa-file-archive
+            span  Opção 2: SIP ZIP
+          .card-body
+            p Carregue um pacote SIP já estruturado com manifesto e ficheiros. Ideal para migrações em lote.
+            ul.list-unstyled
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Pacote ZIP estruturado
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | manifesto.json incluído
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Validação completa
+            a.btn.btn-primary.mt-3(href='/recursos/form')
+              i.fas.fa-arrow-right
+              span Usar SIP ZIP
 
     .card.mt-4
       .card-body
-        h3(style='margin-top: 0;') O que é verificado
+        h3(style='margin-top: 0;') O que é verificado em ambos os modos
         ul
-          li Estrutura do pacote ZIP
+          li Estrutura e formato do pacote
           li Manifesto e ficheiros declarados
           li Metadados obrigatórios
           li Consistência e segurança

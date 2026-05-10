@@ -1,0 +1,219 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .row
+      .col-8
+        .card
+          .card-header
+            h1 Submeter Recurso — Formulário Assistido
+            p.text-muted Preencha os metadados e anexe múltiplos ficheiros
+
+          .card-body
+            if erro
+              .alert.alert-danger
+                i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+                strong= erro
+                if erros && erros.length > 0
+                  ul(style='margin-top: 0.5rem; margin-bottom: 0;')
+                    each err in erros
+                      li= err
+                if detalhes
+                  pre(style='white-space: pre-wrap; margin-top: 0.75rem;')= detalhes
+
+            form(method='POST', action='/recursos/ingestao-form', enctype='multipart/form-data', id='form-ingestao')
+              
+              // Metadados
+              .form-group.mb-4
+                label(for='titulo')
+                  strong Título do Recurso
+                  span.text-danger *
+                input#titulo.form-control(
+                  type='text',
+                  name='titulo',
+                  required,
+                  placeholder='Ex: Guia de Programação em Python',
+                  value=(formData && formData.titulo) || ''
+                )
+              
+              .form-group.mb-4
+                label(for='subtitulo')
+                  strong Subtítulo (opcional)
+                input#subtitulo.form-control(
+                  type='text',
+                  name='subtitulo',
+                  placeholder='Ex: Introdução a conceitos fundamentais',
+                  value=(formData && formData.subtitulo) || ''
+                )
+              
+              .form-group.mb-4
+                label(for='descricao')
+                  strong Descrição
+                  span.text-danger *
+                textarea#descricao.form-control(
+                  name='descricao',
+                  required,
+                  rows='6',
+                  placeholder='Descreva o conteúdo e objetivo do recurso'
+                )= (formData && formData.descricao) || ''
+              
+              .form-group.mb-4
+                label(for='tipo')
+                  strong Tipo de Recurso
+                  span.text-danger *
+                select#tipo.form-control(name='tipo', required)
+                  option(value='') Selecione um tipo...
+                  each tipo in (tiposRecurso || [])
+                    option(value=tipo.slug, selected=formData && formData.tipo === tipo.slug)= tipo.nome
+              
+              .form-group.mb-4
+                label(for='dataCriacao')
+                  strong Data de Criação
+                input#dataCriacao.form-control(
+                  type='date',
+                  name='dataCriacao',
+                  value=(formData && formData.dataCriacao) || new Date().toISOString().split('T')[0]
+                )
+              
+              .form-group.mb-4
+                label(for='hashtags')
+                  strong Hashtags (separadas por vírgula)
+                input#hashtags.form-control(
+                  type='text',
+                  name='hashtags',
+                  placeholder='ex: python, programação, educação',
+                  value=(formData && formData.hashtags) || ''
+                )
+              
+              .form-group.mb-4
+                label
+                  strong Visibilidade
+                .form-check
+                  input#pub.form-check-input(
+                    type='radio',
+                    name='visibilidade',
+                    value='publico',
+                    checked=!formData || formData.visibilidade === 'publico'
+                  )
+                  label.form-check-label(for='pub') Público (qualquer pessoa pode aceder)
+                .form-check
+                  input#priv.form-check-input(
+                    type='radio',
+                    name='visibilidade',
+                    value='privado',
+                    checked=formData && formData.visibilidade === 'privado'
+                  )
+                  label.form-check-label(for='priv') Privado (apenas autor e admin)
+              
+              hr(style='margin: 2rem 0;')
+              
+              // Ficheiros
+              .form-group.mb-4
+                label(for='ficheiros')
+                  strong Ficheiros a Anexar
+                  span.text-danger *
+                .card.bg-light
+                  .card-body
+                    p.text-muted
+                      i.fas.fa-info-circle
+                      |  Carregue um ou mais ficheiros. Todos serão incluídos no pacote de ingestão.
+                    
+                    input#ficheiros.form-control(
+                      type='file',
+                      name='ficheiros',
+                      multiple=true,
+                      required,
+                      accept='.pdf,.docx,.doc,.pptx,.xlsx,.zip,.txt,.png,.jpg,.jpeg,.gif'
+                    )
+                    
+                    small.text-muted.d-block.mt-2
+                      i.fas.fa-check
+                      |  Pode selecionar vários ficheiros de uma vez. 
+                    ul#ficheiros-selecionados.mt-3(style='margin-bottom: 0; padding-left: 1.25rem;')
+              
+              // Submissão
+              .form-actions
+                button.btn.btn-primary.btn-lg(type='submit')
+                  i.fas.fa-upload
+                  span  Submeter Recurso
+                a.btn.btn-outline-secondary.btn-lg(href='/recursos/novo')
+                  i.fas.fa-arrow-left
+                  span  Voltar
+
+      .col-4
+        .card
+          .card-header
+            i.fas.fa-lightbulb
+            span  Dicas
+          .card-body
+            .mb-3
+              strong Qual é a diferença?
+              ul
+                li
+                  strong Formulário (aqui):
+                  |  Preenchas metadados e carrega ficheiros separadamente. Ideal para criação rápida.
+                li
+                  strong SIP ZIP:
+                  |  Upload de pacote completo já estruturado. Ideal para migração/batch.
+
+            .mt-3
+              strong Privacidade
+              p Recursos privados são acessíveis apenas ao autor e administradores.
+
+            .mt-3
+              strong Tipos suportados
+              p
+                | Se precisar de outros tipos de ficheiros, contacte o administrador.
+
+    // Script para gestão de ficheiros
+    script.
+      document.addEventListener('DOMContentLoaded', function(){
+        const inputFicheiros = document.getElementById('ficheiros');
+        const form = document.getElementById('form-ingestao');
+        let ficheirosSelecionados = [];
+        
+        inputFicheiros.addEventListener('change', function(){
+          const novosFicheiros = Array.from(this.files);
+          const mapa = new Map();
+
+          ficheirosSelecionados.concat(novosFicheiros).forEach(function(f){
+            mapa.set(`${f.name}-${f.size}-${f.lastModified}`, f);
+          });
+
+          ficheirosSelecionados = Array.from(mapa.values());
+
+          if (window.DataTransfer) {
+            const dataTransfer = new DataTransfer();
+            ficheirosSelecionados.forEach(function(f){
+              dataTransfer.items.add(f);
+            });
+            inputFicheiros.files = dataTransfer.files;
+          }
+
+          const ficheiros = Array.from(inputFicheiros.files);
+          const lista = document.getElementById('ficheiros-selecionados');
+          console.log(`${ficheiros.length} ficheiro(s) selecionado(s)`);
+          
+          const totalSize = ficheiros.reduce((sum, f) => sum + f.size, 0);
+          const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
+          console.log(`Tamanho total: ${sizeMB} MB`);
+
+          if (lista) {
+            lista.innerHTML = '';
+            ficheiros.forEach(function(f){
+              const item = document.createElement('li');
+              item.textContent = `${f.name} (${(f.size / 1024).toFixed(2)} KB)`;
+              lista.appendChild(item);
+            });
+          }
+        });
+        
+        form.addEventListener('submit', function(e){
+          // Validação simples
+          if(!inputFicheiros.files || inputFicheiros.files.length === 0){
+            alert('Selecione pelo menos um ficheiro');
+            e.preventDefault();
+            return;
+          }
+        });
+      });
