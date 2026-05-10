@@ -49,6 +49,14 @@ recursoSchema.index({ autor: 1 });
 recursoSchema.index({ dataRegisto: -1 });
 recursoSchema.index({ mediaEstrelas: -1 });
 recursoSchema.index({ hashtags: 1 });
-recursoSchema.index({ titulo: 'text', subtitulo: 'text', descricao: 'text', hashtags: 'text' });
+recursoSchema.index({
+    titulo: 'text',
+    subtitulo: 'text',
+    descricao: 'text',
+    tipo: 'text',
+    hashtags: 'text',
+    'ficheiros.nome': 'text',
+    'ficheiros.tipo': 'text'
+});
 
 module.exports = mongoose.model('Recurso', recursoSchema);

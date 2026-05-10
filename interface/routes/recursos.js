@@ -112,9 +112,7 @@ router.get('/', async (req, res) => {
 
         // A lista geral só mostra recursos públicos.
         // A vista "Meus Recursos" pode incluir privados apenas do próprio autor.
-        if (filtros.autor && autorAtual && String(filtros.autor) === String(autorAtual)) {
-            delete filtros.visibilidade;
-        } else {
+        if (!filtros.autor || !autorAtual || String(filtros.autor) !== String(autorAtual)) {
             filtros.visibilidade = 'publico';
             if (filtros.autor && autorAtual && String(filtros.autor) !== String(autorAtual)) {
                 delete filtros.autor;
