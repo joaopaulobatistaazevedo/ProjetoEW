@@ -27,10 +27,10 @@ block content
       .card-body
         form(method='POST', action='/recursos/ingestao-sip', enctype='multipart/form-data')
           .form-group
-            label(for='file')
+            label(for='ficheiro')
               i.fas.fa-file-archive(style='margin-right: 0.5rem;')
               | Ficheiro ZIP
-            input#file.form-control(type='file', name='file', accept='.zip', required=true, style='padding: 0.5rem;')
+            input#ficheiro.form-control(type='file', name='ficheiro', accept='.zip', required=true, style='padding: 0.5rem;')
             small.text-muted O ficheiro deve seguir a estrutura SIP definida pelo manifesto.
 
           .form-group

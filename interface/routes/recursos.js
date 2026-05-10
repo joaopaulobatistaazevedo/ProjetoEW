@@ -476,9 +476,18 @@ router.get('/:id/exportar-dip', async (req, res) => {
 
         res.send(Buffer.from(resposta.data));
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel exportar o DIP solicitado.')
+        const statusCode = err.response?.status || 500;
+        let mensagem = obterMensagemErroAPI(err, 'Nao foi possivel exportar o DIP solicitado.');
+        
+        if (statusCode === 404) {
+            mensagem = 'Este recurso não possui AIP (Archival Information Package). Isto significa que foi criado diretamente sem ingestão de SIP. Para exportar o recurso como DIP, primeiro deve reingerir como SIP através do formulário de submissão.';
+        }
+        
+        res.status(statusCode).render('erro', {
+            titulo: 'Erro ao exportar DIP',
+            mensagem: mensagem,
+            linkVoltar: `/recursos/${req.params.id}`,
+            botaoVolta: 'Voltar ao Recurso'
         });
     }
 });
