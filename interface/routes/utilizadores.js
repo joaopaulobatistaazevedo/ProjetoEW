@@ -3,6 +3,7 @@ var router = express.Router();
 var axios = require('axios');
 
 const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
+const API         = process.env.API_URL     || 'http://localhost:3001';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
 // GET /utilizadores — listar todos (via auth service)
@@ -25,7 +26,32 @@ router.get('/:id', async (req, res) => {
         const resposta = await axios.get(`${AUTH}/${req.params.id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        res.render('utilizadores/detalhe', { titulo: 'Utilizador', utilizador: resposta.data });
+
+        const filtrosRecursos = { autor: req.params.id };
+        const podeVerPrivados = req.user && (
+            req.user.role === 'admin' ||
+            String(req.user.sub || req.user.id) === String(req.params.id)
+        );
+
+        if (!podeVerPrivados) {
+            filtrosRecursos.visibilidade = 'publico';
+        }
+
+        let recursos = [];
+        try {
+            const recursosRes = await axios.get(`${API}/recursos`, {
+                params: filtrosRecursos
+            });
+            recursos = recursosRes.data || [];
+        } catch (recursosErr) {
+            recursos = [];
+        }
+
+        res.render('utilizadores/detalhe', {
+            titulo: 'Utilizador',
+            utilizador: resposta.data,
+            recursos
+        });
     } catch (err) {
         res.redirect('/utilizadores');
     }
