@@ -1,6 +1,9 @@
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const Recurso = require('../models/recurso');
 const Noticia = require('../models/noticia');
+const AIP = require('../models/aip');
 const { obterTipoAtivoPorSlug, enriquecerComTipos } = require('../services/tiposRecursoService');
 const AdmZip = require('adm-zip');
 const zip = new AdmZip();
@@ -22,6 +25,169 @@ function normalizarHashtags(valor) {
     }
 
     return [];
+}
+
+function normalizarLista(valor) {
+    if (!valor) return [];
+    return Array.isArray(valor) ? valor.filter(Boolean) : [valor].filter(Boolean);
+}
+
+function sanitizarSegmentoCaminho(nome = 'ficheiro') {
+    return String(nome)
+        .replace(/\\/g, '/')
+        .split('/')
+        .filter(Boolean)
+        .join('/');
+}
+
+async function obterSipIdBase(aip) {
+    let atual = aip;
+
+    while (atual && atual.aipAnterior) {
+        const anterior = await AIP.findById(atual.aipAnterior);
+        if (!anterior) break;
+        atual = anterior;
+    }
+
+    return String((atual && atual.sipId) || (aip && aip.sipId) || 'sip')
+        .replace(/-v\d+$/i, '');
+}
+
+async function gerarSipIdVersao(aipAnterior, novaVersao) {
+    const base = await obterSipIdBase(aipAnterior);
+    return `${base}-v${novaVersao}`;
+}
+
+function ficheirosRecebidos(req) {
+    if (req.files && Array.isArray(req.files.ficheirosNovos)) {
+        return req.files.ficheirosNovos;
+    }
+
+    if (req.file) return [req.file];
+    if (req.files && Array.isArray(req.files)) return req.files;
+    if (req.files && Array.isArray(req.files.ficheiro)) return req.files.ficheiro;
+
+    return [];
+}
+
+function calcularChecksumBuffer(buffer) {
+    return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+async function criarNovaVersaoAIPDoRecurso(recurso, utilizadorId, ficheirosRemoverIds, novosFicheiros) {
+    const aipAnterior = await AIP.findOne({ recursoId: recurso._id })
+        .sort({ versao: -1 });
+
+    if (!aipAnterior) {
+        throw new Error('Nenhum AIP existente para este recurso');
+    }
+
+    const novaVersao = (aipAnterior.versao || 1) + 1;
+    const storageLocal = path.join(__dirname, '..', 'uploads');
+
+    const idsRemover = new Set(ficheirosRemoverIds.map(String));
+    const ficheirosMantidos = (recurso.ficheiros || []).filter(f => !idsRemover.has(String(f._id)));
+    const ficheirosFinal = [];
+    const manifestoFiles = [];
+
+    for (const ficheiro of ficheirosMantidos) {
+        const nome = sanitizarSegmentoCaminho(ficheiro.nome);
+        const checksum = ficheiro.checksum;
+        const tamanho = ficheiro.tamanho || 0;
+
+        ficheirosFinal.push({
+            nome,
+            caminho: ficheiro.caminho,
+            tamanho,
+            tipo: ficheiro.tipo || 'application/octet-stream',
+            checksum,
+            dataAdicionado: ficheiro.dataAdicionado || new Date(),
+            versaoAIP: ficheiro.versaoAIP || aipAnterior.versao || 1
+        });
+
+        manifestoFiles.push({
+            name: nome,
+            path: ficheiro.caminho,
+            size: tamanho,
+            type: ficheiro.tipo || 'application/octet-stream',
+            checksum_sha256: checksum,
+            required: false
+        });
+    }
+
+    for (const file of novosFicheiros) {
+        const nome = sanitizarSegmentoCaminho(file.originalname);
+        const caminho = file.path
+            ? path.join('/uploads', path.basename(file.path))
+            : path.join('/uploads', nome);
+        const conteudo = file.buffer || fs.readFileSync(file.path);
+        const checksum = calcularChecksumBuffer(conteudo);
+        const tipo = file.mimetype || 'application/octet-stream';
+
+        ficheirosFinal.push({
+            nome,
+            caminho,
+            tamanho: conteudo.length,
+            tipo,
+            checksum,
+            dataAdicionado: new Date(),
+            versaoAIP: novaVersao
+        });
+
+        manifestoFiles.push({
+            name: nome,
+            path: caminho,
+            size: conteudo.length,
+            type: tipo,
+            checksum_sha256: checksum,
+            required: false
+        });
+    }
+
+    const manifestoAnterior = aipAnterior.manifesto || {};
+    const manifesto = {
+        ...manifestoAnterior,
+        titulo: recurso.titulo,
+        subtitulo: recurso.subtitulo || '',
+        descricao: recurso.descricao || '',
+        tipo: recurso.tipo,
+        dataCriacao: recurso.dataCriacao,
+        visibilidade: recurso.visibilidade,
+        hashtags: recurso.hashtags || [],
+        editado: true,
+        aipAnterior: String(aipAnterior._id),
+        files: manifestoFiles
+    };
+
+    const novoAIP = await AIP.create({
+        sipId: await gerarSipIdVersao(aipAnterior, novaVersao),
+        recursoId: recurso._id,
+        versao: novaVersao,
+        aipAnterior: aipAnterior._id,
+        motivoAtualizacao: novosFicheiros.length || ficheirosRemoverIds.length
+            ? 'ficheiro_corrigido'
+            : 'metadados_atualizados',
+        status: 'ok',
+        dataIngestao: new Date(),
+        produtor: utilizadorId,
+        manifesto,
+        validacoes: {
+            estrutura: { ok: true },
+            metadados: { ok: true },
+            seguranca: { ok: true },
+            consistencia: { ok: true }
+        },
+        storageLocal,
+        relatorio: {
+            dataValidacao: new Date(),
+            erros: [],
+            avisos: [`Nova versão criada na edição do recurso: v${novaVersao}`]
+        },
+        checksumSIP: aipAnterior.checksumSIP,
+        downloadCount: 0
+    });
+
+    return { novoAIP, ficheirosFinal };
 }
 
 const recursosController = {
@@ -176,7 +342,7 @@ const recursosController = {
     createRecurso: async (req, res) => {
         try {
             // Rejeitar criação direta de recursos com ficheiro
-            if (req.file) {
+            if (ficheirosRecebidos(req).length > 0) {
                 return res.status(403).json({
                     erro: 'Recursos com ficheiro devem ser criados via submissão de SIP',
                     dica: 'Utilize POST /ingestao/sip para submeter um SIP com ficheiros',
@@ -275,59 +441,41 @@ const recursosController = {
                 update.tipo = tipoPermitido.slug;
             }
 
-            // Permitir atualizar ficheiro com versionamento de AIP
-            if (req.file) {
-                try {
-                    const SIPProcessor = require('../services/sIPProcessor');
-                    const processor = new SIPProcessor();
-                    
-                    // Criar novo AIP versão
-                    const resultadoVersao = await processor.criarNovaVersaoAIP(
-                        recurso._id,
-                        req.user.id,
-                        req.file.path,
-                        'ficheiro_corrigido'
-                    );
-                    
-                    // Adicionar novo ficheiro ao array
-                    const crypto = require('crypto');
-                    const conteudo = await require('fs').promises.readFile(req.file.path);
-                    const checksum = crypto.createHash('sha256').update(conteudo).digest('hex');
-                    
-                    const novoFicheiro = {
-                        nome: req.file.originalname,
-                        caminho: `/uploads/recursos/${recurso._id}/data/${req.file.filename || req.file.originalname}`,
-                        tamanho: req.file.size,
-                        tipo: req.file.mimetype || 'application/octet-stream',
-                        checksum: checksum,
-                        dataAdicionado: new Date(),
-                        versaoAIP: resultadoVersao.versao
-                    };
-                    
-                    // Adicionar à array
-                    if (!update.ficheiros) {
-                        update.ficheiros = recurso.ficheiros || [];
-                    }
-                    update.ficheiros.push(novoFicheiro);
-                    
-                    // Registar na resposta
-                    update._aipVersao = resultadoVersao;
-                } catch (aipErr) {
-                    console.error('Erro ao criar versão AIP:', aipErr.message);
-                    return res.status(500).json({
-                        erro: 'Erro ao processar atualização de ficheiro',
-                        detalhes: aipErr.message,
-                        categoria: 'oais_versionamento'
-                    });
-                }
+            Object.assign(recurso, update);
+
+            const ficheirosRemoverIds = normalizarLista(req.body.ficheirosRemover);
+            const novosFicheiros = ficheirosRecebidos(req);
+
+            let resultadoVersao = null;
+            try {
+                const { novoAIP, ficheirosFinal } = await criarNovaVersaoAIPDoRecurso(
+                    recurso,
+                    req.user.id,
+                    ficheirosRemoverIds,
+                    novosFicheiros
+                );
+
+                recurso.ficheiros = ficheirosFinal;
+                resultadoVersao = {
+                    aipId: novoAIP._id,
+                    versao: novoAIP.versao,
+                    sipId: novoAIP.sipId,
+                    aipAnterior: novoAIP.aipAnterior
+                };
+            } catch (aipErr) {
+                console.error('Erro ao criar versão AIP:', aipErr.message);
+                return res.status(500).json({
+                    erro: 'Erro ao criar nova versão AIP',
+                    detalhes: aipErr.message,
+                    categoria: 'oais_versionamento'
+                });
             }
 
-            const atualizado = await Recurso.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
+            const atualizado = await recurso.save();
             const resposta = await enriquecerComTipos(atualizado);
             
-            // Se criou versão AIP, adicionar à resposta
-            if (update._aipVersao) {
-                resposta._aipVersao = update._aipVersao;
+            if (resultadoVersao) {
+                resposta._aipVersao = resultadoVersao;
             }
             
             res.json(resposta);

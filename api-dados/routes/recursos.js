@@ -21,7 +21,10 @@ router.get('/:id/preview', recursosController.previewRecurso);
 function conditionalUpload(req, res, next) {
 	const ct = (req.headers['content-type'] || '').toLowerCase();
 	if (ct.startsWith('multipart/form-data')) {
-		return upload.single('ficheiro')(req, res, next);
+		return upload.fields([
+			{ name: 'ficheiro', maxCount: 1 },
+			{ name: 'ficheirosNovos', maxCount: 20 }
+		])(req, res, next);
 	}
 	return next();
 }

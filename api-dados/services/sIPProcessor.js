@@ -287,8 +287,16 @@ class SIPProcessor {
                 dataAtualizacao: new Date()
             }];
             
-            // 4. Gerar novo SIP ID com versão
-            const novaSipId = `${aipAtual.sipId}-v${novaVersao}`;
+            // 4. Gerar novo SIP ID com versão a partir do SIP original
+            let aipBase = aipAtual;
+            while (aipBase && aipBase.aipAnterior) {
+                const anterior = await AIP.findById(aipBase.aipAnterior).lean();
+                if (!anterior) break;
+                aipBase = anterior;
+            }
+            const sipIdBase = String((aipBase && aipBase.sipId) || aipAtual.sipId)
+                .replace(/-v\d+$/i, '');
+            const novaSipId = `${sipIdBase}-v${novaVersao}`;
             
             // 5. Criar novo AIP (versão incrementada)
             const novoAIP = new AIP({

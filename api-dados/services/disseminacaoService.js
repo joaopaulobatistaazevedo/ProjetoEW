@@ -58,6 +58,15 @@ function sanitizarNomeArquivo(nome = '') {
         .toLowerCase();
 }
 
+function caminhoAbsolutoDeUpload(caminhoGuardado = '') {
+    const relativo = String(caminhoGuardado).replace(/^\/+/, '');
+    const semUploads = relativo.startsWith('uploads/')
+        ? relativo.substring('uploads/'.length)
+        : relativo;
+
+    return path.join(__dirname, '..', 'uploads', semUploads);
+}
+
 async function localizarFicheiroPreservado(baseDir, nomePedido) {
     const caminhoDireto = path.join(baseDir, nomePedido);
 
@@ -298,7 +307,9 @@ const disseminacaoService = {
             let conteudoOriginal = null;
 
             try {
-                caminhoLocal = await localizarFicheiroPreservado(pastaData, ficheiro.name);
+                caminhoLocal = ficheiro.path
+                    ? caminhoAbsolutoDeUpload(ficheiro.path)
+                    : await localizarFicheiroPreservado(pastaData, ficheiro.name);
                 conteudoOriginal = await fs.readFile(caminhoLocal);
             } catch (err) {
                 conteudoOriginal = await obterConteudoDoSIPOriginal(aip, ficheiro.name);

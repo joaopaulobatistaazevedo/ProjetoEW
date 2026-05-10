@@ -119,10 +119,8 @@ router.get('/', async (req, res) => {
             }
         }
 
-        const [recursosRes, tiposRecurso] = await Promise.all([
-            axios.get(`${API}/recursos`, { params: filtros }),
-            obterTiposAtivos()
-        ]);
+        const recursosRes = await axios.get(`${API}/recursos`, { params: filtros });
+        const tiposRecurso = await obterTiposAtivos();
 
         res.render('recursos/lista', {
             titulo: 'Recursos',
@@ -499,10 +497,8 @@ router.get('/admin', async (req, res) => {
 // GET /recursos/:id/editar — formulario de edicao de metadados
 router.get('/:id/editar', async (req, res) => {
     try {
-        const [recursoRes, tiposRecurso] = await Promise.all([
-            axios.get(`${API}/recursos/${req.params.id}`),
-            obterTiposAtivos()
-        ]);
+        const recursoRes = await axios.get(`${API}/recursos/${req.params.id}`);
+        const tiposRecurso = await obterTiposAtivos();
 
         const recurso = recursoRes.data || {};
         const autorId = recurso.autor && (recurso.autor._id || recurso.autor);
@@ -535,8 +531,10 @@ router.get('/:id/editar', async (req, res) => {
     }
 });
 
-// POST /recursos/:id/editar — atualizar metadados
-router.post('/:id/editar', async (req, res) => {
+// POST /recursos/:id/editar — atualizar metadados e ficheiros
+router.post('/:id/editar', uploadMultipleFiles.array('ficheirosNovos', 20), async (req, res) => {
+    const formData = new FormData();
+
     const payload = {
         titulo: req.body.titulo,
         subtitulo: req.body.subtitulo || '',
@@ -550,9 +548,35 @@ router.post('/:id/editar', async (req, res) => {
         payload.dataCriacao = req.body.dataCriacao;
     }
 
+    Object.entries(payload).forEach(([chave, valor]) => {
+        formData.append(chave, valor);
+    });
+
+    const ficheirosRemover = Array.isArray(req.body.ficheirosRemover)
+        ? req.body.ficheirosRemover
+        : req.body.ficheirosRemover
+            ? [req.body.ficheirosRemover]
+            : [];
+
+    ficheirosRemover.forEach(id => formData.append('ficheirosRemover', id));
+
+    if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+            formData.append('ficheirosNovos', file.buffer, {
+                filename: file.originalname,
+                contentType: file.mimetype || 'application/octet-stream'
+            });
+        }
+    }
+
     try {
-        await axios.put(`${API}/recursos/${req.params.id}`, payload, {
-            headers: obterHeadersAutorizacao(req)
+        await axios.put(`${API}/recursos/${req.params.id}`, formData, {
+            headers: {
+                ...obterHeadersAutorizacao(req),
+                ...formData.getHeaders()
+            },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity
         });
 
         res.redirect(`/recursos/${req.params.id}`);
@@ -576,10 +600,8 @@ router.post('/:id/editar', async (req, res) => {
 // GET /recursos/:id — detalhe + posts
 router.get('/:id', async (req, res) => {
     try {
-        const [recursoRes, postsRes] = await Promise.all([
-            axios.get(`${API}/recursos/${req.params.id}`),
-            axios.get(`${API}/posts?recurso=${req.params.id}`)
-        ]);
+        const recursoRes = await axios.get(`${API}/recursos/${req.params.id}`);
+        const postsRes = await axios.get(`${API}/posts?recurso=${req.params.id}`);
 
         const recurso = recursoRes.data || {};
         
