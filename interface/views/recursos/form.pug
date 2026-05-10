@@ -9,7 +9,7 @@ block content
             h2
               i.fas.fa-file-archive(style='margin-right: 0.5rem;')
               span Submeter Recurso (SIP)
-          
+
           .card-body
             if erro
               .alert.alert-danger
@@ -19,50 +19,64 @@ block content
                   ul(style='margin-top: 0.5rem; margin-bottom: 0;')
                     each err in erros
                       li= err
-            
+
             // Guia de SIP
             .alert.alert-info(style='background-color: #f0f9ff; border-color: #0ea5e9; color: #0c4a6e;')
-              i.fas.fa-lightbulb(style='margin-right: 0.5rem;')
-              strong Guia de Submissão de SIP:
-              p(style='margin-top: 0.5rem; margin-bottom: 0;')
+              p(style='margin-bottom: 0.75rem;')
+                i.fas.fa-lightbulb(style='margin-right: 0.5rem;')
+                strong Guia de Submissão de SIP
+
+              p(style='margin-bottom: 0.25rem;')
                 strong Estrutura do ZIP:
-              ul(style='margin-top: 0.25rem; margin-bottom: 0.5rem;')
-                li 
-                  code manifest.json 
-                  | na raiz (obrigatório)
-                li 
-                  code data/
-                  | pasta com ficheiros (obrigatório, pelo menos vazio)
-              p(style='margin-bottom: 0.5rem;')
-                strong manifest.json deve ter:
-              ul(style='margin-top: 0.25rem;')
-                li 
+              ul(style='margin-bottom: 0.75rem; list-style: none; padding: 0;')
+                li(style='margin-bottom: 0.25rem;')
+                  i.fas.fa-file-code(style='margin-right: 0.5rem; color: #0ea5e9;')
+                  strong manifest.json
+                  |  na raiz (obrigatório)
+                li
+                  i.fas.fa-folder(style='margin-right: 0.5rem; color: #0ea5e9;')
+                  strong data/
+                  |  pasta com ficheiros (obrigatório, pelo menos vazia)
+
+              p(style='margin-bottom: 0.25rem;')
+                strong Campos do manifest.json:
+              ul(style='margin-bottom: 0.5rem; list-style: none; padding: 0;')
+                li(style='margin-bottom: 0.35rem;')
                   strong(style='color: #dc2626;') titulo
-                  | - texto obrigatório
-                li 
+                  |  — texto
+                li(style='margin-bottom: 0.35rem;')
                   strong(style='color: #dc2626;') tipo
-                  | - um de: artigo, tese, slides, teste, relatorio, aplicacao, problema, outro
-                li 
-                  strong descricao
-                  | - texto descritivo
-                li 
-                  strong files
-                  | - array com nomes dos ficheiros em data/; o campo size é opcional
-                li 
-                  code dataCriacao
-                  | - data em ISO 8601 (2026-05-10)
-                li 
-                  code visibilidade
-                  | - publico ou privado
-                li 
-                  code hashtags
-                  | - array de tags
-                li 
-                  code subtitulo
-                  | - opcional
-              
-              pre(style='background: #fff; padding: 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; max-height: 200px; overflow-y: auto; color: #000; border: 1px solid #ddd;')
-                code.
+                  |  — artigo, tese, slides, teste, relatorio, aplicacao, problema, outro
+                li(style='margin-bottom: 0.35rem;')
+                  strong(style='color: #dc2626;') files
+                  |  — array com nomes dos ficheiros em data/
+                li(style='margin-bottom: 0.35rem;')
+                  strong(style='color: #0ea5e9;') descricao
+                  |  — texto descritivo
+                li(style='margin-bottom: 0.35rem;')
+                  strong(style='color: #0ea5e9;') dataCriacao
+                  |  — ISO 8601 (ex: 2026-05-10)
+                li(style='margin-bottom: 0.35rem;')
+                  strong(style='color: #0ea5e9;') visibilidade
+                  |  — publico ou privado
+                li(style='margin-bottom: 0.35rem;')
+                  strong(style='color: #0ea5e9;') hashtags
+                  |  — array de tags
+                li
+                  strong(style='color: #0ea5e9;') subtitulo
+                  |  — texto
+
+              p(style='margin-bottom: 0.75rem; font-size: 0.8rem;')
+                span(style='display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; background-color: #dc2626; margin-right: 0.35rem;')
+                | Obrigatório
+                span(style='margin: 0 0.5rem;') ·
+                span(style='display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; background-color: #0ea5e9; margin-right: 0.35rem;')
+                | Opcional
+
+              p(style='margin-bottom: 0.25rem;')
+                strong Exemplo de manifest.json:
+              pre(style='background: #fff; padding: 0.75rem; border-radius: 0.25rem; font-size: 0.75rem; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; margin-bottom: 0;')
+                code(style='color: #000;').
                   {
                     "titulo": "Meu Artigo",
                     "tipo": "artigo",
@@ -71,11 +85,11 @@ block content
                     "visibilidade": "publico",
                     "hashtags": ["web", "engenharia"],
                     "files": [
-                        {"name": "artigo.pdf"}
+                      { "name": "artigo.pdf" }
                     ]
                   }
-            
-            // Formulario simples - apenas upload
+
+            // Formulario
             form(method='POST', action='/recursos/form', enctype='multipart/form-data')
               .form-group
                 label(for='ficheiro')
@@ -85,7 +99,7 @@ block content
                 small.text-muted(style='display: block; margin-top: 0.5rem;')
                   i.fas.fa-info-circle(style='margin-right: 0.25rem;')
                   | Deve ser um arquivo ZIP estruturado com manifest.json e pasta data/
-              
+
               .card-footer
                 button.btn.btn-primary(type='submit')
                   i.fas.fa-upload

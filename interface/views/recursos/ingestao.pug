@@ -8,10 +8,7 @@ block content
           i.fas.fa-inbox(style='margin-right: 0.75rem; color: var(--primary);')
           span Submeter Recurso
         p.text-muted Escolha uma das opções abaixo para submeter um novo recurso educativo.
-      .col-4.text-right
-        a.btn.btn-outline(href='/recursos/aips')
-          i.fas.fa-archive
-          span Ver AIPs
+
 
     if erro
       .alert.alert-danger
@@ -25,52 +22,43 @@ block content
 
     .row.mb-6
       .col-6
-        .card
+        .card(style='height: 100%;')
           .card-header
-            i.fas.fa-form
+            i.fas.fa-edit
             span  Opção 1: Formulário Assistido
-          .card-body
-            p Preecha um formulário simples e carregue múltiplos ficheiros. Ideal para submissões rápidas e diretas.
-            ul.list-unstyled
-              li
+          .card-body(style='display: flex; flex-direction: column;')
+            p Preencha um formulário simples e carregue múltiplos ficheiros. Ideal para submissões rápidas e diretas.
+            ul(style='margin: 1.5rem 0; flex: 1; list-style: none; padding: 0;')
+              li(style='margin-bottom: 0.75rem;')
                 i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
-                | Preenchimento de metadados em forma
-              li
+                | Preenchimento de metadados em formulário
+              li(style='margin-bottom: 0.75rem;')
                 i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
                 | Upload de múltiplos ficheiros
-              li
+              li(style='margin-bottom: 0.75rem;')
                 i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
                 | Processamento automático de SIP
-            a.btn.btn-primary.mt-3(href='/recursos/ingestao-form')
+            a.btn.btn-primary(href='/recursos/ingestao-form' style='align-self: flex-start; margin-top: auto;')
               i.fas.fa-arrow-right
               span Usar Formulário
 
       .col-6
-        .card
+        .card(style='height: 100%;')
           .card-header
             i.fas.fa-file-archive
             span  Opção 2: SIP ZIP
-          .card-body
+          .card-body(style='display: flex; flex-direction: column;')
             p Carregue um pacote SIP já estruturado com manifesto e ficheiros. Ideal para migrações em lote.
-            ul.list-unstyled
-              li
+            ul(style='margin: 1.5rem 0; flex: 1; list-style: none; padding: 0;')
+              li(style='margin-bottom: 0.75rem;')
                 i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
                 | Pacote ZIP estruturado
-              li
+              li(style='margin-bottom: 0.75rem;')
                 i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
-                | manifesto.json incluído
-              li
+                | Manifesto JSON incluído
+              li(style='margin-bottom: 0.75rem;')
                 i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
                 | Validação completa
-            a.btn.btn-primary.mt-3(href='/recursos/form')
+            a.btn.btn-primary(href='/recursos/form' style='align-self: flex-start; margin-top: auto;')
               i.fas.fa-arrow-right
               span Usar SIP ZIP
-
-    .card.mt-4
-      .card-body
-        h3(style='margin-top: 0;') O que é verificado em ambos os modos
-        ul
-          li Estrutura e formato do pacote
-          li Manifesto e ficheiros declarados
-          li Metadados obrigatórios
-          li Consistência e segurança

@@ -24,7 +24,7 @@ block content
             - const dataCriacao = recurso.dataCriacao ? new Date(recurso.dataCriacao).toISOString().split('T')[0] : '';
             - const hashtagsValor = Array.isArray(recurso.hashtags) ? recurso.hashtags.join(', ') : (recurso.hashtags || '');
 
-            form(method='POST', action='/recursos/' + recurso._id + '/editar')
+            form(method='POST', action='/recursos/' + recurso._id + '/editar', enctype='multipart/form-data')
               .form-group
                 label(for='titulo') Título
                 input#titulo.form-control(type='text', name='titulo', required=true, value=recurso.titulo || '')
@@ -55,6 +55,32 @@ block content
                 input#hashtags.form-control(type='text', name='hashtags', placeholder='ex: web, matemática, avaliação', value=hashtagsValor)
 
               .form-group
+                label Ficheiros actuais
+                if recurso.ficheiros && recurso.ficheiros.length
+                  .existing-files(style='display: grid; gap: 0.75rem;')
+                    each ficheiro in recurso.ficheiros
+                      .card(style='border: 1px solid var(--light-gray);')
+                        .card-body(style='padding: 0.85rem 1rem;')
+                          .row(style='align-items: center;')
+                            .col-8
+                              strong= ficheiro.nome
+                              if ficheiro.tamanho
+                                div.text-muted(style='font-size: 0.9rem;')= (ficheiro.tamanho / 1024).toFixed(2) + ' KB'
+                              if ficheiro.versaoAIP
+                                div.text-muted(style='font-size: 0.9rem;') Versão AIP: #{ficheiro.versaoAIP}
+                            .col-4(style='text-align: right;')
+                              label(style='display: inline-flex; align-items: center; gap: 0.4rem;')
+                                input(type='checkbox', name='ficheirosRemover', value=ficheiro._id)
+                                span Remover
+                else
+                  p.text-muted Nenhum ficheiro associado.
+
+              .form-group
+                label(for='ficheirosNovos') Adicionar ficheiros
+                input#ficheirosNovos.form-control(type='file', name='ficheirosNovos', multiple)
+                small.text-muted Ao adicionar, remover ou substituir ficheiros, é criada uma nova versão AIP para este recurso.
+
+              .form-group
                 label Visibilidade
                 .form-check
                   input#publico.form-check-input(type='radio', name='visibilidade', value='publico', checked=(recurso.visibilidade || 'publico') === 'publico')
@@ -77,7 +103,7 @@ block content
             i.fas.fa-circle-info
             span  Notas
           .card-body
-            p Só são editados os metadados do recurso. Os ficheiros preservados mantêm-se associados ao AIP existente.
+            p Pode alterar os metadados e gerir os ficheiros associados. Qualquer adição ou remoção de ficheiros cria uma nova versão AIP para preservar o histórico.
             if recurso.ficheiros && recurso.ficheiros.length
               p
                 strong Ficheiros:
