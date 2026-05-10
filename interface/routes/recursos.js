@@ -7,7 +7,7 @@ var path = require('path');
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
-const { uploadRecursoSingle } = require('../middleware/uploadRecurso');
+const { uploadSipZip } = require('../middleware/uploadZip');
 
 function obterToken(req) {
     return req.cookies[COOKIE_NAME];
@@ -57,44 +57,51 @@ function obterMensagemErroAPI(err, fallback = 'Ocorreu um erro ao contactar a AP
     return data.mensagem || data.erro || data.error || fallback;
 }
 
-async function encaminharRecursoMultipart(req, metodo, endpoint) {
+async function encaminharRecursoSip(req) {
     const form = new FormData();
 
-    Object.entries(req.body || {}).forEach(([chave, valor]) => {
-        if (valor === undefined || valor === null) {
-            return;
-        }
-
-        if (Array.isArray(valor)) {
-            valor.forEach(item => form.append(chave, item));
-            return;
-        }
-
-        form.append(chave, valor);
-    });
-
-    // Adicionar ficheiro único se existir
+    // Adicionar arquivo ZIP com o nome 'file' que o backend espera
     if (req.file) {
-        form.append('ficheiro', req.file.buffer, {
-            filename: req.file.originalname || req.file.filename || 'ficheiro',
-            contentType: req.file.mimetype || 'application/octet-stream'
+        form.append('file', req.file.buffer, {
+            filename: req.file.originalname || 'recurso.zip',
+            contentType: req.file.mimetype || 'application/zip'
         });
     }
 
-    const config = {
+    return axios.post(`${API}/ingestao/sip`, form, {
         headers: {
             ...obterHeadersAutorizacao(req),
             ...form.getHeaders()
         },
         maxBodyLength: Infinity,
         maxContentLength: Infinity
-    };
+    });
+}
 
-    if (metodo === 'put') {
-        return axios.put(`${API}${endpoint}`, form, config);
+async function encaminharSipZip(req) {
+    const form = new FormData();
+
+    if (req.file) {
+        form.append('file', req.file.buffer, {
+            filename: req.file.originalname || 'sip.zip',
+            contentType: req.file.mimetype || 'application/zip'
+        });
     }
 
-    return axios.post(`${API}${endpoint}`, form, config);
+    Object.entries(req.body || {}).forEach(([chave, valor]) => {
+        if (valor !== undefined && valor !== null) {
+            form.append(chave, valor);
+        }
+    });
+
+    return axios.post(`${API}/ingestao/sip`, form, {
+        headers: {
+            ...obterHeadersAutorizacao(req),
+            ...form.getHeaders()
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity
+    });
 }
 
 // GET /recursos — listagem com filtros
@@ -136,7 +143,41 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /recursos/novo — formulário de criação
+// GET /recursos/ingestao-sip — formulário de ingestão SIP
+router.get('/ingestao-sip', async (req, res) => {
+    res.render('recursos/ingestao', {
+        titulo: 'Submeter SIP',
+        sucesso: req.query.sucesso || '',
+        erro: req.query.erro || ''
+    });
+});
+
+// POST /recursos/ingestao-sip — submeter SIP para a API
+router.post('/ingestao-sip', uploadSipZip, async (req, res) => {
+    try {
+        const resposta = await encaminharSipZip(req);
+        const body = resposta.data || {};
+
+        if (body.status === 'ok') {
+            return res.redirect(`/recursos/aips/${body.aipId || body.sipId || ''}`);
+        }
+
+        return res.status(400).render('recursos/ingestao', {
+            titulo: 'Submeter SIP',
+            erro: body.mensagem || 'SIP rejeitado',
+            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : ''
+        });
+    } catch (err) {
+        const body = err.response && err.response.data ? err.response.data : {};
+        return res.status(err.response?.status || 500).render('recursos/ingestao', {
+            titulo: 'Submeter SIP',
+            erro: body.mensagem || obterMensagemErroAPI(err, 'Nao foi possivel submeter o SIP.'),
+            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : (body.erros ? JSON.stringify(body.erros, null, 2) : '')
+        });
+    }
+});
+
+// GET /recursos/novo — formulário de criação (SIP obrigatório)
 router.get('/novo', async (req, res) => {
     try {
         const tiposRecurso = await obterTiposAtivos();
@@ -153,44 +194,53 @@ router.get('/novo', async (req, res) => {
     }
 });
 
-// POST /recursos/novo — submeter recurso com upload
-router.post('/novo', uploadRecursoSingle, async (req, res) => {
+// POST /recursos/novo — submeter recurso com SIP
+router.post('/novo', uploadSipZip, async (req, res) => {
     try {
-        const resposta = await encaminharRecursoMultipart(req, 'post', '/recursos');
+        const resposta = await encaminharRecursoSip(req);
+        const body = resposta.data || {};
 
-        const roleAtual = req.user && req.user.role;
-        const ehConsumidor = roleAtual === 'consumidor';
-
-        if (ehConsumidor && req.user && req.user.sub) {
-            const token = obterToken(req);
-            const promovido = await axios.put(`${AUTH}/${req.user.sub}/promote/produtor`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (promovido.data && promovido.data.token) {
-                res.cookie(COOKIE_NAME, promovido.data.token, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    maxAge: 3600000
-                });
-            }
+        if (body.status === 'ok') {
+            return res.redirect(`/recursos?autor=${req.user.sub || ''}`);
         }
 
-        res.redirect('/recursos');
-    } catch (err) {
         let tiposRecurso = [];
-
         try {
             tiposRecurso = await obterTiposAtivos();
         } catch (tiposErr) {
             tiposRecurso = [];
         }
 
-        res.status(err.response?.status || 500).render('recursos/form', {
+        // Extrair erros específicos
+        let mensagensErro = [];
+        if (body.erros && Array.isArray(body.erros)) {
+            mensagensErro = body.erros.map(e => `${e.categoria}: ${e.mensagem}`);
+        }
+
+        return res.status(400).render('recursos/form', {
             titulo: 'Submeter Recurso',
             recurso: req.body,
             tiposRecurso,
-            erro: obterMensagemErroAPI(err, 'Nao foi possivel submeter o recurso.')
+            erro: body.mensagem || 'SIP rejeitado - validação falhou',
+            erros: mensagensErro,
+            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : ''
+        });
+    } catch (err) {
+        let tiposRecurso = [];
+        try {
+            tiposRecurso = await obterTiposAtivos();
+        } catch (tiposErr) {
+            tiposRecurso = [];
+        }
+
+        const body = err.response && err.response.data ? err.response.data : {};
+        return res.status(err.response?.status || 500).render('recursos/form', {
+            titulo: 'Submeter Recurso',
+            recurso: req.body,
+            tiposRecurso,
+            erro: body.mensagem || obterMensagemErroAPI(err, 'Erro ao submeter o recurso.'),
+            erros: body.erros ? body.erros.map(e => `${e.categoria}: ${e.mensagem}`) : [],
+            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : (body.erros ? JSON.stringify(body.erros, null, 2) : '')
         });
     }
 });
@@ -198,10 +248,7 @@ router.post('/novo', uploadRecursoSingle, async (req, res) => {
 // GET /recursos/tipos — gestao de tipos de recurso (admin)
 router.get('/tipos', async (req, res) => {
     if (!utilizadorEhAdmin(req)) {
-        return res.status(403).render('erro', {
-            titulo: 'Sem permissao',
-            mensagem: 'Apenas administradores podem gerir tipos de recurso.'
-        });
+        return res.redirect('/recursos');
     }
 
     try {
@@ -223,10 +270,7 @@ router.get('/tipos', async (req, res) => {
 // POST /recursos/tipos/novo — criar novo tipo (admin)
 router.post('/tipos/novo', async (req, res) => {
     if (!utilizadorEhAdmin(req)) {
-        return res.status(403).render('erro', {
-            titulo: 'Sem permissao',
-            mensagem: 'Apenas administradores podem gerir tipos de recurso.'
-        });
+        return res.redirect('/recursos');
     }
 
     try {
@@ -256,10 +300,7 @@ router.post('/tipos/novo', async (req, res) => {
 // POST /recursos/tipos/:id/estado — ativar/desativar tipo (admin)
 router.post('/tipos/:id/estado', async (req, res) => {
     if (!utilizadorEhAdmin(req)) {
-        return res.status(403).render('erro', {
-            titulo: 'Sem permissao',
-            mensagem: 'Apenas administradores podem gerir tipos de recurso.'
-        });
+        return res.redirect('/recursos');
     }
 
     try {
@@ -322,10 +363,7 @@ router.get('/aips/:sipId', async (req, res) => {
 // GET /recursos/ingestao — vista administrativa para Ingestões (AIPs)
 router.get('/ingestao', async (req, res) => {
     if (!utilizadorEhAdmin(req)) {
-        return res.status(403).render('erro', {
-            titulo: 'Sem permissao',
-            mensagem: 'Apenas administradores podem aceder a esta página.'
-        });
+        return res.redirect('/recursos/aips');
     }
 
     try {
@@ -351,10 +389,7 @@ router.get('/ingestao', async (req, res) => {
 // GET /recursos/admin — hub de administração
 router.get('/admin', async (req, res) => {
     if (!utilizadorEhAdmin(req)) {
-        return res.status(403).render('erro', {
-            titulo: 'Sem permissao',
-            mensagem: 'Apenas administradores podem aceder a esta página.'
-        });
+        return res.redirect('/recursos');
     }
 
     res.render('recursos/admin', {
@@ -445,65 +480,6 @@ router.get('/:id/exportar-dip', async (req, res) => {
             titulo: 'Erro',
             mensagem: obterMensagemErroAPI(err, 'Nao foi possivel exportar o DIP solicitado.')
         });
-    }
-});
-
-// GET /recursos/:id/editar
-router.get('/:id/editar', async (req, res) => {
-    try {
-        const [recursoRes, tiposRecurso] = await Promise.all([
-            axios.get(`${API}/recursos/${req.params.id}`),
-            obterTiposAtivos()
-        ]);
-
-        const recurso = recursoRes.data;
-        const ehAdmin = utilizadorEhAdmin(req);
-        const ehDono = recurso.autor && req.user && req.user.sub === recurso.autor._id;
-
-        if (!ehAdmin && !ehDono) {
-            return res.status(403).render('erro', {
-                titulo: 'Sem permissao',
-                mensagem: 'Nao tem permissao para editar este recurso.'
-            });
-        }
-
-        res.render('recursos/form', {
-            titulo: 'Editar Recurso',
-            recurso,
-            tiposRecurso
-        });
-    } catch (err) {
-        res.redirect('/recursos');
-    }
-});
-
-// POST /recursos/:id/editar — atualizar com upload
-router.post('/:id/editar', uploadRecursoSingle, async (req, res) => {
-    try {
-        await encaminharRecursoMultipart(req, 'put', `/recursos/${req.params.id}`);
-        res.redirect(`/recursos/${req.params.id}`);
-    } catch (err) {
-        try {
-            const [recursoRes, tiposRecurso] = await Promise.all([
-                axios.get(`${API}/recursos/${req.params.id}`),
-                obterTiposAtivos()
-            ]);
-
-            const recurso = {
-                ...recursoRes.data,
-                ...req.body,
-                _id: req.params.id
-            };
-
-            res.status(err.response?.status || 500).render('recursos/form', {
-                titulo: 'Editar Recurso',
-                recurso,
-                tiposRecurso,
-                erro: obterMensagemErroAPI(err, 'Nao foi possivel atualizar o recurso.')
-            });
-        } catch (reloadErr) {
-            res.redirect('/recursos');
-        }
     }
 });
 

@@ -52,14 +52,36 @@ class ValidadorSIP {
             }
 
             const ziprEntries = zip.getEntries();
-            this.ficheirosZip = ziprEntries.map(e => ({
-                nome: e.entryName,
-                tamanho: e.header.size,
-                isDir: e.isDirectory
-            }));
+            
+            // Detectar se há pasta raiz única (problema comum ao comprimir uma pasta)
+            let pastaRaiz = null;
+            const todasAsPastas = ziprEntries.map(e => e.entryName).filter(nome => !nome.endsWith('/'));
+            
+            if (todasAsPastas.length > 0) {
+                const primeiraNivel = todasAsPastas[0].split('/')[0];
+                // Se todos os ficheiros começam com a mesma pasta
+                if (todasAsPastas.every(nome => nome.startsWith(primeiraNivel + '/'))) {
+                    pastaRaiz = primeiraNivel;
+                    console.log(`Detectada pasta raiz: ${pastaRaiz}. Normalizando...`);
+                }
+            }
+
+            // Normalizar nomes dos ficheiros removendo pasta raiz se existir
+            this.ficheirosZip = ziprEntries.map(e => {
+                let nome = e.entryName;
+                if (pastaRaiz && nome.startsWith(pastaRaiz + '/')) {
+                    nome = nome.substring(pastaRaiz.length + 1);
+                }
+                return {
+                    nome: nome,
+                    tamanho: e.header.size,
+                    isDir: e.isDirectory,
+                    entryOriginal: e.entryName
+                };
+            }).filter(e => !e.isDir || e.nome); // Filtrar pastas vazias
 
             // Verificar se existe manifest.json na raiz
-            const temManifesto = ziprEntries.some(e => e.entryName === 'manifest.json');
+            const temManifesto = this.ficheirosZip.some(e => e.nome === 'manifest.json');
             if (!temManifesto) {
                 this.erros.push({
                     categoria: 'estrutura',
@@ -70,14 +92,16 @@ class ValidadorSIP {
             }
 
             // Verificar se existe pasta data/
-            const temData = ziprEntries.some(e => e.entryName.startsWith('data/'));
+            const temData = this.ficheirosZip.some(e => e.nome.startsWith('data/'));
             if (!temData) {
                 this.avisos.push('Pasta data/ vazia ou não encontrada');
             }
 
             // Ler e parsear manifest.json
             try {
-                const manifestEntry = zip.getEntry('manifest.json');
+                const manifestEntry = pastaRaiz 
+                    ? zip.getEntry(`${pastaRaiz}/manifest.json`)
+                    : zip.getEntry('manifest.json');
                 const manifestContent = manifestEntry.getData().toString('utf8');
                 this.manifesto = JSON.parse(manifestContent);
             } catch (err) {
@@ -88,6 +112,7 @@ class ValidadorSIP {
                 });
                 return false;
             }
+
 
             this.validacoes.estrutura.ok = true;
             this.validacoes.estrutura.detalhes = 'Estrutura ZIP válida';

@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
         });
         res.render('utilizadores/lista', { titulo: 'Utilizadores', utilizadores: resposta.data });
     } catch (err) {
-        res.render('erro', { titulo: 'Erro', mensagem: 'Sem permissão ou erro ao carregar' });
+        res.redirect('/');
     }
 });
 
@@ -27,7 +27,7 @@ router.get('/:id', async (req, res) => {
         });
         res.render('utilizadores/detalhe', { titulo: 'Utilizador', utilizador: resposta.data });
     } catch (err) {
-        res.render('erro', { titulo: 'Erro', mensagem: 'Utilizador não encontrado' });
+        res.redirect('/utilizadores');
     }
 });
 
@@ -38,10 +38,7 @@ router.post('/:id/editar', async (req, res) => {
         const isAdmin = req.user && req.user.role === 'admin';
 
         if (!isSelf && !isAdmin) {
-            return res.status(403).render('erro', {
-                titulo: 'Sem permissao',
-                mensagem: 'Nao tem permissao para editar este utilizador.'
-            });
+            return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
         const token = req.cookies[COOKIE_NAME];
@@ -58,9 +55,9 @@ router.post('/:id/editar', async (req, res) => {
         await axios.put(`${AUTH}/${req.params.id}`, dados, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        res.redirect('/utilizadores');
+        res.redirect(`/utilizadores/${req.params.id}`);
     } catch (err) {
-        res.render('erro', { titulo: 'Erro', mensagem: 'Erro ao atualizar utilizador' });
+        res.redirect(`/utilizadores/${req.params.id}`);
     }
 });
 
@@ -68,10 +65,7 @@ router.post('/:id/editar', async (req, res) => {
 router.post('/:id/apagar', async (req, res) => {
     try {
         if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).render('erro', {
-                titulo: 'Sem permissao',
-                mensagem: 'Apenas administradores podem apagar utilizadores.'
-            });
+            return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
         const token = req.cookies[COOKIE_NAME];
@@ -80,7 +74,7 @@ router.post('/:id/apagar', async (req, res) => {
         });
         res.redirect('/utilizadores');
     } catch (err) {
-        res.render('erro', { titulo: 'Erro', mensagem: 'Erro ao apagar utilizador' });
+        res.redirect(`/utilizadores/${req.params.id}`);
     }
 });
 
@@ -88,10 +82,7 @@ router.post('/:id/apagar', async (req, res) => {
 router.post('/:id/promover/admin', async (req, res) => {
     try {
         if (!req.user || req.user.role !== 'admin') {
-            return res.status(403).render('erro', {
-                titulo: 'Sem permissao',
-                mensagem: 'Apenas administradores podem promover utilizadores a admin.'
-            });
+            return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
         const token = req.cookies[COOKIE_NAME];
@@ -100,7 +91,7 @@ router.post('/:id/promover/admin', async (req, res) => {
         });
         res.redirect(`/utilizadores/${req.params.id}`);
     } catch (err) {
-        res.render('erro', { titulo: 'Erro', mensagem: 'Erro ao promover utilizador a admin' });
+        res.redirect(`/utilizadores/${req.params.id}`);
     }
 });
 

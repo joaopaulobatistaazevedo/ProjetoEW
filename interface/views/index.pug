@@ -53,13 +53,71 @@ block content
       h2
         i.fas.fa-newspaper(style='color: var(--primary); margin-right: 0.5rem;')
         span Últimas Notícias
-      .row
+      .noticias-grid
         each n in noticias
-          .col-4
-            .card.mb-3
-              .card-body
-                h4= n.titulo
-                small.text-muted= new Date(n.dataCriacao).toLocaleString('pt-PT')
-                if n.link
-                  p
-                    a(href=n.link) Ver recurso
+          - const badgeClass = n.tipo === 'novo_recurso' ? 'badge-noticia badge-noticia-novo' : n.tipo === 'trending' ? 'badge-noticia badge-noticia-trending' : n.tipo === 'comentarios' ? 'badge-noticia badge-noticia-comentarios' : n.tipo === 'tipo_destaque' ? 'badge-noticia badge-noticia-tipo' : n.tipo === 'stats' ? 'badge-noticia badge-noticia-stats' : 'badge-noticia badge-noticia-milestone';
+          .card.noticia-card
+            .card-body
+              .noticia-header
+                span(class=badgeClass)
+                  case n.tipo
+                    when 'novo_recurso'
+                      i.fas.fa-star
+                    when 'trending'
+                      i.fas.fa-fire
+                    when 'comentarios'
+                      i.fas.fa-comments
+                    when 'tipo_destaque'
+                      i.fas.fa-tag
+                    when 'stats'
+                      i.fas.fa-chart-pie
+                    default
+                      i.fas.fa-trophy
+                .noticia-meta
+                  h4= n.titulo
+                  small.text-muted= n.dataCriacao ? new Date(n.dataCriacao).toLocaleString('pt-PT') : 'Data indisponível'
+              p.noticia-conteudo= n.conteudo
+              if n.link
+                a.btn.btn-outline.btn-sm(href=n.link)
+                  i.fas.fa-eye
+                  span Ver recurso
+  
+  style.
+    .noticias-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .noticia-card {
+      border-left: 4px solid var(--primary);
+      height: 100%;
+    }
+    .noticia-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .badge-noticia {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 999px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .badge-noticia-novo { background: var(--primary); }
+    .badge-noticia-trending { background: #ef4444; }
+    .badge-noticia-comentarios { background: #0ea5e9; }
+    .badge-noticia-tipo { background: #8b5cf6; }
+    .badge-noticia-stats { background: #10b981; }
+    .badge-noticia-milestone { background: #f59e0b; }
+    .noticia-meta h4 {
+      margin-bottom: 0.25rem;
+    }
+    .noticia-conteudo {
+      color: #475569;
+      margin-bottom: 1rem;
+    }

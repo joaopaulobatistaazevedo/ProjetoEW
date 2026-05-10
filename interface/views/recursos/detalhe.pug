@@ -121,7 +121,10 @@ block content
                       i.fas.fa-info-circle(style='margin-right: 0.5rem;')
                       | Não há pré-visualização inline para este tipo de ficheiro. O caminho acima identifica o ficheiro guardado.
             
-            if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
+            - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
+            - const podeExportar = user && (user.role === 'admin' || recurso.visibilidade === 'publico' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
+
+            if podeEditar
               .card-footer
                 a.btn.btn-primary(href='/recursos/' + recurso._id + '/editar')
                   i.fas.fa-edit
@@ -130,10 +133,6 @@ block content
                   button.btn.btn-danger(type='submit')
                     i.fas.fa-trash-alt
                     span Apagar Recurso
-            else if !user
-              .alert.alert-info
-                i.fas.fa-info-circle(style='margin-right: 0.5rem;')
-                strong Faça login para comentar e interagir com este recurso.
       
       .col-4
         // Sidebar de informacoes
@@ -184,12 +183,13 @@ block content
               strong Fase inicial:
               |  o utilizador descarrega o pacote completo, sem filtros nem transformações adicionais.
 
-            .dip-toolbar
-              a.btn.btn-secondary(href='/recursos/' + recurso._id + '/exportar-dip')
-                i.fas.fa-download
-                span Exportar DIP
-              p.dip-help
-                | Numa fase seguinte poderemos separar DIP e SIP com mais detalhe, mas por agora mantemos a equivalência para fechar o ciclo base de ingestão e disseminação.
+            if podeExportar
+              .dip-toolbar
+                a.btn.btn-secondary(href='/recursos/' + recurso._id + '/exportar-dip')
+                  i.fas.fa-download
+                  span Exportar DIP
+                p.dip-help
+                  | Numa fase seguinte poderemos separar DIP e SIP com mais detalhe, mas por agora mantemos a equivalência para fechar o ciclo base de ingestão e disseminação.
 
     // Posts e comentarios
     .row

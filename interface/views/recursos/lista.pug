@@ -12,7 +12,7 @@ block content
         if user
           a.btn.btn-primary.btn-block(href='/recursos/novo')
             i.fas.fa-plus
-            span Novo Recurso
+            span Submeter Recurso
           // novos botoes para acessar recursos e AIPs do utilizador
           a.btn.btn-outline.btn-block.mt-2(href='/recursos?autor=' + (user.sub || ''))
             i.fas.fa-folder-open
@@ -127,8 +127,14 @@ block content
                 a.btn.btn-primary.btn-sm(href='/recursos/' + recurso._id)
                   i.fas.fa-eye
                   span Ver
-                
-                if user && (user.role === 'admin' || (user.role === 'produtor' && user.sub === recurso.autor._id))
+                - const podeExportar = user && (user.role === 'admin' || recurso.visibilidade === 'publico' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
+                if podeExportar
+                  a.btn.btn-secondary.btn-sm(href='/recursos/' + recurso._id + '/exportar-dip', title='Exportar DIP')
+                    i.fas.fa-file-export
+                    span Exportar DIP
+
+                - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
+                if podeEditar
                   a.btn.btn-primary.btn-sm(href='/recursos/' + recurso._id + '/editar')
                     i.fas.fa-edit
                     span Editar

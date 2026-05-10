@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
 router.get('/novo', (req, res) => {
     const user = res.locals.user;
     if (!user || user.role !== 'admin') {
-        return res.status(403).render('erro', { titulo: 'Sem permissao', mensagem: 'Apenas administradores podem criar noticias.' });
+        return res.redirect('/noticias');
     }
     res.render('noticias/form', { titulo: 'Nova Notícia', noticia: {} });
 });

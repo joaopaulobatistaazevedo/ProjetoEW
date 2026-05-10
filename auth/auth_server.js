@@ -11,16 +11,44 @@ const app = express();
 const PORT      = process.env.PORT      || 2623;
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/auth_service';
 
+async function ligarMongoComRetry(tentativas = 20, intervaloMs = 3000) {
+    let ultimoErro = null;
+
+    for (let i = 1; i <= tentativas; i++) {
+        try {
+            await mongoose.connect(MONGO_URL, {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                useCreateIndex: true,
+                useFindAndModify: false
+            });
+            return;
+        } catch (err) {
+            ultimoErro = err;
+            console.error(`Auth: tentativa ${i}/${tentativas} falhou ao ligar ao MongoDB:`, err.message);
+
+            if (i < tentativas) {
+                await new Promise(resolve => setTimeout(resolve, intervaloMs));
+            }
+        }
+    }
+
+    throw ultimoErro;
+}
+
 // MongoDB connection
-mongoose.connect(MONGO_URL)
-    .then(() => {
+async function iniciarAuth() {
+    try {
+        await ligarMongoComRetry();
         console.log('Auth: MongoDB ligado com sucesso.');
-        ensureBaseAdmin();
-    })
-    .catch(err => {
-        console.error('Auth: Erro crítico:', err.message);
+        await ensureBaseAdmin();
+
+        app.listen(PORT, () => console.log(`Auth Server a correr na porta ${PORT}`));
+    } catch (err) {
+        console.error('Auth: Erro crítico ao ligar ao MongoDB:', err.message);
         process.exit(1);
-    });
+    }
+}
 
 // Garantir existencia de utilizador admin base
 const Utilizador = require('./models/utilizador');
@@ -75,4 +103,4 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ erro: err.message });
 });
 
-app.listen(PORT, () => console.log(`Auth Server a correr na porta ${PORT}`));
+iniciarAuth();

@@ -48,6 +48,7 @@ class SIPProcessor {
             const baseStorage = path.join(__dirname, '..', 'uploads', 'recursos');
             this.storageLocal = path.join(baseStorage, String(recursoGuardado._id));
             const dataDir = path.join(this.storageLocal, 'data');
+            const sourceDir = path.join(this.storageLocal, 'source');
 
             await fs.mkdir(dataDir, { recursive: true });
 
@@ -55,10 +56,30 @@ class SIPProcessor {
             const zip = new AdmZip(caminhoZipTemp);
             const entries = zip.getEntries();
 
+            // Normalizar caso o ZIP venha com uma pasta raiz única
+            const ficheirosNaoDiretorio = entries
+                .filter(entry => !entry.isDirectory)
+                .map(entry => entry.entryName);
+
+            let pastaRaiz = '';
+            if (ficheirosNaoDiretorio.length > 0) {
+                const primeira = ficheirosNaoDiretorio[0].split('/')[0];
+                if (ficheirosNaoDiretorio.every(nome => nome.startsWith(primeira + '/'))) {
+                    pastaRaiz = primeira + '/';
+                }
+            }
+
             for (const entry of entries) {
+                if (entry.isDirectory) continue;
+
+                let nomeNormalizado = entry.entryName;
+                if (pastaRaiz && nomeNormalizado.startsWith(pastaRaiz)) {
+                    nomeNormalizado = nomeNormalizado.substring(pastaRaiz.length);
+                }
+
                 // Apenas ficheiros em data/
-                if (entry.entryName.startsWith('data/') && !entry.isDirectory) {
-                    const nomeLocal = entry.entryName.substring(5); // Remove 'data/'
+                if (nomeNormalizado.startsWith('data/')) {
+                    const nomeLocal = nomeNormalizado.substring(5); // Remove 'data/'
                     const caminhoDestino = path.join(dataDir, nomeLocal);
 
                     // Garantir que o diretório de destino existe
@@ -69,6 +90,10 @@ class SIPProcessor {
                     await fs.writeFile(caminhoDestino, entry.getData());
                 }
             }
+
+            // 3b. Guardar cópia do SIP original para permitir reconstrução futura do DIP
+            await fs.mkdir(sourceDir, { recursive: true });
+            await fs.copyFile(caminhoZipTemp, path.join(sourceDir, 'sip-original.zip'));
 
             // 4. Atualizar recurso com path do ficheiro principal (primeiro em data/)
             if (manifesto.files && manifesto.files.length > 0) {

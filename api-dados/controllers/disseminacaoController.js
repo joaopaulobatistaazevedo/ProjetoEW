@@ -37,7 +37,7 @@ const disseminacaoController = {
             }
             
             // Response com headers de metadados
-            const nomeArquivo = `dip-${recursoId}-${Date.now()}.zip`;
+            const nomeArquivo = metadata.nomeArquivo || `dip-${recursoId}-${Date.now()}.zip`;
             
             res.setHeader('Content-Type', 'application/zip');
             res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);

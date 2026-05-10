@@ -48,6 +48,134 @@ function formatarTamanho(bytes = 0) {
     return `${bytes} B`;
 }
 
+function sanitizarNomeArquivo(nome = '') {
+    return String(nome)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase();
+}
+
+async function localizarFicheiroPreservado(baseDir, nomePedido) {
+    const caminhoDireto = path.join(baseDir, nomePedido);
+
+    try {
+        await fs.access(caminhoDireto);
+        return caminhoDireto;
+    } catch (err) {
+        // procurar recursivamente
+    }
+
+    const alvoNormalizado = nomePedido.replace(/\\/g, '/');
+    const nomeBase = path.basename(nomePedido);
+    const encontrados = [];
+
+    async function percorrer(diretorioAtual, prefixoRelativo = '') {
+        let entradas;
+        try {
+            entradas = await fs.readdir(diretorioAtual, { withFileTypes: true });
+        } catch (err) {
+            return;
+        }
+
+        for (const entrada of entradas) {
+            const caminho = path.join(diretorioAtual, entrada.name);
+            const relativo = path.posix.join(prefixoRelativo, entrada.name).replace(/\\/g, '/');
+
+            if (entrada.isDirectory()) {
+                await percorrer(caminho, relativo);
+                continue;
+            }
+
+            if (relativo === alvoNormalizado || entrada.name === nomeBase) {
+                encontrados.push(caminho);
+            }
+        }
+    }
+
+    await percorrer(baseDir);
+
+    if (encontrados.length === 1) {
+        return encontrados[0];
+    }
+
+    if (encontrados.length > 1) {
+        throw criarErro(
+            `Ficheiro preservado ambíguo no AIP: ${nomePedido}. Existem múltiplas cópias no armazenamento.`,
+            500
+        );
+    }
+
+    throw criarErro(`Ficheiro preservado não encontrado no AIP: ${nomePedido}`, 500);
+}
+
+async function obterConteudoDoSIPOriginal(aip, nomePedido) {
+    const possiveisFontes = [
+        path.join(aip.storageLocal || '', 'source', 'sip-original.zip'),
+        path.join(aip.storageLocal || '', 'source', 'original.zip')
+    ];
+
+    for (const fonte of possiveisFontes) {
+        try {
+            await fs.access(fonte);
+        } catch (err) {
+            continue;
+        }
+
+        try {
+            const zip = new (require('adm-zip'))(fonte);
+            const entries = zip.getEntries();
+
+            let pastaRaiz = '';
+            const ficheiros = entries.filter(entry => !entry.isDirectory).map(entry => entry.entryName);
+            if (ficheiros.length > 0) {
+                const primeira = ficheiros[0].split('/')[0];
+                if (ficheiros.every(nome => nome.startsWith(primeira + '/'))) {
+                    pastaRaiz = primeira + '/';
+                }
+            }
+
+            const nomesCandidatos = [
+                `data/${nomePedido}`,
+                `${pastaRaiz}data/${nomePedido}`,
+                nomePedido,
+                `${pastaRaiz}${nomePedido}`
+            ].filter(Boolean);
+
+            for (const candidato of nomesCandidatos) {
+                const entry = zip.getEntry(candidato);
+                if (entry && !entry.isDirectory) {
+                    return entry.getData();
+                }
+            }
+        } catch (err) {
+            // ignorar e tentar a próxima fonte
+        }
+    }
+
+    return null;
+}
+
+async function obterZipOriginalSIP(aip) {
+    const possiveisFontes = [
+        path.join(aip.storageLocal || '', 'source', 'sip-original.zip'),
+        path.join(aip.storageLocal || '', 'source', 'original.zip')
+    ];
+
+    for (const fonte of possiveisFontes) {
+        try {
+            await fs.access(fonte);
+            return await fs.readFile(fonte);
+        } catch (err) {
+            // tentar próxima fonte
+        }
+    }
+
+    return null;
+}
+
 /**
  * Serviço: Disseminação (DIP)
  *
@@ -144,13 +272,18 @@ const disseminacaoService = {
         const ficheirosPreparados = [];
 
         for (const ficheiro of ficheirosIncluidos) {
-            const caminhoLocal = path.join(pastaData, ficheiro.name);
+            let caminhoLocal = null;
+            let conteudoOriginal = null;
 
-            let conteudoOriginal;
             try {
+                caminhoLocal = await localizarFicheiroPreservado(pastaData, ficheiro.name);
                 conteudoOriginal = await fs.readFile(caminhoLocal);
             } catch (err) {
-                throw criarErro(`Ficheiro preservado não encontrado no AIP: ${ficheiro.name}`, 500);
+                conteudoOriginal = await obterConteudoDoSIPOriginal(aip, ficheiro.name);
+                if (!conteudoOriginal) {
+                    throw criarErro(`Ficheiro preservado não encontrado no AIP: ${ficheiro.name}`, 500);
+                }
+                caminhoLocal = null;
             }
 
             const checksumOriginal = ficheiro.checksum_sha256 && ficheiro.checksum_sha256 !== 'pendente'
@@ -237,6 +370,66 @@ const disseminacaoService = {
             const pedido = this.normalizarPedidoExportacao(opcoes);
             const ficheirosManifesto = Array.isArray(manifesto.files) ? manifesto.files : [];
             const nomesDisponiveis = new Set(ficheirosManifesto.map(ficheiro => ficheiro.name));
+            const pedidoCompleto = pedido.ficheirosSolicitados.length === 0 || pedido.ficheirosSolicitados.length >= ficheirosManifesto.length;
+
+            // Nesta fase do projeto, DIP = SIP. Se o ZIP original estiver preservado,
+            // devolvemos exatamente o pacote ingerido.
+            if (pedido.transformacao === 'original' && pedidoCompleto) {
+                const zipOriginal = await obterZipOriginalSIP(aip);
+                if (zipOriginal) {
+                    const checksumZIP = calcularChecksum(zipOriginal);
+                    const tempoProcessamento = Date.now() - tempoInicio;
+
+                    const metadata = {
+                        aipId: aip._id.toString(),
+                        recursoId: recursoId,
+                        titulo: recurso.titulo,
+                        formato: 'zip',
+                        tipoPedido: 'completo',
+                        transformacao: 'original',
+                        ficheirosSolicitados: [],
+                        tamanhoZIP: zipOriginal.length,
+                        checksumDIP: checksumZIP,
+                        tempoProcessamento: tempoProcessamento,
+                        ficheirosIncluidos: ficheirosManifesto.length,
+                        ficheirosExcluidos: 0,
+                        nomeArquivo: `${sanitizarNomeArquivo(recurso.titulo || manifesto.titulo || `recurso-${recursoId}`)}.zip`
+                    };
+
+                    console.log(
+                        `✅ DIP exportado como SIP original: ${recursoId} ` +
+                        `${(zipOriginal.length / 1024).toFixed(2)}KB em ${tempoProcessamento}ms`
+                    );
+
+                    return {
+                        zipBuffer: zipOriginal,
+                        metadata,
+                        dip: {
+                            aipId: aip._id.toString(),
+                            pedido: {
+                                tipo: 'completo',
+                                transformacao: 'original',
+                                ficheirosSolicitados: [],
+                                totalDisponiveisNoAIP: ficheirosManifesto.length
+                            },
+                            metadados: this.obterMetadadosBase(manifesto, recurso.visibilidade),
+                            metadados_enriquecidos: {
+                                dataIngestao: aip.dataIngestao,
+                                dataExportacao: new Date().toISOString(),
+                                produtorId: aip.produtor,
+                                exportadoPor: utilizadorId,
+                                versionAIP: '1',
+                                estadoArmazenamento: aip.status || 'ok',
+                                visibilidade: recurso.visibilidade,
+                                tipoPedido: 'completo',
+                                transformacao: 'original'
+                            },
+                            ficheirosIncluidos: ficheirosManifesto,
+                            ficheirosExcluidos: []
+                        }
+                    };
+                }
+            }
 
             const ficheirosInvalidos = pedido.ficheirosSolicitados.filter(nome => !nomesDisponiveis.has(nome));
             if (ficheirosInvalidos.length > 0) {
@@ -318,6 +511,7 @@ const disseminacaoService = {
             const metadata = {
                 aipId: aip._id.toString(),
                 recursoId: recursoId,
+                titulo: recurso.titulo,
                 formato: 'zip',
                 tipoPedido,
                 transformacao: pedido.transformacao,
@@ -326,7 +520,8 @@ const disseminacaoService = {
                 checksumDIP: checksumZIP,
                 tempoProcessamento: tempoProcessamento,
                 ficheirosIncluidos: dip.ficheirosIncluidos.length,
-                ficheirosExcluidos: dip.ficheirosExcluidos.length
+                ficheirosExcluidos: dip.ficheirosExcluidos.length,
+                nomeArquivo: `${sanitizarNomeArquivo(recurso.titulo || manifesto.titulo || `recurso-${recursoId}`)}.zip`
             };
 
             console.log(
