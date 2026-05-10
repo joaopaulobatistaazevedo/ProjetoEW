@@ -13,13 +13,6 @@ block content
           a.btn.btn-primary.btn-block(href='/recursos/novo')
             i.fas.fa-plus
             span Submeter Recurso
-          // novos botoes para acessar recursos e AIPs do utilizador
-          a.btn.btn-outline.btn-block.mt-2(href='/recursos?autor=' + (user.sub || ''))
-            i.fas.fa-folder-open
-            |  Meus Recursos
-          a.btn.btn-outline.btn-block.mt-2(href='/recursos/aips')
-            i.fas.fa-archive
-            |  Ver os meus AIPs
     
     // Alerta de erro (se houver)
     if erro
@@ -49,6 +42,13 @@ block content
             .form-group
               label(for='hashtag') Hashtag
               input#hashtag.form-control(type='text', name='hashtag', placeholder='Ex: matematica', value=(filtros && filtros.hashtag) || '')
+          if user
+            .col-3
+              .form-group
+                label(for='autor') Âmbito
+                select#autor.form-control(name='autor')
+                  option(value='' selected=!(filtros && filtros.autor)) Recursos públicos
+                  option(value=(user.sub || '') selected=((filtros && filtros.autor) === (user.sub || ''))) Meus recursos
           .col-3
             .form-group
               label(for='ano') Ano
