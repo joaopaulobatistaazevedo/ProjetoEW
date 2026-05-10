@@ -5,6 +5,10 @@ var axios = require('axios');
 const API         = process.env.API_URL     || 'http://localhost:3001';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
+function obterDestinoRecurso(req) {
+    return req.body && req.body.recurso ? `/recursos/${req.body.recurso}` : '/recursos';
+}
+
 // POST /posts — criar post (forward token)
 router.post('/', async (req, res) => {
     try {
@@ -12,9 +16,9 @@ router.post('/', async (req, res) => {
         await axios.post(`${API}/posts`, req.body, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        res.redirect(`/recursos/${req.body.recurso}`);
+        res.redirect(obterDestinoRecurso(req));
     } catch (err) {
-        res.redirect('back');
+        res.redirect(obterDestinoRecurso(req));
     }
 });
 
@@ -25,9 +29,9 @@ router.post('/:id/comentarios', async (req, res) => {
         await axios.post(`${API}/posts/${req.params.id}/comentarios`, req.body, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        res.redirect('back');
+        res.redirect(obterDestinoRecurso(req));
     } catch (err) {
-        res.redirect('back');
+        res.redirect(obterDestinoRecurso(req));
     }
 });
 
@@ -39,9 +43,9 @@ router.post('/:id/apagar', async (req, res) => {
         await axios.delete(`${API}/posts/${req.params.id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        res.redirect(`/recursos/${recursoId}`);
+        res.redirect(recursoId ? `/recursos/${recursoId}` : '/recursos');
     } catch (err) {
-        res.redirect('back');
+        res.redirect(obterDestinoRecurso(req));
     }
 });
 

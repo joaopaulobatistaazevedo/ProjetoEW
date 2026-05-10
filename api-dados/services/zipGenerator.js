@@ -145,10 +145,7 @@ Status: OK
             // 1) manifest.json
             zipper.file('manifest.json', JSON.stringify(manifesto, null, 2));
 
-            // 2) BagIt: metadata basica do pacote
-            zipper.file('bagit.txt', 'BagIt-Version: 1.0\nTag-File-Character-Encoding: UTF-8\n');
-
-            // 3) Conteudos em /data/
+            // 2) Conteudos em /data/
             if (sip.ficheirosIncluidos && sip.ficheirosIncluidos.length > 0) {
                 for (const ficheiro of sip.ficheirosIncluidos) {
                     const nomeNoDIP = ficheiro.nomeNoDIP || ficheiro.name;
@@ -169,16 +166,7 @@ Status: OK
                 }
             }
 
-            // 4) Checksums BagIt
-            zipper.file('checksums.txt', this.gerarChecksumsContent(sip.ficheirosIncluidos || []));
-
-            // 5) Log apenas para DIP
-            if (tipo === 'DIP') {
-                zipper.file('disseminacao.log', 
-                    this.gerarLogDisseminacao(sip, opcoes.recursoId, opcoes.utilizadorId));
-            }
-
-            // 6) Compactar e devolver buffer
+            // 3) Compactar e devolver buffer
             console.log(`⚡ Comprimindo ${tipo}...`);
             const buffer = await zipper.generateAsync({
                 type: 'nodebuffer',

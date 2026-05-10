@@ -3,15 +3,19 @@ extends ../layout
 block content
   .container.py-6
     h1 Nova Notícia
+
+    if erro
+      .alert.alert-danger= erro
+
     form(method='POST', action='/noticias/novo')
       .form-group
         label(for='titulo') Título
-        input#titulo.form-control(type='text', name='titulo', required=true)
+        input#titulo.form-control(type='text', name='titulo', required=true, value=noticia.titulo)
       .form-group
         label(for='conteudo') Conteúdo
-        textarea#conteudo.form-control(name='conteudo')
+        textarea#conteudo.form-control(name='conteudo')= noticia.conteudo
       .form-group
         label(for='link') Link (opcional)
-        input#link.form-control(type='text', name='link')
+        input#link.form-control(type='text', name='link', value=noticia.link)
       .form-actions
         button.btn.btn-primary(type='submit') Criar

@@ -2,6 +2,8 @@ const path = require('path');
 const Recurso = require('../models/recurso');
 const Noticia = require('../models/noticia');
 const { obterTipoAtivoPorSlug, enriquecerComTipos } = require('../services/tiposRecursoService');
+const AdmZip = require('adm-zip');
+const zip = new AdmZip();
 
 // Normalize hashtags input into array of strings
 function normalizarHashtags(valor) {
@@ -99,12 +101,14 @@ const recursosController = {
         }
     },
 
-    // GET /recursos/:id/download — autenticado, respeita visibilidade
+    // GET /recursos/:id/download — retorna ZIP com todos os ficheiros do recurso
     downloadRecurso: async (req, res) => {
         try {
             const recurso = await Recurso.findById(req.params.id);
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
-            if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
+            if (!recurso.ficheiros || recurso.ficheiros.length === 0) {
+                return res.status(404).json({ erro: 'Sem ficheiros associados' });
+            }
 
             // Privado: apenas admin ou autor
             if (recurso.visibilidade === 'privado') {
@@ -113,29 +117,73 @@ const recursosController = {
                 }
             }
 
-            res.download(path.resolve(recurso.ficheiro));
+            // Criar ZIP com todos os ficheiros
+            
+            for (const ficheiro of recurso.ficheiros) {
+                try {
+                    const caminhoFicheiro = path.resolve(ficheiro.caminho);
+                    zip.addFile(path.basename(ficheiro.caminho), require('fs').readFileSync(caminhoFicheiro));
+                } catch (err) {
+                    console.error(`Erro ao adicionar ${ficheiro.nome} ao ZIP:`, err.message);
+                    // Continuar com próximos ficheiros
+                }
+            }
+
+            // Enviar ZIP
+            const zipBuffer = zip.toBuffer();
+            res.setHeader('Content-Type', 'application/zip');
+            res.setHeader('Content-Disposition', `attachment; filename="recurso_${recurso._id}.zip"`);
+            res.send(zipBuffer);
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
     },
 
-    // GET /recursos/:id/preview — devolve o ficheiro para visualização inline
+    // GET /recursos/:id/preview — retorna JSON com lista de todos os ficheiros
     previewRecurso: async (req, res) => {
         try {
             const recurso = await Recurso.findById(req.params.id);
             if (!recurso) return res.status(404).json({ erro: 'Recurso não encontrado' });
-            if (!recurso.ficheiro) return res.status(404).json({ erro: 'Sem ficheiro associado' });
+            if (!recurso.ficheiros || recurso.ficheiros.length === 0) {
+                return res.status(404).json({ erro: 'Sem ficheiros associados' });
+            }
 
-            const ficheiroPath = path.resolve(recurso.ficheiro);
-            res.sendFile(ficheiroPath);
+            // Retornar lista com metadados de todos os ficheiros
+            const ficheirosList = recurso.ficheiros.map((f, idx) => ({
+                indice: idx,
+                nome: f.nome,
+                tamanho: f.tamanho,
+                tipo: f.tipo,
+                checksum_sha256: f.checksum,
+                dataAdicionado: f.dataAdicionado,
+                versaoAIP: f.versaoAIP,
+                downloadUrl: `/recursos/${recurso._id}/ficheiro/${idx}`  // Para próxima fase
+            }));
+
+            res.json({
+                recursoId: recurso._id,
+                titulo: recurso.titulo,
+                ficheiros: ficheirosList,
+                totalFicheiros: ficheirosList.length
+            });
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
     },
 
-    // POST /recursos — criar (qualquer autenticado, será promovido a produtor)
+    // POST /recursos — criar (apenas metadados administrativos, sem ficheiro)
+    //  Recursos com ficheiros DEVEM ser criados via POST /ingestao/sip
     createRecurso: async (req, res) => {
         try {
+            // Rejeitar criação direta de recursos com ficheiro
+            if (req.file) {
+                return res.status(403).json({
+                    erro: 'Recursos com ficheiro devem ser criados via submissão de SIP',
+                    dica: 'Utilize POST /ingestao/sip para submeter um SIP com ficheiros',
+                    categoria: 'oais_architecture'
+                });
+            }
+
             const { titulo, subtitulo, tipo, dataCriacao, visibilidade, hashtags } = req.body;
 
             // Validações básicas
@@ -148,6 +196,7 @@ const recursosController = {
 
             const tags = normalizarHashtags(hashtags);
 
+            // Garantir que ficheiros é array vazio (metadados apenas)
             const recurso = await Recurso.create({
                 titulo,
                 subtitulo,
@@ -157,7 +206,7 @@ const recursosController = {
                 visibilidade,
                 hashtags: tags,
                 autor: req.user.id,
-                ficheiro: req.file ? req.file.path : null
+                ficheiros: []  // Sempre array vazio — ficheiros devem vir via SIP
             });
 
             // Promover utilizador a produtor se consumidor (nao bloqueia resposta)
@@ -177,9 +226,9 @@ const recursosController = {
             try {
                 const autorNome = req.user && (req.user.nome || req.user.username) ? (req.user.nome || req.user.username) : 'Um utilizador';
                 await Noticia.create({
-                    titulo: `Nova submissão: ${autorNome} - ${recurso.titulo}`,
+                    titulo: 'Novo recurso adicionado',
                     conteudo: `O produtor ${autorNome} submeteu o recurso "${recurso.titulo}".`,
-                    tipo: 'sistema',
+                    tipo: 'novo_recurso',
                     link: `/recursos/${recurso._id}`,
                     autorNome
                 });
@@ -195,6 +244,7 @@ const recursosController = {
     },
 
     // PUT /recursos/:id — editar (admin ou autor dono)
+    // Permite atualizar ficheiro com versionamento de AIP
     updateRecurso: async (req, res) => {
         try {
             const recurso = await Recurso.findById(req.params.id);
@@ -204,7 +254,7 @@ const recursosController = {
                 return res.status(403).json({ erro: 'Sem permissão' });
             }
 
-            // Sanitizar e validar campos atualizaveis
+            // Sanitizar e validar campos atualizaveis (metadados)
             const allowed = ['titulo','subtitulo','descricao','tipo','dataCriacao','visibilidade','hashtags'];
             const update = {};
             for (const k of allowed) {
@@ -225,13 +275,62 @@ const recursosController = {
                 update.tipo = tipoPermitido.slug;
             }
 
-            // Atualizar ficheiro se um novo foi enviado
+            // Permitir atualizar ficheiro com versionamento de AIP
             if (req.file) {
-                update.ficheiro = req.file.path;
+                try {
+                    const SIPProcessor = require('../services/sIPProcessor');
+                    const processor = new SIPProcessor();
+                    
+                    // Criar novo AIP versão
+                    const resultadoVersao = await processor.criarNovaVersaoAIP(
+                        recurso._id,
+                        req.user.id,
+                        req.file.path,
+                        'ficheiro_corrigido'
+                    );
+                    
+                    // Adicionar novo ficheiro ao array
+                    const crypto = require('crypto');
+                    const conteudo = await require('fs').promises.readFile(req.file.path);
+                    const checksum = crypto.createHash('sha256').update(conteudo).digest('hex');
+                    
+                    const novoFicheiro = {
+                        nome: req.file.originalname,
+                        caminho: `/uploads/recursos/${recurso._id}/data/${req.file.filename || req.file.originalname}`,
+                        tamanho: req.file.size,
+                        tipo: req.file.mimetype || 'application/octet-stream',
+                        checksum: checksum,
+                        dataAdicionado: new Date(),
+                        versaoAIP: resultadoVersao.versao
+                    };
+                    
+                    // Adicionar à array
+                    if (!update.ficheiros) {
+                        update.ficheiros = recurso.ficheiros || [];
+                    }
+                    update.ficheiros.push(novoFicheiro);
+                    
+                    // Registar na resposta
+                    update._aipVersao = resultadoVersao;
+                } catch (aipErr) {
+                    console.error('Erro ao criar versão AIP:', aipErr.message);
+                    return res.status(500).json({
+                        erro: 'Erro ao processar atualização de ficheiro',
+                        detalhes: aipErr.message,
+                        categoria: 'oais_versionamento'
+                    });
+                }
             }
 
             const atualizado = await Recurso.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
-            res.json(await enriquecerComTipos(atualizado));
+            const resposta = await enriquecerComTipos(atualizado);
+            
+            // Se criou versão AIP, adicionar à resposta
+            if (update._aipVersao) {
+                resposta._aipVersao = update._aipVersao;
+            }
+            
+            res.json(resposta);
         } catch (err) {
             res.status(500).json({ erro: err.message });
         }
@@ -288,7 +387,7 @@ const recursosController = {
                 await Noticia.create({
                     titulo: 'O novo top3 de recursos mais requisitados é ...',
                     conteudo: resumo || 'Ainda não existem recursos suficientes para construir o top3.',
-                    tipo: 'sistema',
+                    tipo: 'trending',
                     link: '/recursos?sort=mediaEstrelas',
                     autorNome: 'Sistema'
                 });

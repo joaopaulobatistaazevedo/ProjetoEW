@@ -1,0 +1,76 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .row.mb-6
+      .col-8
+        h1
+          i.fas.fa-inbox(style='margin-right: 0.75rem; color: var(--primary);')
+          span Submeter Recurso
+        p.text-muted Escolha uma das opções abaixo para submeter um novo recurso educativo.
+      .col-4.text-right
+        a.btn.btn-outline(href='/recursos/aips')
+          i.fas.fa-archive
+          span Ver AIPs
+
+    if erro
+      .alert.alert-danger
+        strong= erro
+        if detalhes
+          pre(style='white-space: pre-wrap; margin-top: 0.75rem;')= detalhes
+
+    if sucesso
+      .alert.alert-success
+        strong= sucesso
+
+    .row.mb-6
+      .col-6
+        .card
+          .card-header
+            i.fas.fa-form
+            span  Opção 1: Formulário Assistido
+          .card-body
+            p Preecha um formulário simples e carregue múltiplos ficheiros. Ideal para submissões rápidas e diretas.
+            ul.list-unstyled
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Preenchimento de metadados em forma
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Upload de múltiplos ficheiros
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Processamento automático de SIP
+            a.btn.btn-primary.mt-3(href='/recursos/ingestao-form')
+              i.fas.fa-arrow-right
+              span Usar Formulário
+
+      .col-6
+        .card
+          .card-header
+            i.fas.fa-file-archive
+            span  Opção 2: SIP ZIP
+          .card-body
+            p Carregue um pacote SIP já estruturado com manifesto e ficheiros. Ideal para migrações em lote.
+            ul.list-unstyled
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Pacote ZIP estruturado
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | manifesto.json incluído
+              li
+                i.fas.fa-check(style='color: var(--success); margin-right: 0.5rem;')
+                | Validação completa
+            a.btn.btn-primary.mt-3(href='/recursos/form')
+              i.fas.fa-arrow-right
+              span Usar SIP ZIP
+
+    .card.mt-4
+      .card-body
+        h3(style='margin-top: 0;') O que é verificado em ambos os modos
+        ul
+          li Estrutura e formato do pacote
+          li Manifesto e ficheiros declarados
+          li Metadados obrigatórios
+          li Consistência e segurança

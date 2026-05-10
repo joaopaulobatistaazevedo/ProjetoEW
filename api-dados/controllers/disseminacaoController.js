@@ -37,7 +37,7 @@ const disseminacaoController = {
             }
             
             // Response com headers de metadados
-            const nomeArquivo = `dip-${recursoId}-${Date.now()}.zip`;
+            const nomeArquivo = metadata.nomeArquivo || `dip-${recursoId}-${Date.now()}.zip`;
             
             res.setHeader('Content-Type', 'application/zip');
             res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
@@ -231,6 +231,90 @@ const disseminacaoController = {
             res.status(500).json({
                 status: 'erro',
                 mensagem: 'Erro ao exportar recursos',
+                erro: err.message
+            });
+        }
+    },
+
+    /**
+     * GET /disseminacao/recursos/:id/exportar?modo=X&ficheiros=...
+     * Suporta 3 modos: completo, subconjunto, individual
+     */
+    exportarComOpcoes: async (req, res) => {
+        try {
+            const { recursoId } = req.params;
+            const utilizadorId = req.user.id;
+            const papelUtilizador = req.user.role || 'consumidor';
+            
+            // Query params
+            const modo = req.query.modo || 'completo';  // completo | subconjunto | individual
+            const ficheirosParam = req.query.ficheiros;  // para subconjunto/individual
+            
+            // Validar modo
+            if (!['completo', 'subconjunto', 'individual'].includes(modo)) {
+                return res.status(400).json({
+                    status: 'erro',
+                    mensagem: `Modo inválido: ${modo}. Use: completo, subconjunto ou individual`
+                });
+            }
+            
+            // Validar parâmetros por modo
+            if (modo === 'subconjunto' && !ficheirosParam) {
+                return res.status(400).json({
+                    status: 'erro',
+                    mensagem: 'Modo "subconjunto" requer parâmetro "ficheiros" (ex: ?ficheiros=file1.pdf,file2.docx)'
+                });
+            }
+            
+            if (modo === 'individual' && !ficheirosParam) {
+                return res.status(400).json({
+                    status: 'erro',
+                    mensagem: 'Modo "individual" requer parâmetro "ficheiros" (ex: ?ficheiros=file.pdf)'
+                });
+            }
+            
+            // Exportar com opções
+            const opcoes = {
+                modo: modo,
+                ficheirosSolicitados: modo === 'completo' ? [] : (ficheirosParam || '').split(',')
+            };
+            
+            const { zipBuffer, metadata } = await disseminacaoService.exportarRecursoComOpcoes(
+                recursoId,
+                utilizadorId,
+                papelUtilizador,
+                opcoes
+            );
+            
+            // Registar auditoria
+            try {
+                await disseminacaoService.registarExportacao(
+                    metadata.aipId,
+                    recursoId,
+                    utilizadorId,
+                    { ...metadata, modo: modo },
+                    req
+                );
+            } catch (auditErr) {
+                console.warn('Aviso: Falha ao registar auditoria:', auditErr.message);
+            }
+            
+            // Response
+            const contentType = metadata.contentType || (modo === 'individual' ? 'application/octet-stream' : 'application/zip');
+            const nomeArquivo = metadata.nomeArquivo || `dip-${recursoId}-${modo}-${Date.now()}.zip`;
+            
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
+            res.setHeader('Content-Length', zipBuffer.length);
+            res.setHeader('X-DIP-Modo', modo);
+            
+            res.send(zipBuffer);
+            
+        } catch (err) {
+            console.error('Erro ao exportar com opções:', err);
+            res.status(err.statusCode || 500).json({
+                status: 'erro',
+                mensagem: err.message || 'Erro ao exportar recurso',
                 erro: err.message
             });
         }

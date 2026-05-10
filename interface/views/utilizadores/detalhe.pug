@@ -10,7 +10,7 @@ block content
 
     if utilizador
       - const isAdmin = user && user.role === 'admin'
-      - const isSelf = user && user.sub === utilizador._id
+      - const isSelf = user && String(user.sub) === String(utilizador._id)
       .row
         .col-4
           // Perfil
@@ -102,25 +102,14 @@ block content
                   button.btn.btn-primary(type='submit')
                     i.fas.fa-save
                     span Guardar Alterações
-                  if isAdmin
-                    form(method='POST', action='/utilizadores/' + utilizador._id + '/apagar', style='display: inline; margin-left: 0.5rem;')
-                      button.btn.btn-danger(type='submit', onclick='return confirm("Tem a certeza que deseja eliminar este utilizador?")')
-                        i.fas.fa-trash
-                        span Eliminar Utilizador
                   a.btn.btn-outline(href='/utilizadores')
                     i.fas.fa-arrow-left
                     span Voltar
-          else
-            .card
-              .card-body
-                .alert.alert-warning
-                  i.fas.fa-lock(style='margin-right: 0.5rem;')
-                  strong Permissões Insuficientes
-                  p Apenas administradores ou o proprio utilizador podem editar este perfil.
-                
-                a.btn.btn-outline(href='/utilizadores')
-                  i.fas.fa-arrow-left
-                  span Voltar
+                  if isAdmin
+                    form(method='POST', action='/utilizadores/' + utilizador._id + '/apagar', onsubmit='return confirm("Tem a certeza que deseja eliminar este utilizador?")', style='display: inline;')
+                      button.btn.btn-danger(type='submit')
+                        i.fas.fa-trash
+                        span Eliminar Utilizador
     else
       .card
         .card-body

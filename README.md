@@ -61,4 +61,6 @@ curl http://localhost:3002/
 
 - Os serviços partilham o mesmo `JWT_SECRET` para validar tokens.
 - Os uploads são guardados em `api-dados/uploads` por defeito.
+- A interface já inclui submissão SIP e histórico de AIPs.
+- A homepage mostra notícias automáticas com novos recursos, tendências e estatísticas.
 - Para desenvolvimento local, usar `npm start` em cada serviço é suficiente; para demonstração, usar Docker.

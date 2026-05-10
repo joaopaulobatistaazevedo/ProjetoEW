@@ -1,4 +1,5 @@
 const Post = require('../models/post');
+const Recurso = require('../models/recurso');
 
 const postsController = {
 
@@ -40,7 +41,6 @@ const postsController = {
 
             // Se associado a recurso, validar existencia e visibilidade
             if (recursoId) {
-                const Recurso = require('../models/recurso');
                 const recurso = await Recurso.findById(recursoId);
                 if (!recurso) return res.status(400).json({ error: 'Recurso associado não encontrado' });
                 if (recurso.visibilidade === 'privado' && req.user.role !== 'admin' && req.user.id !== recurso.autor.toString()) {

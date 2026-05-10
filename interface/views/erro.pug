@@ -7,24 +7,34 @@ block content
         .empty-state(style='padding: 4rem 1.5rem;')
           if status && status === 404
             i.fas.fa-search.empty-icon(style='color: var(--warning); font-size: 4rem;')
-            h1.empty-title Página Não Encontrada
-            p.empty-text
-              | Desculpe, a página que está procurando não existe (Erro 404).
+            h1.empty-title= titulo || 'Página Não Encontrada'
+            p.empty-text= mensagem || 'Desculpe, a página que está procurando não existe (Erro 404).'
           else if status && status === 500
             i.fas.fa-exclamation-triangle.empty-icon(style='color: var(--danger); font-size: 4rem;')
-            h1.empty-title Erro do Servidor
-            p.empty-text
-              | Desculpe, ocorreu um erro no servidor. Tente novamente mais tarde.
+            h1.empty-title= titulo || 'Erro do Servidor'
+            p.empty-text= mensagem || 'Desculpe, ocorreu um erro no servidor. Tente novamente mais tarde.'
           else
             i.fas.fa-exclamation-circle.empty-icon(style='color: var(--danger); font-size: 4rem;')
             h1.empty-title= titulo || 'Erro'
             p.empty-text= mensagem || 'Ocorreu um erro inesperado.'
           
-          // Acoes
+          // Contexto adicional (ex: detalhes de erro ou informação)
+          if detalhe
+            .mt-4(style='margin-top: 1.5rem; padding: 1rem; background: #f8f8f8; border-radius: 0.5rem; border-left: 3px solid var(--warning);')
+              small.text-muted= detalhe
+          
+          // Acoes personalizadas ou default
           .mt-6(style='margin-top: 3rem;')
-            a.btn.btn-primary(href='/')
-              i.fas.fa-home
-              span Voltar à Página Inicial
-            a.btn.btn-secondary(href='/' onclick='window.history.back();' style='margin-left: 1rem;')
-              i.fas.fa-arrow-left
-              span Voltar
+            if linkVoltar
+              a.btn.btn-primary(href=linkVoltar)
+                i.fas.fa-undo(style='margin-right: 0.5rem;')
+                span= botaoVolta || 'Voltar'
+            else
+              a.btn.btn-primary(href='/')
+                i.fas.fa-home(style='margin-right: 0.5rem;')
+                span Voltar à Página Inicial
+            
+            if !linkVoltar
+              a.btn.btn-secondary(onclick='window.history.back();' style='margin-left: 1rem; cursor: pointer;')
+                i.fas.fa-arrow-left(style='margin-right: 0.5rem;')
+                span Voltar
