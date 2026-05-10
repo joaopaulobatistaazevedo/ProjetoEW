@@ -56,6 +56,30 @@ function obterMensagemErroAPI(err, fallback = 'Ocorreu um erro ao contactar a AP
     return data.mensagem || data.erro || data.error || fallback;
 }
 
+function obterContentTypePreview(nome = '', contentTypeOriginal = '') {
+    const tipo = String(contentTypeOriginal || '').toLowerCase();
+    if (tipo && tipo !== 'application/octet-stream') return contentTypeOriginal;
+
+    const ext = path.extname(nome).toLowerCase();
+    const tipos = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.svg': 'image/svg+xml',
+        '.pdf': 'application/pdf',
+        '.txt': 'text/plain; charset=utf-8',
+        '.md': 'text/markdown; charset=utf-8',
+        '.csv': 'text/csv; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.xml': 'application/xml; charset=utf-8',
+        '.html': 'text/html; charset=utf-8'
+    };
+
+    return tipos[ext] || contentTypeOriginal || 'application/octet-stream';
+}
+
 async function encaminharRecursoSip(req) {
     const form = new FormData();
 
@@ -509,6 +533,41 @@ router.get('/:id', async (req, res) => {
         });
     } catch (err) {
         res.status(404).render('erro', { titulo: 'Erro', mensagem: 'Recurso não encontrado' });
+    }
+});
+
+// GET /recursos/:id/ficheiro/:indice — preview inline de um ficheiro individual
+router.get('/:id/ficheiro/:indice', async (req, res) => {
+    try {
+        const indice = Number(req.params.indice);
+
+        if (!Number.isInteger(indice) || indice < 0) {
+            return res.status(404).send('Ficheiro não encontrado');
+        }
+
+        const recursoRes = await axios.get(`${API}/recursos/${req.params.id}`);
+        const recurso = recursoRes.data || {};
+        const ficheiro = recurso.ficheiros && recurso.ficheiros[indice];
+
+        if (!ficheiro) {
+            return res.status(404).send('Ficheiro não encontrado');
+        }
+
+        const resposta = await axios.get(
+            `${API}/disseminacao/recursos/${req.params.id}/ficheiros/${indice}/exportar`,
+            {
+                headers: obterHeadersAutorizacao(req),
+                responseType: 'arraybuffer'
+            }
+        );
+
+        const buffer = Buffer.from(resposta.data);
+        res.setHeader('Content-Type', obterContentTypePreview(ficheiro.nome, resposta.headers['content-type']));
+        res.setHeader('Content-Disposition', `inline; filename="${String(ficheiro.nome || `ficheiro-${indice}`).replace(/"/g, '')}"`);
+        res.setHeader('Content-Length', buffer.length);
+        res.send(buffer);
+    } catch (err) {
+        res.status(err.response?.status || 500).send(obterMensagemErroAPI(err, 'Nao foi possivel pré-visualizar o ficheiro.'));
     }
 });
 

@@ -10,7 +10,7 @@ block content
 
     // Detalhe do recurso
     .row.mb-6
-      .col-8
+      .col-12
         .card
           .card-header
             h1= recurso.titulo
@@ -103,19 +103,17 @@ block content
                       - var f = recurso.ficheirosList[i];
                       .list-group-item(style='padding: 1rem; border-bottom: 1px solid var(--light-gray);')
                         .row
-                          .col-8
+                          .col-12
                             p(style='margin-bottom: 0.5rem;')
                               strong= f.nome
-                            p(style='margin-bottom: 0.25rem; color: var(--gray);')
-                              small
+                            .resource-meta(style='margin-bottom: 0.75rem;')
+                              span
                                 i.fas.fa-file
                                 |  Tamanho: #{(f.tamanho / 1024).toFixed(2)} KB
-                            p(style='margin-bottom: 0.25rem; color: var(--gray);')
-                              small
+                              span
                                 i.fas.fa-calendar
                                 |  Adicionado: #{new Date(f.dataAdicionado).toLocaleDateString('pt-PT')}
-                            p(style='margin-bottom: 0.75rem; color: var(--gray);')
-                              small
+                              span
                                 i.fas.fa-fingerprint
                                 |  Versão AIP: #{f.versaoAIP}
                             
@@ -128,9 +126,9 @@ block content
                             - var isTexto = ['txt','md','csv','json','xml','html'].includes(ext);
 
                             if isImagem
-                              img(src='/recursos/' + recurso._id + '/ficheiro/' + i, alt=f.nome, style='max-width: 100%; max-height: 300px; border-radius: 0.25rem; border: 1px solid var(--light-gray);')
+                              img(src='/recursos/' + recurso._id + '/ficheiro/' + i, alt=f.nome, style='max-width: 100%; max-height: 620px; border-radius: 0.25rem; border: 1px solid var(--light-gray);')
                             else if isPdf
-                              iframe(src='/recursos/' + recurso._id + '/ficheiro/' + i, style='width: 100%; height: 300px; border: 1px solid var(--light-gray); border-radius: 0.25rem;')
+                              iframe(src='/recursos/' + recurso._id + '/ficheiro/' + i, style='width: 100%; height: 760px; border: 1px solid var(--light-gray); border-radius: 0.25rem; overflow: auto;')
                             else if isVideo
                               video(controls, style='width: 100%; border-radius: 0.25rem;')
                                 source(src='/recursos/' + recurso._id + '/ficheiro/' + i, type='video/' + ext)
@@ -140,17 +138,16 @@ block content
                                 source(src='/recursos/' + recurso._id + '/ficheiro/' + i, type='audio/' + ext)
                                 | O seu browser não suporta a reprodução de áudio.
                             else if isTexto
-                              iframe(src='/recursos/' + recurso._id + '/ficheiro/' + i, style='width: 100%; height: 200px; border: 1px solid var(--light-gray); border-radius: 0.25rem; font-family: monospace;')
+                              iframe(src='/recursos/' + recurso._id + '/ficheiro/' + i, style='width: 100%; height: 620px; border: 1px solid var(--light-gray); border-radius: 0.25rem; font-family: monospace; overflow: auto;')
                             else
                               small.text-muted
                                 i.fas.fa-eye-slash(style='margin-right: 0.25rem;')
                                 | Pré-visualização não disponível para este tipo de ficheiro.
 
-                          .col-4(style='text-align: right;')
-                            a.btn.btn-sm.btn-outline-primary(href=f.downloadUrl, title='Descarregar este ficheiro')
-                              i.fas.fa-download
-                              |  Descarregar
-            
+                            div(style='margin-top: 0.75rem; text-align: right;')
+                              a.btn.btn-sm.btn-outline-primary(href=f.downloadUrl, title='Descarregar este ficheiro')
+                                i.fas.fa-download
+                                |  Descarregar
             - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
             - const podeExportar = user && (user.role === 'admin' || recurso.visibilidade === 'publico' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
 
@@ -163,39 +160,39 @@ block content
                   button.btn.btn-danger(type='submit')
                     i.fas.fa-trash-alt
                     span  Apagar Recurso
-      
-      .col-4
-        // Sidebar de informacoes
+    .row.mb-6
+      .col-12
         .card
           .card-header
             i.fas.fa-info-circle
             span  Informações
           .card-body
-            if recurso.tipo
-              div.mb-4
-                strong Tipo:
-                p= recurso.tipoNome || recurso.tipo
-            
-            if recurso.visibilidade
-              div.mb-4
-                strong Visibilidade:
-                p
-                  if recurso.visibilidade === 'publico'
-                    i.fas.fa-globe(style='color: var(--primary); margin-right: 0.25rem;')
-                    | Público
-                  else
-                    i.fas.fa-lock(style='color: var(--warning); margin-right: 0.25rem;')
-                    | Privado
-            
-            if recurso.autor
-              div.mb-4
-                strong Autor:
-                p= recurso.autor.nome
-            
-            if recurso.criatedAt
-              div
-                strong Criado em:
-                p= new Date(recurso.criatedAt).toLocaleDateString('pt-PT')
+            .row
+              if recurso.tipo
+                .col-3
+                  strong Tipo:
+                  p= recurso.tipoNome || recurso.tipo
+              
+              if recurso.visibilidade
+                .col-3
+                  strong Visibilidade:
+                  p
+                    if recurso.visibilidade === 'publico'
+                      i.fas.fa-globe(style='color: var(--primary); margin-right: 0.25rem;')
+                      | Público
+                    else
+                      i.fas.fa-lock(style='color: var(--warning); margin-right: 0.25rem;')
+                      | Privado
+              
+              if recurso.autor
+                .col-3
+                  strong Autor:
+                  p= recurso.autor.nome
+              
+              if recurso.criatedAt
+                .col-3
+                  strong Criado em:
+                  p= new Date(recurso.criatedAt).toLocaleDateString('pt-PT')
 
     .row.mb-6
       .col-12
