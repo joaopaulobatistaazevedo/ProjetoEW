@@ -269,6 +269,7 @@ block content
                 // Formulário de Comentário
                 if user
                   form.mt-3(method='POST', action='/posts/' + post._id + '/comentarios')
+                    input(type='hidden', name='recurso', value=recurso._id)
                     .row
                       .col-10
                         textarea.form-control(name='conteudo', placeholder='Deixe seu comentário...', required=true, style='resize: none; height: 60px;')
