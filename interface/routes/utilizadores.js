@@ -1,17 +1,16 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
+const { obterHeadersAutorizacao } = require('./utils');
 
 const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
 const API         = process.env.API_URL     || 'http://localhost:3001';
-const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
 // GET /utilizadores — listar todos (via auth service)
 router.get('/', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         const resposta = await axios.get(`${AUTH}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.render('utilizadores/lista', { titulo: 'Utilizadores', utilizadores: resposta.data });
     } catch (err) {
@@ -22,9 +21,8 @@ router.get('/', async (req, res) => {
 // GET /utilizadores/:id — ver um utilizador
 router.get('/:id', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         const resposta = await axios.get(`${AUTH}/${req.params.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
 
         const filtrosRecursos = { autor: req.params.id };
@@ -67,7 +65,6 @@ router.post('/:id/editar', async (req, res) => {
             return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
-        const token = req.cookies[COOKIE_NAME];
         const dados = { ...req.body };
 
         // A interface nao permite alterar passwords por este formulario.
@@ -79,7 +76,7 @@ router.post('/:id/editar', async (req, res) => {
         }
 
         await axios.put(`${AUTH}/${req.params.id}`, dados, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect(`/utilizadores/${req.params.id}`);
     } catch (err) {
@@ -94,9 +91,8 @@ router.post('/:id/apagar', async (req, res) => {
             return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
-        const token = req.cookies[COOKIE_NAME];
         await axios.delete(`${AUTH}/${req.params.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect('/utilizadores');
     } catch (err) {
@@ -111,9 +107,8 @@ router.post('/:id/promover/admin', async (req, res) => {
             return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
-        const token = req.cookies[COOKIE_NAME];
         await axios.put(`${AUTH}/${req.params.id}/promote/admin`, {}, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect(`/utilizadores/${req.params.id}`);
     } catch (err) {

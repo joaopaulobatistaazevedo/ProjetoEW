@@ -1,20 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
+const { obterHeadersAutorizacao } = require('./utils');
 
 const API = process.env.API_URL || 'http://localhost:3001';
-const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 const LIMITE_NOTICIAS_PAGINA = 20;
 const DIAS_NOTICIAS_PAGINA = 3;
-
-function obterToken(req) {
-    return req.cookies[COOKIE_NAME];
-}
-
-function obterHeadersAutorizacao(req) {
-    const token = obterToken(req);
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 // GET /noticias - lista publica
 router.get('/', async (req, res) => {
