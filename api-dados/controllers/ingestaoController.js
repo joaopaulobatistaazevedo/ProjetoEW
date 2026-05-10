@@ -1,6 +1,7 @@
 const ValidadorSIP = require('../services/validadorSIP');
 const SIPProcessor = require('../services/sIPProcessor');
 const AIP = require('../models/aip');
+const Recurso = require('../models/recurso');
 const fs = require('fs').promises;
 
 const ingestaoController = {
@@ -97,7 +98,7 @@ const ingestaoController = {
     listarAIPs: async (req, res) => {
         try {
             const { status, page, limit } = req.query;
-            const filtro = { produtor: req.user.id };
+            const filtro = req.user.role === 'admin' ? {} : { produtor: req.user.id };
 
             if (status && ['ok', 'erro'].includes(status)) {
                 filtro.status = status;

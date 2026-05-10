@@ -20,7 +20,7 @@ block content
                 i.fas.fa-tags
                 |  Tipos de recurso
           .card-footer
-            a.btn.btn-primary.btn-block(href='/recursos/tipos')
+            a.btn.btn-primary.btn-block(href='/admin/tiposrecursos')
               i.fas.fa-arrow-right
               span Abrir Gestão de Tipos
 
@@ -34,6 +34,20 @@ block content
                 i.fas.fa-archive
                 |  Ingestões
           .card-footer
-            a.btn.btn-primary.btn-block(href='/recursos/ingestao')
+            a.btn.btn-primary.btn-block(href='/admin/gestaoaips')
               i.fas.fa-arrow-right
               span Abrir Gestão de AIPs
+
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title Exportação de Dados
+            p.resource-subtitle Exportar dados administrativos da plataforma.
+            .resource-meta
+              span
+                i.fas.fa-file-export
+                |  Utilizadores, metadados e DIPs
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao')
+              i.fas.fa-arrow-right
+              span Abrir Exportação

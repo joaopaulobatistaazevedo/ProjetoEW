@@ -12,6 +12,7 @@ var postsRouter        = require('./routes/posts');
 var utilizadoresRouter = require('./routes/utilizadores');
 var authRouter         = require('./routes/auth');
 var noticiasRouter     = require('./routes/noticias');
+var adminRouter        = require('./routes/admin');
 
 var app = express();
 
@@ -67,6 +68,7 @@ app.use('/noticias', noticiasRouter);
 
 // Rotas protegidas
 app.use('/recursos',     verificarAutenticacao, recursosRouter);
+app.use('/admin',        verificarAutenticacao, adminRouter);
 app.use('/posts',        verificarAutenticacao, postsRouter);
 app.use('/utilizadores', verificarAutenticacao, utilizadoresRouter);
 

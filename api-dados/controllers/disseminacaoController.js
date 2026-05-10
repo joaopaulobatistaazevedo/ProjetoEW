@@ -84,13 +84,6 @@ const disseminacaoController = {
                 });
             }
             
-            if (recursoIds.length > 100) {
-                return res.status(400).json({
-                    status: 'erro',
-                    mensagem: 'Máximo de 100 recursos por lote'
-                });
-            }
-            
             // Verificar permissao para cada recurso
             const recursosPermitidos = [];
             for (const recursoId of recursoIds) {

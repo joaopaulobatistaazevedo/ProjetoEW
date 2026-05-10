@@ -5,7 +5,6 @@ var FormData = require('form-data');
 var path = require('path');
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
-const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 const { uploadSipZip } = require('../middleware/uploadZip');
 
@@ -255,80 +254,6 @@ router.post('/form', uploadSipZip, submeterRecursoSip);
 // Compatibilidade com formulários antigos que ainda submetam para /recursos/novo
 router.post('/novo', uploadSipZip, submeterRecursoSip);
 
-// GET /recursos/tipos — gestao de tipos de recurso (admin)
-router.get('/tipos', async (req, res) => {
-    if (!utilizadorEhAdmin(req)) {
-        return res.redirect('/recursos');
-    }
-
-    try {
-        const tiposRecurso = await obterTodosTiposAdmin(req);
-        res.render('recursos/tipos', {
-            titulo: 'Tipos de Recurso',
-            tiposRecurso,
-            formData: {},
-            sucesso: req.query.sucesso
-        });
-    } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar a gestao de tipos de recurso.')
-        });
-    }
-});
-
-// POST /recursos/tipos/novo — criar novo tipo (admin)
-router.post('/tipos/novo', async (req, res) => {
-    if (!utilizadorEhAdmin(req)) {
-        return res.redirect('/recursos');
-    }
-
-    try {
-        await axios.post(`${API}/tipos-recurso`, req.body, {
-            headers: obterHeadersAutorizacao(req)
-        });
-
-        res.redirect('/recursos/tipos?sucesso=tipo-criado');
-    } catch (err) {
-        let tiposRecurso = [];
-
-        try {
-            tiposRecurso = await obterTodosTiposAdmin(req);
-        } catch (tiposErr) {
-            tiposRecurso = [];
-        }
-
-        res.status(err.response?.status || 500).render('recursos/tipos', {
-            titulo: 'Tipos de Recurso',
-            tiposRecurso,
-            formData: req.body,
-            erro: obterMensagemErroAPI(err, 'Nao foi possivel criar o tipo de recurso.')
-        });
-    }
-});
-
-// POST /recursos/tipos/:id/estado — ativar/desativar tipo (admin)
-router.post('/tipos/:id/estado', async (req, res) => {
-    if (!utilizadorEhAdmin(req)) {
-        return res.redirect('/recursos');
-    }
-
-    try {
-        await axios.put(`${API}/tipos-recurso/${req.params.id}`, {
-            ativo: req.body.ativo
-        }, {
-            headers: obterHeadersAutorizacao(req)
-        });
-
-        res.redirect('/recursos/tipos?sucesso=estado-atualizado');
-    } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel atualizar o estado do tipo de recurso.')
-        });
-    }
-});
-
 // GET /recursos/aips — listar AIPs do utilizador
 router.get('/aips', async (req, res) => {
     try {
@@ -366,32 +291,6 @@ router.get('/aips/:sipId', async (req, res) => {
         res.status(err.response?.status || 500).render('erro', {
             titulo: 'Erro',
             mensagem: obterMensagemErroAPI(err, 'Nao foi possivel obter o detalhe do AIP.')
-        });
-    }
-});
-
-// GET /recursos/ingestao — vista administrativa para Ingestões (AIPs)
-router.get('/ingestao', async (req, res) => {
-    if (!utilizadorEhAdmin(req)) {
-        return res.redirect('/recursos/aips');
-    }
-
-    try {
-        const resposta = await axios.get(`${API}/ingestao/aips`, {
-            headers: obterHeadersAutorizacao(req),
-            params: req.query
-        });
-
-        res.render('recursos/aips', {
-            titulo: 'Ingestões (AIPs)',
-            aips: resposta.data.aips || [],
-            paginacao: resposta.data.paginacao || {},
-            admin: true
-        });
-    } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar as ingestões.')
         });
     }
 });
@@ -481,17 +380,6 @@ router.post('/ingestao-form', uploadMultipleFiles.array('ficheiros', 20), async 
             detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : ''
         });
     }
-});
-
-// GET /recursos/admin — hub de administração
-router.get('/admin', async (req, res) => {
-    if (!utilizadorEhAdmin(req)) {
-        return res.redirect('/recursos');
-    }
-
-    res.render('recursos/admin', {
-        titulo: 'Administração'
-    });
 });
 
 // GET /recursos/:id/editar — formulario de edicao de metadados
