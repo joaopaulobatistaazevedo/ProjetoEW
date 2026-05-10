@@ -496,6 +496,83 @@ router.get('/admin', async (req, res) => {
     });
 });
 
+// GET /recursos/:id/editar — formulario de edicao de metadados
+router.get('/:id/editar', async (req, res) => {
+    try {
+        const [recursoRes, tiposRecurso] = await Promise.all([
+            axios.get(`${API}/recursos/${req.params.id}`),
+            obterTiposAtivos()
+        ]);
+
+        const recurso = recursoRes.data || {};
+        const autorId = recurso.autor && (recurso.autor._id || recurso.autor);
+        const podeEditar = req.user && (
+            req.user.role === 'admin' ||
+            (req.user.role === 'produtor' && String(req.user.sub || req.user.id) === String(autorId))
+        );
+
+        if (!podeEditar) {
+            return res.status(403).render('erro', {
+                titulo: 'Sem permissão',
+                mensagem: 'Não tem permissão para editar este recurso.',
+                linkVoltar: `/recursos/${req.params.id}`,
+                botaoVolta: 'Voltar ao Recurso'
+            });
+        }
+
+        res.render('recursos/editar', {
+            titulo: 'Editar Recurso',
+            recurso,
+            tiposRecurso
+        });
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro',
+            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar o recurso para edicao.'),
+            linkVoltar: '/recursos',
+            botaoVolta: 'Voltar a Recursos'
+        });
+    }
+});
+
+// POST /recursos/:id/editar — atualizar metadados
+router.post('/:id/editar', async (req, res) => {
+    const payload = {
+        titulo: req.body.titulo,
+        subtitulo: req.body.subtitulo || '',
+        descricao: req.body.descricao || '',
+        tipo: req.body.tipo,
+        visibilidade: req.body.visibilidade || 'publico',
+        hashtags: req.body.hashtags || ''
+    };
+
+    if (req.body.dataCriacao) {
+        payload.dataCriacao = req.body.dataCriacao;
+    }
+
+    try {
+        await axios.put(`${API}/recursos/${req.params.id}`, payload, {
+            headers: obterHeadersAutorizacao(req)
+        });
+
+        res.redirect(`/recursos/${req.params.id}`);
+    } catch (err) {
+        let tiposRecurso = [];
+        try {
+            tiposRecurso = await obterTiposAtivos();
+        } catch (tiposErr) {
+            tiposRecurso = [];
+        }
+
+        res.status(err.response?.status || 500).render('recursos/editar', {
+            titulo: 'Editar Recurso',
+            recurso: { ...req.body, _id: req.params.id },
+            tiposRecurso,
+            erro: obterMensagemErroAPI(err, 'Nao foi possivel atualizar o recurso.')
+        });
+    }
+});
+
 // GET /recursos/:id — detalhe + posts
 router.get('/:id', async (req, res) => {
     try {

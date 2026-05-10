@@ -1,0 +1,84 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .mb-4
+      a(href='/recursos/' + recurso._id, style='color: var(--gray);')
+        i.fas.fa-arrow-left(style='margin-right: 0.25rem;')
+        span Voltar ao Recurso
+
+    .row
+      .col-8
+        .card
+          .card-header
+            h1 Editar Recurso
+            if recurso.titulo
+              p.resource-subtitle= recurso.titulo
+
+          .card-body
+            if erro
+              .alert.alert-danger
+                i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+                strong= erro
+
+            - const dataCriacao = recurso.dataCriacao ? new Date(recurso.dataCriacao).toISOString().split('T')[0] : '';
+            - const hashtagsValor = Array.isArray(recurso.hashtags) ? recurso.hashtags.join(', ') : (recurso.hashtags || '');
+
+            form(method='POST', action='/recursos/' + recurso._id + '/editar')
+              .form-group
+                label(for='titulo') Título
+                input#titulo.form-control(type='text', name='titulo', required=true, value=recurso.titulo || '')
+
+              .form-group
+                label(for='subtitulo') Subtítulo
+                input#subtitulo.form-control(type='text', name='subtitulo', value=recurso.subtitulo || '')
+
+              .form-group
+                label(for='descricao') Descrição
+                textarea#descricao.form-control(name='descricao', rows='6')= recurso.descricao || ''
+
+              .row
+                .col-6
+                  .form-group
+                    label(for='tipo') Tipo
+                    select#tipo.form-control(name='tipo', required=true)
+                      option(value='') Selecione um tipo
+                      each tipo in (tiposRecurso || [])
+                        option(value=tipo.slug selected=((recurso.tipo || '') === tipo.slug))= tipo.nome
+                .col-6
+                  .form-group
+                    label(for='dataCriacao') Data de criação
+                    input#dataCriacao.form-control(type='date', name='dataCriacao', value=dataCriacao)
+
+              .form-group
+                label(for='hashtags') Hashtags
+                input#hashtags.form-control(type='text', name='hashtags', placeholder='ex: web, matemática, avaliação', value=hashtagsValor)
+
+              .form-group
+                label Visibilidade
+                .form-check
+                  input#publico.form-check-input(type='radio', name='visibilidade', value='publico', checked=(recurso.visibilidade || 'publico') === 'publico')
+                  label.form-check-label(for='publico') Público
+                .form-check
+                  input#privado.form-check-input(type='radio', name='visibilidade', value='privado', checked=recurso.visibilidade === 'privado')
+                  label.form-check-label(for='privado') Privado
+
+              .form-actions
+                button.btn.btn-primary(type='submit')
+                  i.fas.fa-save
+                  span Guardar Alterações
+                a.btn.btn-outline(href='/recursos/' + recurso._id)
+                  i.fas.fa-times
+                  span Cancelar
+
+      .col-4
+        .card
+          .card-header
+            i.fas.fa-circle-info
+            span  Notas
+          .card-body
+            p Só são editados os metadados do recurso. Os ficheiros preservados mantêm-se associados ao AIP existente.
+            if recurso.ficheiros && recurso.ficheiros.length
+              p
+                strong Ficheiros:
+                |  #{recurso.ficheiros.length}

@@ -260,7 +260,7 @@ const recursosController = {
             for (const k of allowed) {
                 if (req.body[k] !== undefined) update[k] = req.body[k];
             }
-            if (update.hashtags) {
+            if (update.hashtags !== undefined) {
                 update.hashtags = normalizarHashtags(update.hashtags);
             }
 
