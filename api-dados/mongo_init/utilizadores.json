@@ -14,5 +14,21 @@
     "_id": {
       "$oid": "000000000000000000000001"
     }
+  },
+  {
+    "username": "bob",
+    "nome": "Bob",
+    "email": "bob@local",
+    "password": "$2a$10$7ekX4y9K5w/GKYD5S443iOoJ55c/FkH0HbV3NOx65//Oyrls0UDfe",
+    "role": "consumidor",
+    "filiacao": "Universidade do Minho",
+    "dataRegisto": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "dataUltimoAcesso": null,
+    "ativo": true,
+    "_id": {
+      "$oid": "000000000000000000000002"
+    }
   }
 ]
