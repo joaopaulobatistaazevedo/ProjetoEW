@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
-const { obterHeadersAutorizacao } = require('./utils');
+const { obterHeadersAutorizacao, renderErroVista } = require('./utils');
 
 const API = process.env.API_URL || 'http://localhost:3001';
 const LIMITE_NOTICIAS_PAGINA = 20;
@@ -42,11 +42,9 @@ router.post('/novo', async (req, res) => {
         await axios.post(`${API}/noticias`, { ...req.body, tipo: 'admin' }, { headers: obterHeadersAutorizacao(req) });
         res.redirect('/noticias');
     } catch (err) {
-        const erro = err.response?.data?.erro || err.message;
-        res.status(err.response?.status || 500).render('noticias/form', {
-            titulo: 'Nova Notícia',
+        renderErroVista(res, err, err.response?.data?.erro || 'Nao foi possivel criar a notícia.', 'noticias/form', {
             noticia: req.body,
-            erro
+            titulo: 'Nova Notícia'
         });
     }
 });

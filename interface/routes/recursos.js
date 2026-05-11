@@ -1,67 +1,18 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
-var FormData = require('form-data');
+const { uploadSipZip, uploadMultipleFiles } = require('../middleware/uploadZip');
 const {
     obterHeadersAutorizacao,
     obterMensagemErroAPI,
-    obterContentTypePreview
+    obterContentTypePreview,
+    obterTiposAtivos,
+    encaminharSipZip,
+    submeterRecursoSip,
+    renderErroVista
 } = require('./utils');
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
-const { uploadSipZip } = require('../middleware/uploadZip');
-
-async function obterTiposAtivos() {
-    const resposta = await axios.get(`${API}/tipos-recurso`);
-    return resposta.data;
-}
-
-async function encaminharRecursoSip(req) {
-    const form = new FormData();
-
-    // Adicionar arquivo ZIP com o nome 'file' que o backend espera
-    if (req.file) {
-        form.append('file', req.file.buffer, {
-            filename: req.file.originalname || 'recurso.zip',
-            contentType: req.file.mimetype || 'application/zip'
-        });
-    }
-
-    return axios.post(`${API}/ingestao/sip`, form, {
-        headers: {
-            ...obterHeadersAutorizacao(req),
-            ...form.getHeaders()
-        },
-        maxBodyLength: Infinity,
-        maxContentLength: Infinity
-    });
-}
-
-async function encaminharSipZip(req) {
-    const form = new FormData();
-
-    if (req.file) {
-        form.append('file', req.file.buffer, {
-            filename: req.file.originalname || 'sip.zip',
-            contentType: req.file.mimetype || 'application/zip'
-        });
-    }
-
-    Object.entries(req.body || {}).forEach(([chave, valor]) => {
-        if (valor !== undefined && valor !== null) {
-            form.append(chave, valor);
-        }
-    });
-
-    return axios.post(`${API}/ingestao/sip`, form, {
-        headers: {
-            ...obterHeadersAutorizacao(req),
-            ...form.getHeaders()
-        },
-        maxBodyLength: Infinity,
-        maxContentLength: Infinity
-    });
-}
 
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
@@ -79,7 +30,7 @@ router.get('/', async (req, res) => {
         }
 
         const recursosRes = await axios.get(`${API}/recursos`, { params: filtros });
-        const tiposRecurso = await obterTiposAtivos();
+        const tiposRecurso = await obterTiposAtivos(API);
 
         res.render('recursos/lista', {
             titulo: 'Recursos',
@@ -110,7 +61,7 @@ router.get('/ingestao-sip', async (req, res) => {
 // POST /recursos/ingestao-sip — submeter SIP para a API
 router.post('/ingestao-sip', uploadSipZip, async (req, res) => {
     try {
-        const resposta = await encaminharSipZip(req);
+        const resposta = await encaminharSipZip(req, API);
         const body = resposta.data || {};
 
         if (body.status === 'ok') {
@@ -144,7 +95,7 @@ router.get('/novo', async (req, res) => {
 // GET /recursos/form — submissão de SIP ZIP
 router.get('/form', async (req, res) => {
     try {
-        const tiposRecurso = await obterTiposAtivos();
+        const tiposRecurso = await obterTiposAtivos(API);
         res.render('recursos/form', {
             titulo: 'Submeter Recurso',
             recurso: null,
@@ -158,61 +109,11 @@ router.get('/form', async (req, res) => {
     }
 });
 
-async function submeterRecursoSip(req, res) {
-    try {
-        const resposta = await encaminharRecursoSip(req);
-        const body = resposta.data || {};
-
-        if (body.status === 'ok') {
-            return res.redirect(`/recursos?autor=${req.user.sub || ''}`);
-        }
-
-        let tiposRecurso = [];
-        try {
-            tiposRecurso = await obterTiposAtivos();
-        } catch (tiposErr) {
-            tiposRecurso = [];
-        }
-
-        // Extrair erros específicos
-        let mensagensErro = [];
-        if (body.erros && Array.isArray(body.erros)) {
-            mensagensErro = body.erros.map(e => `${e.categoria}: ${e.mensagem}`);
-        }
-
-        return res.status(400).render('recursos/form', {
-            titulo: 'Submeter Recurso',
-            recurso: req.body,
-            tiposRecurso,
-            erro: body.mensagem || 'SIP rejeitado - validação falhou',
-            erros: mensagensErro,
-            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : ''
-        });
-    } catch (err) {
-        let tiposRecurso = [];
-        try {
-            tiposRecurso = await obterTiposAtivos();
-        } catch (tiposErr) {
-            tiposRecurso = [];
-        }
-
-        const body = err.response && err.response.data ? err.response.data : {};
-        return res.status(err.response?.status || 500).render('recursos/form', {
-            titulo: 'Submeter Recurso',
-            recurso: req.body,
-            tiposRecurso,
-            erro: body.mensagem || obterMensagemErroAPI(err, 'Erro ao submeter o recurso.'),
-            erros: body.erros ? body.erros.map(e => `${e.categoria}: ${e.mensagem}`) : [],
-            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : (body.erros ? JSON.stringify(body.erros, null, 2) : '')
-        });
-    }
-}
-
 // POST /recursos/form — submeter recurso com SIP
-router.post('/form', uploadSipZip, submeterRecursoSip);
+router.post('/form', uploadSipZip, (req, res) => submeterRecursoSip(req, res, API));
 
 // Compatibilidade com formulários antigos que ainda submetam para /recursos/novo
-router.post('/novo', uploadSipZip, submeterRecursoSip);
+router.post('/novo', uploadSipZip, (req, res) => submeterRecursoSip(req, res, API));
 
 // GET /recursos/aips — listar AIPs do utilizador
 router.get('/aips', async (req, res) => {
@@ -248,10 +149,7 @@ router.get('/aips/:sipId', async (req, res) => {
             aip: resposta.data.aip
         });
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel obter o detalhe do AIP.')
-        });
+        renderErroVista(res, err, 'Nao foi possivel obter o detalhe do AIP.');
     }
 });
 
@@ -262,22 +160,18 @@ router.get('/ingestao-form', async (req, res) => {
     }
 
     try {
-        const tiposRecurso = await obterTiposAtivos();
+        const tiposRecurso = await obterTiposAtivos(API);
         res.render('recursos/ingestao-form', {
             titulo: 'Submeter Recurso — Formulário Assistido',
             formData: {},
             tiposRecurso
         });
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar os tipos de recurso.')
-        });
+        renderErroVista(res, err, 'Nao foi possivel carregar os tipos de recurso.');
     }
 });
 
 // POST /recursos/ingestao-form — submeter formulário + ficheiros para gerar SIP
-const { uploadMultipleFiles } = require('../middleware/uploadZip');
 router.post('/ingestao-form', uploadMultipleFiles.array('ficheiros', 20), async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
@@ -325,7 +219,7 @@ router.post('/ingestao-form', uploadMultipleFiles.array('ficheiros', 20), async 
         console.error('Erro ao submeter formulário:', err.message);
         let tiposRecurso = [];
         try {
-            tiposRecurso = await obterTiposAtivos();
+            tiposRecurso = await obterTiposAtivos(API);
         } catch (tiposErr) {
             tiposRecurso = [];
         }
@@ -346,7 +240,7 @@ router.post('/ingestao-form', uploadMultipleFiles.array('ficheiros', 20), async 
 router.get('/:id/editar', async (req, res) => {
     try {
         const recursoRes = await axios.get(`${API}/recursos/${req.params.id}`);
-        const tiposRecurso = await obterTiposAtivos();
+        const tiposRecurso = await obterTiposAtivos(API);
 
         const recurso = recursoRes.data || {};
         const autorId = recurso.autor && (recurso.autor._id || recurso.autor);
@@ -370,9 +264,7 @@ router.get('/:id/editar', async (req, res) => {
             tiposRecurso
         });
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar o recurso para edicao.'),
+        renderErroVista(res, err, 'Nao foi possivel carregar o recurso para edicao.', 'erro', {
             linkVoltar: '/recursos',
             botaoVolta: 'Voltar a Recursos'
         });
@@ -431,7 +323,7 @@ router.post('/:id/editar', uploadMultipleFiles.array('ficheirosNovos', 20), asyn
     } catch (err) {
         let tiposRecurso = [];
         try {
-            tiposRecurso = await obterTiposAtivos();
+            tiposRecurso = await obterTiposAtivos(API);
         } catch (tiposErr) {
             tiposRecurso = [];
         }
@@ -537,9 +429,8 @@ router.get('/:id/ficheiros/:indice/download', async (req, res) => {
 
         res.send(Buffer.from(resposta.data));
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
+        renderErroVista(res, err, 'Nao foi possivel descarregar o ficheiro solicitado.', 'erro', {
             titulo: 'Erro ao descarregar ficheiro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel descarregar o ficheiro solicitado.'),
             linkVoltar: `/recursos/${req.params.id}`,
             botaoVolta: 'Voltar ao Recurso'
         });
@@ -565,9 +456,8 @@ router.get('/:id/download', async (req, res) => {
 
         res.send(Buffer.from(resposta.data));
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
+        renderErroVista(res, err, 'Nao foi possivel descarregar os ficheiros do recurso.', 'erro', {
             titulo: 'Erro ao descarregar recurso',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel descarregar os ficheiros do recurso.'),
             linkVoltar: `/recursos/${req.params.id}`,
             botaoVolta: 'Voltar ao Recurso'
         });

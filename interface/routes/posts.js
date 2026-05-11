@@ -1,13 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
-const { obterHeadersAutorizacao } = require('./utils');
+const { obterHeadersAutorizacao, obterDestinoRecurso } = require('./utils');
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
-
-function obterDestinoRecurso(req) {
-    return req.body && req.body.recurso ? `/recursos/${req.body.recurso}` : '/recursos';
-}
 
 // POST /posts — criar post (forward token)
 router.post('/', async (req, res) => {
