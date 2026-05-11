@@ -140,6 +140,39 @@ const swaggerSpec = {
                     '401': { description: 'Nao autenticado' }
                 }
             }
+        },
+        '/users/{id}/promote/produtor': {
+            put: {
+                summary: 'Promover utilizador a produtor',
+                description: 'O proprio utilizador pode ser promovido de consumidor para produtor; admin tambem pode promover.',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                responses: {
+                    '200': { description: 'Utilizador promovido a produtor' },
+                    '400': { description: 'Utilizador ja e produtor ou admin' },
+                    '401': { description: 'Nao autenticado' },
+                    '403': { description: 'Sem permissao' },
+                    '404': { description: 'Utilizador nao encontrado' }
+                }
+            }
+        },
+        '/users/{id}/promote/admin': {
+            put: {
+                summary: 'Promover utilizador a admin',
+                description: 'Apenas administradores podem promover outros utilizadores a admin.',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+                ],
+                responses: {
+                    '200': { description: 'Utilizador promovido a admin' },
+                    '401': { description: 'Nao autenticado' },
+                    '403': { description: 'Apenas admin' },
+                    '404': { description: 'Utilizador nao encontrado' }
+                }
+            }
         }
     }
 };

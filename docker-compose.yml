@@ -8,6 +8,7 @@ services:
       - JWT_SECRET=jcr_secret_2026
       - COOKIE_NAME=token
       - INTERFACE_URL=http://interface:3000
+      - INTERNAL_NEWS_SECRET=jcr_internal_news_2026
     depends_on:
       - mongodb_api
     volumes:
@@ -26,6 +27,7 @@ services:
       - COOKIE_NAME=token
       - SWAGGER_URL=http://localhost:3002
       - INTERFACE_URL=http://interface:3000
+      - INTERNAL_NEWS_SECRET=jcr_internal_news_2026
     depends_on:
       - mongodb_api
     networks:
@@ -41,6 +43,7 @@ services:
       - AUTH_URL=http://auth:2623/users
       - COOKIE_NAME=token
       - JWT_SECRET=jcr_secret_2026
+      - INTERNAL_NEWS_SECRET=jcr_internal_news_2026
     depends_on:
       - api-dados
       - auth

@@ -36,6 +36,23 @@ async function criarNoticiaSeNaoExistir(noticia, filtro = null) {
     return Noticia.create(noticia);
 }
 
+async function atualizarNoticiaAutomatica(filtro, noticia) {
+    return Noticia.findOneAndUpdate(
+        filtro,
+        {
+            $set: {
+                ...noticia,
+                dataCriacao: new Date()
+            }
+        },
+        {
+            upsert: true,
+            new: true,
+            setDefaultsOnInsert: true
+        }
+    );
+}
+
 async function gerarNoticiasAutomaticas(diasAnalise = null) {
     const agora = new Date();
     const desde = diasAnalise ? new Date(agora.getTime() - diasAnalise * 24 * 60 * 60 * 1000) : null;
@@ -102,18 +119,16 @@ async function gerarNoticiasAutomaticas(diasAnalise = null) {
 
     if (destaqueTipo.length > 0) {
         const tipo = await TipoRecurso.findOne({ slug: destaqueTipo[0]._id }).select('nome slug');
-        await criarNoticiaSeNaoExistir({
+        await atualizarNoticiaAutomatica({
+            titulo: 'Tipo em destaque',
+            tipo: 'tipo_destaque',
+            link: '/recursos'
+        }, {
             titulo: 'Tipo em destaque',
             conteudo: `${tipo ? tipo.nome : destaqueTipo[0]._id} lidera com ${destaqueTipo[0].total} novos recursos esta semana.`,
             tipo: 'tipo_destaque',
             link: '/recursos',
-            dataCriacao: agora,
             autorNome: 'Sistema'
-        }, {
-            titulo: 'Tipo em destaque',
-            tipo: 'tipo_destaque',
-            link: '/recursos',
-            dataCriacao: { $gte: hoje }
         });
     }
 
@@ -123,17 +138,16 @@ async function gerarNoticiasAutomaticas(diasAnalise = null) {
         { $group: { _id: null, media: { $avg: '$mediaEstrelas' } } }
     ]);
 
-    await criarNoticiaSeNaoExistir({
+    await atualizarNoticiaAutomatica({
+        titulo: 'Estatísticas da plataforma',
+        tipo: 'stats',
+        link: '/recursos'
+    }, {
         titulo: 'Estatísticas da plataforma',
         conteudo: `${totalRecursos} recursos publicados em ${totalTipos} tipos ativos. Média global de ${Number(mediaEstrelas[0]?.media || 0).toFixed(1)} estrelas.`,
         tipo: 'stats',
         link: '/recursos',
-        dataCriacao: agora,
         autorNome: 'Sistema'
-    }, {
-        titulo: 'Estatísticas da plataforma',
-        tipo: 'stats',
-        dataCriacao: { $gte: hoje }
     });
 
     if (totalRecursos > 0 && totalRecursos % 10 === 0) {

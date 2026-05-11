@@ -9,7 +9,7 @@ const app = express();
 
 // Config
 const PORT      = process.env.PORT      || 2623;
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/auth_service';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/recursos_educativos';
 
 async function ligarMongoComRetry(tentativas = 20, intervaloMs = 3000) {
     let ultimoErro = null;

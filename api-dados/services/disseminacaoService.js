@@ -58,6 +58,15 @@ function sanitizarNomeArquivo(nome = '') {
         .toLowerCase();
 }
 
+function caminhoAbsolutoDeUpload(caminhoGuardado = '') {
+    const relativo = String(caminhoGuardado).replace(/^\/+/, '');
+    const semUploads = relativo.startsWith('uploads/')
+        ? relativo.substring('uploads/'.length)
+        : relativo;
+
+    return path.join(__dirname, '..', 'uploads', semUploads);
+}
+
 async function localizarFicheiroPreservado(baseDir, nomePedido) {
     const caminhoDireto = path.join(baseDir, nomePedido);
 
@@ -298,7 +307,9 @@ const disseminacaoService = {
             let conteudoOriginal = null;
 
             try {
-                caminhoLocal = await localizarFicheiroPreservado(pastaData, ficheiro.name);
+                caminhoLocal = ficheiro.path
+                    ? caminhoAbsolutoDeUpload(ficheiro.path)
+                    : await localizarFicheiroPreservado(pastaData, ficheiro.name);
                 conteudoOriginal = await fs.readFile(caminhoLocal);
             } catch (err) {
                 conteudoOriginal = await obterConteudoDoSIPOriginal(aip, ficheiro.name);
@@ -664,123 +675,57 @@ const disseminacaoService = {
     },
 
     /**
-     * Exportar recurso com opções (modo: completo, subconjunto, individual)
+     * Exporta um único ficheiro preservado do AIP, sem empacotar em ZIP.
      */
-    exportarRecursoComOpcoes: async function(recursoId, utilizadorId, papelUtilizador, opcoes = {}) {
-        try {
-            // 1. Carregar contexto
-            const contexto = await this.carregarContextoRecurso(recursoId);
-            
-            if (!contexto.aip) {
-                const erro = new Error(`AIP não encontrado para recurso ${recursoId}`);
-                erro.statusCode = 404;
-                throw erro;
-            }
+    exportarFicheiroIndividual: async function(recursoId, indice, utilizadorId, papelUtilizador = 'consumidor') {
+        const tempoInicio = Date.now();
+        const { aip, recurso, manifesto } = await this.carregarContextoRecurso(recursoId);
+        const ficheirosManifesto = Array.isArray(manifesto.files) ? manifesto.files : [];
 
-            // 2. Verificar permissões
-            const temPermissao = await verificacaoPermissoes.podeExportarRecurso(
-                recursoId,
-                utilizadorId,
-                papelUtilizador
-            );
-
-            if (!temPermissao.temPermissao) {
-                const erro = new Error('Sem permissão para exportar este recurso');
-                erro.statusCode = 403;
-                throw erro;
-            }
-
-            // 3. Filtrar ficheiros conforme modo
-            const { ficheirosIncluidos, ficheirosExcluidos } = 
-                await verificacaoPermissoes.filtrarFicheirosParaDIP(
-                    contexto.aip,
-                    utilizadorId,
-                    papelUtilizador,
-                    opcoes
-                );
-
-            // 4. Exportar conforme modo
-            let zipBuffer;
-            let contentType = 'application/zip';
-            let nomeArquivo = `dip-${recursoId}`;
-
-            const modo = opcoes.modo || 'completo';
-
-            if (modo === 'individual' && ficheirosIncluidos.length === 1) {
-                // Modo individual: retorna ficheiro raw
-                const preparados = await this.prepararFicheirosParaExportacao(
-                    contexto.aip,
-                    ficheirosIncluidos,
-                    'original'
-                );
-                const ficheiro = preparados[0];
-                zipBuffer = ficheiro.conteudoBuffer || await fs.readFile(ficheiro.caminhoLocal);
-                contentType = ficheiro.type || 'application/octet-stream';
-                nomeArquivo = ficheiro.name;
-            } else if (modo === 'subconjunto' || modo === 'completo') {
-                // Modo subconjunto ou completo: retorna ZIP
-                const JSZip = require('jszip');
-                const zip = new JSZip();
-                const preparados = await this.prepararFicheirosParaExportacao(
-                    contexto.aip,
-                    ficheirosIncluidos,
-                    'original'
-                );
-
-                // Adicionar ficheiros
-                for (const ficheiro of preparados) {
-                    const conteudo = ficheiro.conteudoBuffer || await fs.readFile(ficheiro.caminhoLocal);
-                    zip.file(ficheiro.name, conteudo);
-                }
-
-                // Adicionar metadados
-                const metadadosDIP = {
-                    recursoId: contexto.recurso._id.toString(),
-                    titulo: contexto.recurso.titulo,
-                    modo: modo,
-                    dataExportacao: new Date().toISOString(),
-                    ficheirosIncluidos: preparados.map(f => ({
-                        nome: f.name,
-                        tamanho: f.size,
-                        tipo: f.type,
-                        checksum: f.checksum_sha256
-                    })),
-                    ficheirosExcluidos: ficheirosExcluidos.map(f => f.name || f),
-                    totalFicheiros: ficheirosIncluidos.length
-                };
-
-                zip.file('METADADOS-DIP.json', JSON.stringify(metadadosDIP, null, 2));
-
-                zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-                nomeArquivo = `dip-${recursoId}-${modo}`;
-            } else {
-                throw new Error(`Modo desconhecido: ${modo}`);
-            }
-
-            // 5. Calcular checksum
-            const crypto = require('crypto');
-            const checksumDIP = crypto.createHash('sha256').update(zipBuffer).digest('hex');
-
-            // 6. Preparar metadados de resposta
-            const metadata = {
-                recursoId: recursoId,
-                aipId: contexto.aip._id.toString(),
-                sipId: contexto.aip.sipId,
-                tamanhoZIP: zipBuffer.length,
-                checksumDIP: checksumDIP,
-                nomeArquivo: modo === 'individual'
-                    ? nomeArquivo
-                    : `${nomeArquivo}-${Date.now()}.zip`,
-                contentType: contentType,
-                modo: modo,
-                ficheirosIncluidos: ficheirosIncluidos.length
-            };
-
-            return { zipBuffer, metadata };
-
-        } catch (err) {
-            throw err;
+        if (!Number.isInteger(indice) || indice < 0 || indice >= ficheirosManifesto.length) {
+            throw criarErro('Ficheiro não encontrado no AIP', 404);
         }
+
+        const ficheiroPedido = ficheirosManifesto[indice];
+        const filtro = await verificacaoPermissoes.filtrarFicheirosParaDIP(
+            aip,
+            utilizadorId,
+            papelUtilizador,
+            { ficheirosSolicitados: [ficheiroPedido.name] }
+        );
+
+        if (!filtro.ficheirosIncluidos || filtro.ficheirosIncluidos.length !== 1) {
+            throw criarErro('O ficheiro pedido não está disponível para exportação', 403);
+        }
+
+        const [ficheiro] = await this.prepararFicheirosParaExportacao(
+            aip,
+            filtro.ficheirosIncluidos,
+            'original'
+        );
+
+        const buffer = ficheiro.conteudoBuffer || await fs.readFile(ficheiro.caminhoLocal);
+        const checksumDIP = calcularChecksum(buffer);
+
+        return {
+            buffer,
+            metadata: {
+                aipId: aip._id.toString(),
+                recursoId,
+                titulo: recurso.titulo,
+                formato: 'ficheiro',
+                tipoPedido: 'ficheiro-individual',
+                transformacao: 'original',
+                ficheirosSolicitados: [ficheiro.name],
+                tamanhoZIP: buffer.length,
+                checksumDIP,
+                tempoProcessamento: Date.now() - tempoInicio,
+                ficheirosIncluidos: 1,
+                ficheirosExcluidos: ficheirosManifesto.length - 1,
+                nomeArquivo: ficheiro.name,
+                contentType: ficheiro.type || 'application/octet-stream'
+            }
+        };
     }
 
 };

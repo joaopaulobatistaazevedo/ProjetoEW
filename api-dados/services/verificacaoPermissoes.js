@@ -102,6 +102,7 @@ class VerificacaoPermissoes {
             for (const ficheiro of ficheirosManifesto) {
                 const base = {
                     name: ficheiro.name,
+                    path: ficheiro.path,
                     size: ficheiro.size,
                     type: ficheiro.type,
                     required: ficheiro.required,

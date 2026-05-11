@@ -84,13 +84,6 @@ const disseminacaoController = {
                 });
             }
             
-            if (recursoIds.length > 100) {
-                return res.status(400).json({
-                    status: 'erro',
-                    mensagem: 'Máximo de 100 recursos por lote'
-                });
-            }
-            
             // Verificar permissao para cada recurso
             const recursosPermitidos = [];
             for (const recursoId of recursoIds) {
@@ -237,84 +230,50 @@ const disseminacaoController = {
     },
 
     /**
-     * GET /disseminacao/recursos/:id/exportar?modo=X&ficheiros=...
-     * Suporta 3 modos: completo, subconjunto, individual
+     * GET /disseminacao/recursos/:recursoId/ficheiros/:indice/exportar
+     * Exporta apenas um ficheiro preservado do AIP
      */
-    exportarComOpcoes: async (req, res) => {
+    exportarFicheiroIndividual: async (req, res) => {
         try {
-            const { recursoId } = req.params;
+            const { recursoId, indice } = req.params;
             const utilizadorId = req.user.id;
             const papelUtilizador = req.user.role || 'consumidor';
-            
-            // Query params
-            const modo = req.query.modo || 'completo';  // completo | subconjunto | individual
-            const ficheirosParam = req.query.ficheiros;  // para subconjunto/individual
-            
-            // Validar modo
-            if (!['completo', 'subconjunto', 'individual'].includes(modo)) {
-                return res.status(400).json({
-                    status: 'erro',
-                    mensagem: `Modo inválido: ${modo}. Use: completo, subconjunto ou individual`
-                });
-            }
-            
-            // Validar parâmetros por modo
-            if (modo === 'subconjunto' && !ficheirosParam) {
-                return res.status(400).json({
-                    status: 'erro',
-                    mensagem: 'Modo "subconjunto" requer parâmetro "ficheiros" (ex: ?ficheiros=file1.pdf,file2.docx)'
-                });
-            }
-            
-            if (modo === 'individual' && !ficheirosParam) {
-                return res.status(400).json({
-                    status: 'erro',
-                    mensagem: 'Modo "individual" requer parâmetro "ficheiros" (ex: ?ficheiros=file.pdf)'
-                });
-            }
-            
-            // Exportar com opções
-            const opcoes = {
-                modo: modo,
-                ficheirosSolicitados: modo === 'completo' ? [] : (ficheirosParam || '').split(',')
-            };
-            
-            const { zipBuffer, metadata } = await disseminacaoService.exportarRecursoComOpcoes(
+
+            const { buffer, metadata } = await disseminacaoService.exportarFicheiroIndividual(
                 recursoId,
+                Number(indice),
                 utilizadorId,
-                papelUtilizador,
-                opcoes
+                papelUtilizador
             );
-            
-            // Registar auditoria
+
             try {
                 await disseminacaoService.registarExportacao(
                     metadata.aipId,
                     recursoId,
                     utilizadorId,
-                    { ...metadata, modo: modo },
+                    metadata,
                     req
                 );
             } catch (auditErr) {
                 console.warn('Aviso: Falha ao registar auditoria:', auditErr.message);
             }
-            
-            // Response
-            const contentType = metadata.contentType || (modo === 'individual' ? 'application/octet-stream' : 'application/zip');
-            const nomeArquivo = metadata.nomeArquivo || `dip-${recursoId}-${modo}-${Date.now()}.zip`;
-            
-            res.setHeader('Content-Type', contentType);
+
+            const nomeArquivo = String(metadata.nomeArquivo || `ficheiro-${indice}`)
+                .replace(/"/g, '');
+
+            res.setHeader('Content-Type', metadata.contentType || 'application/octet-stream');
             res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
-            res.setHeader('Content-Length', zipBuffer.length);
-            res.setHeader('X-DIP-Modo', modo);
-            
-            res.send(zipBuffer);
-            
+            res.setHeader('Content-Length', buffer.length);
+            res.setHeader('X-DIP-Checksum', metadata.checksumDIP);
+            res.setHeader('X-DIP-Size', metadata.tamanhoZIP);
+            res.setHeader('X-DIP-Tipo-Pedido', 'ficheiro-individual');
+
+            res.send(buffer);
         } catch (err) {
-            console.error('Erro ao exportar com opções:', err);
+            console.error('Erro ao exportar ficheiro individual:', err);
             res.status(err.statusCode || 500).json({
                 status: 'erro',
-                mensagem: err.message || 'Erro ao exportar recurso',
+                mensagem: err.message || 'Erro ao exportar ficheiro',
                 erro: err.message
             });
         }

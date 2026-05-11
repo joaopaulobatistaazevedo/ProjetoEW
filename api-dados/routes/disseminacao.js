@@ -58,14 +58,14 @@ router.get(
 );
 
 /**
- * GET /disseminacao/recursos/:recursoId/exportar-flexivel
- * Exporta com opções: ?modo=completo|subconjunto|individual&ficheiros=file1.pdf,file2.docx
+ * GET /disseminacao/recursos/:recursoId/ficheiros/:indice/exportar
+ * Exporta um ficheiro individual do AIP
  */
 router.get(
-    '/recursos/:recursoId/exportar-flexivel',
+    '/recursos/:recursoId/ficheiros/:indice/exportar',
     authenticate,
     verificarPermissaoExportacao,
-    disseminacaoController.exportarComOpcoes
+    disseminacaoController.exportarFicheiroIndividual
 );
 
 module.exports = router;

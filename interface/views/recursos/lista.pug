@@ -127,6 +127,13 @@ block content
                     span
                       i.fas.fa-user
                       | #{recurso.autor.nome}
+
+                if recurso.hashtags && recurso.hashtags.length
+                  .resource-tags
+                    each tag in recurso.hashtags
+                      span.resource-tag
+                        i.fas.fa-hashtag
+                        | #{tag}
                 
                 p(style='color: #64748b; font-size: 0.9rem; display:flex; align-items:center; gap:0.5rem;')
                   // Mostrar estrelas com base na média (arredondada)
@@ -148,14 +155,14 @@ block content
                 if podeExportar
                   a.btn.btn-secondary.btn-sm(href='/recursos/' + recurso._id + '/exportar-dip', title='Exportar DIP')
                     i.fas.fa-file-export
-                    span Exportar DIP
+                    span Exportar
 
                 - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
                 if podeEditar
                   a.btn.btn-primary.btn-sm(href='/recursos/' + recurso._id + '/editar')
                     i.fas.fa-edit
                     span Editar
-                  form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline', onsubmit='return confirm("Tem a certeza?");')
+                  form.resource-action-form(method='POST', action='/recursos/' + recurso._id + '/apagar', onsubmit='return confirm("Tem a certeza?");')
                     button.btn.btn-danger.btn-sm(type='submit')
                       i.fas.fa-trash-alt
                       span Apagar

@@ -1,0 +1,110 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .mb-4
+      a(href='/recursos/' + recurso._id, style='color: var(--gray);')
+        i.fas.fa-arrow-left(style='margin-right: 0.25rem;')
+        span Voltar ao Recurso
+
+    .row
+      .col-8
+        .card
+          .card-header
+            h1 Editar Recurso
+            if recurso.titulo
+              p.resource-subtitle= recurso.titulo
+
+          .card-body
+            if erro
+              .alert.alert-danger
+                i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+                strong= erro
+
+            - const dataCriacao = recurso.dataCriacao ? new Date(recurso.dataCriacao).toISOString().split('T')[0] : '';
+            - const hashtagsValor = Array.isArray(recurso.hashtags) ? recurso.hashtags.join(', ') : (recurso.hashtags || '');
+
+            form(method='POST', action='/recursos/' + recurso._id + '/editar', enctype='multipart/form-data')
+              .form-group
+                label(for='titulo') Título
+                input#titulo.form-control(type='text', name='titulo', required=true, value=recurso.titulo || '')
+
+              .form-group
+                label(for='subtitulo') Subtítulo
+                input#subtitulo.form-control(type='text', name='subtitulo', value=recurso.subtitulo || '')
+
+              .form-group
+                label(for='descricao') Descrição
+                textarea#descricao.form-control(name='descricao', rows='6')= recurso.descricao || ''
+
+              .row
+                .col-6
+                  .form-group
+                    label(for='tipo') Tipo
+                    select#tipo.form-control(name='tipo', required=true)
+                      option(value='') Selecione um tipo
+                      each tipo in (tiposRecurso || [])
+                        option(value=tipo.slug selected=((recurso.tipo || '') === tipo.slug))= tipo.nome
+                .col-6
+                  .form-group
+                    label(for='dataCriacao') Data de criação
+                    input#dataCriacao.form-control(type='date', name='dataCriacao', value=dataCriacao)
+
+              .form-group
+                label(for='hashtags') Hashtags
+                input#hashtags.form-control(type='text', name='hashtags', placeholder='ex: web, matemática, avaliação', value=hashtagsValor)
+
+              .form-group
+                label Ficheiros actuais
+                if recurso.ficheiros && recurso.ficheiros.length
+                  .existing-files(style='display: grid; gap: 0.75rem;')
+                    each ficheiro in recurso.ficheiros
+                      .card(style='border: 1px solid var(--light-gray);')
+                        .card-body(style='padding: 0.85rem 1rem;')
+                          .row(style='align-items: center;')
+                            .col-8
+                              strong= ficheiro.nome
+                              if ficheiro.tamanho
+                                div.text-muted(style='font-size: 0.9rem;')= (ficheiro.tamanho / 1024).toFixed(2) + ' KB'
+                              if ficheiro.versaoAIP
+                                div.text-muted(style='font-size: 0.9rem;') Versão AIP: #{ficheiro.versaoAIP}
+                            .col-4(style='text-align: right;')
+                              label(style='display: inline-flex; align-items: center; gap: 0.4rem;')
+                                input(type='checkbox', name='ficheirosRemover', value=ficheiro._id)
+                                span Remover
+                else
+                  p.text-muted Nenhum ficheiro associado.
+
+              .form-group
+                label(for='ficheirosNovos') Adicionar ficheiros
+                input#ficheirosNovos.form-control(type='file', name='ficheirosNovos', multiple)
+                small.text-muted Ao adicionar, remover ou substituir ficheiros, é criada uma nova versão AIP para este recurso.
+
+              .form-group
+                label Visibilidade
+                .form-check
+                  input#publico.form-check-input(type='radio', name='visibilidade', value='publico', checked=(recurso.visibilidade || 'publico') === 'publico')
+                  label.form-check-label(for='publico') Público
+                .form-check
+                  input#privado.form-check-input(type='radio', name='visibilidade', value='privado', checked=recurso.visibilidade === 'privado')
+                  label.form-check-label(for='privado') Privado
+
+              .form-actions
+                button.btn.btn-primary(type='submit')
+                  i.fas.fa-save
+                  span Guardar Alterações
+                a.btn.btn-outline(href='/recursos/' + recurso._id)
+                  i.fas.fa-times
+                  span Cancelar
+
+      .col-4
+        .card
+          .card-header
+            i.fas.fa-circle-info
+            span  Notas
+          .card-body
+            p Pode alterar os metadados e gerir os ficheiros associados. Qualquer adição ou remoção de ficheiros cria uma nova versão AIP para preservar o histórico.
+            if recurso.ficheiros && recurso.ficheiros.length
+              p
+                strong Ficheiros:
+                |  #{recurso.ficheiros.length}

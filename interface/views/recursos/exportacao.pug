@@ -1,0 +1,105 @@
+extends ../layout
+
+block content
+  .container.py-6
+    .mb-4
+      a(href='/admin', style='color: var(--gray);')
+        i.fas.fa-arrow-left(style='margin-right: 0.25rem;')
+        span Voltar à Administração
+
+    .row.mb-6
+      .col-8
+        h1
+          i.fas.fa-file-export(style='margin-right: 0.75rem; color: var(--primary);')
+          span Exportação de Dados
+        p Exportações administrativas da plataforma.
+
+    if erro
+      .alert.alert-danger
+        i.fas.fa-exclamation-circle(style='margin-right: 0.5rem;')
+        strong= erro
+
+    .row
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title Utilizadores
+            p.resource-subtitle Exporta os dados dos utilizadores em JSON.
+            .resource-meta
+              span
+                i.fas.fa-users
+                |  JSON
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao/utilizadores')
+              i.fas.fa-download
+              span Descarregar Utilizadores
+
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title Metadados dos Recursos
+            p.resource-subtitle Exporta a listagem completa de recursos e metadados em JSON.
+            .resource-meta
+              span
+                i.fas.fa-database
+                |  JSON
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao/recursos')
+              i.fas.fa-download
+              span Descarregar Metadados
+
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title DIPs dos Recursos
+            p.resource-subtitle Exporta os pacotes DIP dos recursos num ZIP.
+            .resource-meta
+              span
+                i.fas.fa-archive
+                |  ZIP
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao/dips')
+              i.fas.fa-download
+              span Descarregar DIPs
+
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title AIPs
+            p.resource-subtitle Exporta o histórico de pacotes AIP e respetivos manifestos em JSON.
+            .resource-meta
+              span
+                i.fas.fa-box-archive
+                |  JSON
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao/aips')
+              i.fas.fa-download
+              span Descarregar AIPs
+
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title Notícias
+            p.resource-subtitle Exporta as notícias da plataforma em JSON.
+            .resource-meta
+              span
+                i.fas.fa-newspaper
+                |  JSON
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao/noticias')
+              i.fas.fa-download
+              span Descarregar Notícias
+
+      .col-6
+        .card.resource-card
+          .card-body
+            h3.resource-title Históricos
+            p.resource-subtitle Exporta históricos de AIPs, exportações, comentários e avaliações.
+            .resource-meta
+              span
+                i.fas.fa-clock-rotate-left
+                |  JSON
+          .card-footer
+            a.btn.btn-primary.btn-block(href='/admin/exportacao/historicos')
+              i.fas.fa-download
+              span Descarregar Históricos

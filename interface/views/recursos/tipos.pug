@@ -9,9 +9,9 @@ block content
           span Tipos de Recurso
         p Gere os tipos disponiveis nos formularios sem alterar o codigo da aplicacao.
       .col-4
-        a.btn.btn-outline.btn-block(href='/recursos')
+        a.btn.btn-outline.btn-block(href='/admin')
           i.fas.fa-arrow-left
-          span Voltar aos Recursos
+          span Voltar à Administração
 
     if sucesso === 'tipo-criado'
       .alert.alert-success
@@ -34,7 +34,7 @@ block content
           .card-header
             i.fas.fa-plus-circle
             span  Novo Tipo
-          form(method='POST', action='/recursos/tipos/novo')
+          form(method='POST', action='/admin/tiposrecursos/novo')
             .card-body
               .form-group
                 label(for='nome') Nome
@@ -84,7 +84,7 @@ block content
                           span.badge.badge-warning Inativo
                       td= tipo.ordem
                       td
-                        form(method='POST', action='/recursos/tipos/' + tipo._id + '/estado')
+                        form(method='POST', action='/admin/tiposrecursos/' + tipo._id + '/estado')
                           input(type='hidden', name='ativo', value=tipo.ativo ? 'false' : 'true')
                           button.btn.btn-sm(class=tipo.ativo ? 'btn-outline' : 'btn-secondary', type='submit')
                             if tipo.ativo
