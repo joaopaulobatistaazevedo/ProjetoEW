@@ -24,7 +24,11 @@ O sistema está dividido em três serviços principais, todos em Node.js/Express
 
 Esta separação foi uma decisão importante. O serviço de autenticação fica isolado da lógica dos recursos, enquanto a interface se limita a orquestrar chamadas HTTP e apresentar páginas. Assim, a API de dados continua testável e documentada, e a interface pode evoluir sem alterar diretamente a persistência.
 
-A autenticação é feita com **JWT**, guardado pela interface em cookie. Os serviços partilham o mesmo segredo (`JWT_SECRET`), permitindo que a API valide pedidos autenticados. O projeto pode ser executado localmente serviço a serviço ou com `docker compose`, que arranca `interface`, `api-dados`, `auth` e `mongodb_api`.
+A execução com Docker Compose acrescenta ainda um serviço **gateway**, implementado com nginx. Este gateway é o ponto único de entrada da aplicação: recebe pedidos em `localhost:3000` e encaminha-os para a interface, para a API de dados ou para o serviço de autenticação, consoante o prefixo do URL. Assim, a interface fica disponível em `/`, a API de dados em `/api-dados/` e o serviço de autenticação em `/auth-service/`.
+
+Esta decisão mantém a arquitetura simples e evita expor diretamente as portas internas dos serviços. No `docker-compose.yml`, `interface`, `api-dados`, `auth` e `mongodb_api` usam `expose`, ficando acessíveis apenas dentro da rede Docker. Apenas o gateway usa `ports`, limitado a `127.0.0.1:3000`, para permitir acesso local pelo browser. O nginx foi colocado num diretório próprio com `Dockerfile`, tornando a configuração explícita e semelhante à organização praticada nas aulas.
+
+A autenticação é feita com **JWT**, guardado pela interface em cookie. Os serviços partilham o mesmo segredo (`JWT_SECRET`), permitindo que a API valide pedidos autenticados. O projeto pode ser executado localmente serviço a serviço ou com `docker compose`, que arranca `gateway`, `interface`, `api-dados`, `auth` e `mongodb_api`.
 
 ## 3. Utilizadores e permissões
 
@@ -200,7 +204,7 @@ Foram mantidos dois Swagger:
 - `api-dados`: recursos, tipos, ingestão, AIPs, disseminação, posts e notícias;
 - `auth`: registo, login, utilizadores e promoções de perfil.
 
-A documentação Swagger é útil para testar endpoints e para demonstrar rapidamente a cobertura funcional da API. Além disso, o repositório contém documentos Markdown auxiliares para planeamento, ingestão e disseminação.
+A documentação Swagger é útil para testar endpoints e para demonstrar rapidamente a cobertura funcional da API. Com o gateway nginx, estes Swagger continuam acessíveis sem expor diretamente as portas internas: `/api-dados/docs` para a API de dados e `/auth-service/docs` para o serviço de autenticação. Além disso, o repositório contém documentos Markdown auxiliares para planeamento, ingestão e disseminação.
 
 ## 12. Limitações e decisões assumidas
 

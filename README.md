@@ -8,12 +8,13 @@ Aplicação web para submissão, gestão, preservação e disseminação de recu
 
 ## Serviços
 
-O projeto está dividido em três serviços Node.js e uma base de dados MongoDB:
+O projeto está dividido em três serviços Node.js, uma base de dados MongoDB e um gateway nginx:
 
 - `interface`: aplicação web Express + Pug.
 - `api-dados`: API de recursos, ingestão, disseminação, posts e notícias.
 - `auth`: autenticação e gestão de utilizadores.
 - `mongodb_api`: MongoDB usado pelos serviços.
+- `gateway`: nginx simples que expõe a aplicação e encaminha pedidos para os serviços internos.
 
 ## Arranque Rápido
 
@@ -22,12 +23,13 @@ cd ProjetoEW
 docker compose up -d --build
 ```
 
-Serviços por defeito:
+Depois de arrancar, aceder sempre pelo gateway:
 
 - Interface: http://localhost:3000
-- API de dados: http://localhost:3001
-- Auth service: http://localhost:3002
-- MongoDB: `localhost:27018`
+- API de dados via gateway: http://localhost:3000/api-dados
+- Auth service via gateway: http://localhost:3000/auth-service
+
+Os serviços internos não ficam expostos diretamente ao exterior. A `interface`, a `api-dados`, o `auth` e o `mongodb_api` usam `expose` no Docker Compose, ficando acessíveis apenas dentro da rede Docker. Só o `gateway` usa `ports`, ligado a `127.0.0.1:3000`, para permitir acesso local pelo browser.
 
 Parar os serviços:
 
@@ -91,13 +93,13 @@ Exportações disponíveis:
 
 Documentação Swagger:
 
-- API de dados: http://localhost:3001/docs
-- Auth service: http://localhost:3002/docs
+- API de dados: http://localhost:3000/api-dados/docs
+- Auth service: http://localhost:3000/auth-service/docs
 
 JSON OpenAPI:
 
-- API de dados: http://localhost:3001/docs.json
-- Auth service: http://localhost:3002/docs.json
+- API de dados: http://localhost:3000/api-dados/docs.json
+- Auth service: http://localhost:3000/auth-service/docs.json
 
 Áreas documentadas na API de dados:
 
@@ -128,11 +130,10 @@ Usadas no `docker-compose.yml`:
 - `AUTH_URL`: URL usada pela interface para contactar o serviço de auth.
 - `INTERFACE_URL`: URL interna/externa da interface.
 - `INTERNAL_NEWS_SECRET`: segredo usado para criação interna de notícias.
-- `SWAGGER_URL`: URL pública usada pelo Swagger do serviço de auth.
+- `SWAGGER_URL`: URL pública usada pelos Swagger atrás do gateway.
 
 ## Armazenamento
 
 - Uploads e ficheiros preservados ficam em `api-dados/uploads`.
 - Em Docker, os uploads usam o volume `api_dados_uploads`.
 - Os dados MongoDB usam o volume `mongodb_api_data`.
-
