@@ -62,7 +62,7 @@ module.exports.login = async (username, password) => {
     return { token, user: { nome: user.nome, role: user.role } };
 };
 
-// Promover utilizador a produtor (consumidor → produtor)
+// Promover utilizador a produtor (consumidor -> produtor)
 module.exports.promoteToProdutor = async (id) => {
     const user = await Utilizador.findById(id);
     if (!user) throw new Error('Utilizador não encontrado.');
