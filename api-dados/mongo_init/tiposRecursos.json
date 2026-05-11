@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "artigo",
+    "nome": "Artigo",
+    "descricao": "Artigos e textos academicos.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 10,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "tese",
+    "nome": "Tese",
+    "descricao": "Teses e dissertacoes.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 20,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "slides",
+    "nome": "Slides",
+    "descricao": "Apresentacoes e diapositivos.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 30,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "teste",
+    "nome": "Teste",
+    "descricao": "Testes, fichas e avaliacoes.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 40,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "relatorio",
+    "nome": "Relatorio",
+    "descricao": "Relatorios tecnicos ou cientificos.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 50,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "aplicacao",
+    "nome": "Aplicacao",
+    "descricao": "Aplicacoes, software ou prototipos.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 60,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "problema",
+    "nome": "Problema",
+    "descricao": "Problemas, exercicios e desafios.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 70,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  },
+  {
+    "slug": "outro",
+    "nome": "Outro",
+    "descricao": "Outro tipo de recurso.",
+    "ativo": true,
+    "sistema": true,
+    "ordem": 80,
+    "createdAt": { "$date": "2026-05-11T00:00:00.000Z" },
+    "updatedAt": { "$date": "2026-05-11T00:00:00.000Z" }
+  }
+]

@@ -1,16 +1,5 @@
 const TipoRecurso = require('../models/tipoRecurso');
 
-const TIPOS_RECURSO_BASE = [
-    { slug: 'artigo', nome: 'Artigo', descricao: 'Artigos e textos academicos.', ordem: 10, sistema: true },
-    { slug: 'tese', nome: 'Tese', descricao: 'Teses e dissertacoes.', ordem: 20, sistema: true },
-    { slug: 'slides', nome: 'Slides', descricao: 'Apresentacoes e diapositivos.', ordem: 30, sistema: true },
-    { slug: 'teste', nome: 'Teste', descricao: 'Testes, fichas e avaliacoes.', ordem: 40, sistema: true },
-    { slug: 'relatorio', nome: 'Relatorio', descricao: 'Relatorios tecnicos ou cientificos.', ordem: 50, sistema: true },
-    { slug: 'aplicacao', nome: 'Aplicacao', descricao: 'Aplicacoes, software ou prototipos.', ordem: 60, sistema: true },
-    { slug: 'problema', nome: 'Problema', descricao: 'Problemas, exercicios e desafios.', ordem: 70, sistema: true },
-    { slug: 'outro', nome: 'Outro', descricao: 'Outro tipo de recurso.', ordem: 80, sistema: true }
-];
-
 function slugifyTipo(valor) {
     return String(valor || '')
         .normalize('NFD')
@@ -19,19 +8,6 @@ function slugifyTipo(valor) {
         .trim()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
-}
-
-async function ensureTiposRecursoBase() {
-    const operacoes = TIPOS_RECURSO_BASE.map(tipo => ({
-        updateOne: {
-            filter: { slug: tipo.slug },
-            update: { $setOnInsert: tipo },
-            upsert: true
-        }
-    }));
-
-    if (!operacoes.length) return;
-    await TipoRecurso.bulkWrite(operacoes, { ordered: false });
 }
 
 async function listarTiposAtivos() {
@@ -81,9 +57,7 @@ async function enriquecerComTipos(recursos) {
 }
 
 module.exports = {
-    TIPOS_RECURSO_BASE,
     slugifyTipo,
-    ensureTiposRecursoBase,
     listarTiposAtivos,
     listarTodosTipos,
     obterTipoAtivoPorSlug,

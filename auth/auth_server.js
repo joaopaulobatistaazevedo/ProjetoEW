@@ -41,40 +41,11 @@ async function iniciarAuth() {
     try {
         await ligarMongoComRetry();
         console.log('Auth: MongoDB ligado com sucesso.');
-        await ensureBaseAdmin();
 
         app.listen(PORT, () => console.log(`Auth Server a correr na porta ${PORT}`));
     } catch (err) {
         console.error('Auth: Erro crítico ao ligar ao MongoDB:', err.message);
         process.exit(1);
-    }
-}
-
-// Garantir existencia de utilizador admin base
-const Utilizador = require('./models/utilizador');
-const bcrypt = require('bcryptjs');
-async function ensureBaseAdmin() {
-    try {
-        const admin = await Utilizador.findOne({ role: 'admin' }).exec();
-        if (!admin) {
-            const password = process.env.BASE_ADMIN_PASS || 'admin';
-            const salt = await bcrypt.genSalt(10);
-            const hash = await bcrypt.hash(password, salt);
-            const novo = new Utilizador({
-                username: process.env.BASE_ADMIN_USER || 'admin',
-                nome: process.env.BASE_ADMIN_NOME || 'admin',
-                email: process.env.BASE_ADMIN_EMAIL || 'admin@local',
-                password: hash,
-                role: 'admin',
-                filiacao: process.env.BASE_ADMIN_FILIACAO || 'admin'
-            });
-            await novo.save();
-            console.log('Auth: Utilizador admin base criado (username/password = admin/admin por defeito).');
-        } else {
-            console.log('Auth: Já existe pelo menos um admin.');
-        }
-    } catch (err) {
-        console.error('Auth: Erro ao garantir admin base:', err.message);
     }
 }
 
