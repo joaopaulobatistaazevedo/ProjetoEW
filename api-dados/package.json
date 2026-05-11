@@ -5,8 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "node --test",
-    "start": "node app.js",
-    "seed:recursos": "node scripts/populate_recursos.js"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",

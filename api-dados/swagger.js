@@ -1,6 +1,7 @@
 const swaggerUi = require('swagger-ui-express');
 
 const PORT = process.env.PORT || 3001;
+const SWAGGER_URL = process.env.SWAGGER_URL || `http://localhost:${PORT}`;
 
 const jsonBody = {
     required: true,
@@ -20,7 +21,7 @@ const swaggerSpec = {
         version: '1.0.0',
         description: 'Endpoints do servico api-dados: recursos, tipos, ingestao AIP/SIP, disseminacao DIP, posts e noticias.'
     },
-    servers: [{ url: `http://localhost:${PORT}`, description: 'Servidor local' }],
+    servers: [{ url: SWAGGER_URL, description: 'Servidor local' }],
     components: {
         securitySchemes: {
             bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }

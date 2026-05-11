@@ -47,6 +47,7 @@ block content
           a.btn.btn-secondary(href="/auth/registo")
             i.fas.fa-user-plus
             span Registar-se
+
   // Mostrar noticias recentes na homepage (sidebar)
   if noticias && noticias.length
     .container.py-6
@@ -81,6 +82,35 @@ block content
                 a.btn.btn-outline.btn-sm(href=n.link)
                   i.fas.fa-eye
                   span Ver recurso
+
+  if top3 && top3.length
+    .container.py-6
+      h2
+        i.fas.fa-trophy(style='color: var(--warning); margin-right: 0.5rem;')
+        span Top 3 Recursos
+      .row
+        each recurso, idx in top3
+          .col-4
+            .card.resource-card
+              .card-body
+                span.resource-badge.badge-public
+                  i.fas.fa-trophy(style='margin-right: 0.25rem;')
+                  | ##{idx + 1}
+                h3.resource-title= recurso.titulo
+                if recurso.subtitulo
+                  p.resource-subtitle= recurso.subtitulo
+                .resource-meta
+                  span
+                    i.fas.fa-star(style='color: var(--warning);')
+                    |  #{recurso.mediaEstrelas ? recurso.mediaEstrelas.toFixed(1) : '0.0'}
+                  if recurso.autor
+                    span
+                      i.fas.fa-user
+                      |  #{recurso.autor.nome}
+              .card-footer
+                a.btn.btn-primary.btn-sm(href='/recursos/' + recurso._id)
+                  i.fas.fa-eye
+                  span Ver
   
   style.
     .noticias-grid {
