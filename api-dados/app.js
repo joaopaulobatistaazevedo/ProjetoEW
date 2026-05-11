@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 const setupSwagger = require('./swagger');
-const { ensureTiposRecursoBase } = require('./services/tiposRecursoService');
 
 var app = express();
 
@@ -15,10 +14,8 @@ const mongoURI = process.env.MONGO_URL || `mongodb://localhost:27017/${nomeBD}`;
 
 // MongoDB connection
 mongoose.connect(mongoURI)
-    .then(async () => {
+    .then(() => {
         console.log(`MongoDB: Conectado à base de dados ${nomeBD}.`);
-        await ensureTiposRecursoBase();
-        console.log('MongoDB: Tipos de recurso base verificados.');
     })
     .catch(err => {
         console.error('MongoDB: Erro crítico:', err.message);

@@ -6,3 +6,5 @@ FROM mongo:latest
 #
 # O comando abaixo copia tudo da pasta mongo_init (incluindo scripts e dados):
 COPY mongo_init /docker-entrypoint-initdb.d/
+
+RUN chmod +x /docker-entrypoint-initdb.d/import.sh

@@ -1,0 +1,13 @@
+[
+  {
+    "username": "admin",
+    "nome": "admin",
+    "email": "admin@local",
+    "password": "$2a$10$27smUZ0PTUfyZv3qBU0o5.MIl9e1W8QF9yb3cHk9uV0/6Ea3ySlg.",
+    "role": "admin",
+    "filiacao": "admin",
+    "dataRegisto": { "$date": "2026-05-11T00:00:00.000Z" },
+    "dataUltimoAcesso": null,
+    "ativo": true
+  }
+]
