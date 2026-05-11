@@ -3,41 +3,16 @@ var router = express.Router();
 var axios = require('axios');
 const {
     obterHeadersAutorizacao,
-    utilizadorEhAdmin,
     obterMensagemErroAPI,
-    enviarJSONDownload
+    enviarJSONDownload,
+    garantirAdmin,
+    obterTodosRecursos,
+    obterTodosTiposAdmin,
+    renderErroVista
 } = require('./utils');
 
 const API = process.env.API_URL || 'http://localhost:3001';
 const AUTH = process.env.AUTH_URL || 'http://localhost:3002/users';
-
-function garantirAdmin(req, res) {
-    if (utilizadorEhAdmin(req)) return true;
-    res.redirect('/recursos');
-    return false;
-}
-
-async function obterTodosRecursos() {
-    const resposta = await axios.get(`${API}/recursos`, {
-        params: { limit: 10000 }
-    });
-
-    return resposta.data || [];
-}
-
-async function obterTodosTiposAdmin(req) {
-    const resposta = await axios.get(`${API}/tipos-recurso/todos`, {
-        headers: obterHeadersAutorizacao(req)
-    });
-    return resposta.data;
-}
-
-function renderErro(res, err, fallback) {
-    res.status(err.response?.status || 500).render('recursos/exportacao', {
-        titulo: 'Exportação de Dados',
-        erro: obterMensagemErroAPI(err, fallback)
-    });
-}
 
 router.get('/', async (req, res) => {
     if (!garantirAdmin(req, res)) return;
@@ -51,7 +26,7 @@ router.get('/tiposrecursos', async (req, res) => {
     if (!garantirAdmin(req, res)) return;
 
     try {
-        const tiposRecurso = await obterTodosTiposAdmin(req);
+        const tiposRecurso = await obterTodosTiposAdmin(req, API);
         res.render('recursos/tipos', {
             titulo: 'Tipos de Recurso',
             tiposRecurso,
@@ -59,10 +34,7 @@ router.get('/tiposrecursos', async (req, res) => {
             sucesso: req.query.sucesso
         });
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar a gestao de tipos de recurso.')
-        });
+        renderErroVista(res, err, 'Nao foi possivel carregar a gestao de tipos de recurso.');
     }
 });
 
@@ -79,7 +51,7 @@ router.post('/tiposrecursos/novo', async (req, res) => {
         let tiposRecurso = [];
 
         try {
-            tiposRecurso = await obterTodosTiposAdmin(req);
+            tiposRecurso = await obterTodosTiposAdmin(req, API);
         } catch (tiposErr) {
             tiposRecurso = [];
         }
@@ -105,10 +77,7 @@ router.post('/tiposrecursos/:id/estado', async (req, res) => {
 
         res.redirect('/admin/tiposrecursos?sucesso=estado-atualizado');
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel atualizar o estado do tipo de recurso.')
-        });
+        renderErroVista(res, err, 'Nao foi possivel atualizar o estado do tipo de recurso.');
     }
 });
 
@@ -128,10 +97,7 @@ router.get('/gestaoaips', async (req, res) => {
             admin: true
         });
     } catch (err) {
-        res.status(err.response?.status || 500).render('erro', {
-            titulo: 'Erro',
-            mensagem: obterMensagemErroAPI(err, 'Nao foi possivel carregar a gestão de AIPs.')
-        });
+        renderErroVista(res, err, 'Nao foi possivel carregar a gestão de AIPs.');
     }
 });
 
@@ -158,7 +124,7 @@ router.get('/exportacao/utilizadores', async (req, res) => {
             utilizadores: resposta.data || []
         });
     } catch (err) {
-        renderErro(res, err, 'Nao foi possivel exportar os utilizadores.');
+        renderErroVista(res, err, 'Nao foi possivel exportar os utilizadores.', 'recursos/exportacao', { titulo: 'Exportação de Dados' });
     }
 });
 
@@ -166,7 +132,7 @@ router.get('/exportacao/recursos', async (req, res) => {
     if (!garantirAdmin(req, res)) return;
 
     try {
-        const recursos = await obterTodosRecursos();
+        const recursos = await obterTodosRecursos(API);
 
         enviarJSONDownload(res, `recursos-metadados-${Date.now()}.json`, {
             tipo: 'recursos-metadados',
@@ -175,7 +141,7 @@ router.get('/exportacao/recursos', async (req, res) => {
             recursos
         });
     } catch (err) {
-        renderErro(res, err, 'Nao foi possivel exportar os metadados dos recursos.');
+        renderErroVista(res, err, 'Nao foi possivel exportar os metadados dos recursos.', 'recursos/exportacao', { titulo: 'Exportação de Dados' });
     }
 });
 
@@ -183,7 +149,7 @@ router.get('/exportacao/dips', async (req, res) => {
     if (!garantirAdmin(req, res)) return;
 
     try {
-        const recursos = await obterTodosRecursos();
+        const recursos = await obterTodosRecursos(API);
         const ids = recursos.map(recurso => recurso._id).filter(Boolean);
 
         if (ids.length === 0) {
@@ -211,7 +177,7 @@ router.get('/exportacao/dips', async (req, res) => {
 
         res.send(Buffer.from(resposta.data));
     } catch (err) {
-        renderErro(res, err, 'Nao foi possivel exportar os DIPs dos recursos.');
+        renderErroVista(res, err, 'Nao foi possivel exportar os DIPs dos recursos.', 'recursos/exportacao', { titulo: 'Exportação de Dados' });
     }
 });
 
@@ -233,7 +199,7 @@ router.get('/exportacao/aips', async (req, res) => {
             aips
         });
     } catch (err) {
-        renderErro(res, err, 'Nao foi possivel exportar os AIPs.');
+        renderErroVista(res, err, 'Nao foi possivel exportar os AIPs.', 'recursos/exportacao', { titulo: 'Exportação de Dados' });
     }
 });
 
@@ -251,7 +217,7 @@ router.get('/exportacao/noticias', async (req, res) => {
             noticias
         });
     } catch (err) {
-        renderErro(res, err, 'Nao foi possivel exportar as notícias.');
+        renderErroVista(res, err, 'Nao foi possivel exportar as notícias.', 'recursos/exportacao', { titulo: 'Exportação de Dados' });
     }
 });
 
@@ -259,7 +225,7 @@ router.get('/exportacao/historicos', async (req, res) => {
     if (!garantirAdmin(req, res)) return;
 
     try {
-        const recursos = await obterTodosRecursos();
+        const recursos = await obterTodosRecursos(API);
         const historicoAIPs = [];
         const historicoExportacoes = [];
 
@@ -312,7 +278,7 @@ router.get('/exportacao/historicos', async (req, res) => {
             })))
         });
     } catch (err) {
-        renderErro(res, err, 'Nao foi possivel exportar os históricos.');
+        renderErroVista(res, err, 'Nao foi possivel exportar os históricos.', 'recursos/exportacao', { titulo: 'Exportação de Dados' });
     }
 });
 

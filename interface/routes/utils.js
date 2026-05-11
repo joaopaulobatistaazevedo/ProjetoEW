@@ -1,4 +1,6 @@
 var path = require('path');
+var axios = require('axios');
+var FormData = require('form-data');
 
 const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
 
@@ -66,11 +68,155 @@ function obterContentTypePreview(nome = '', contentTypeOriginal = '') {
     return tipos[ext] || contentTypeOriginal || 'application/octet-stream';
 }
 
+function garantirAdmin(req, res) {
+    if (utilizadorEhAdmin(req)) return true;
+    res.redirect('/recursos');
+    return false;
+}
+
+async function obterTodosRecursos(apiUrl) {
+    const resposta = await axios.get(`${apiUrl}/recursos`, {
+        params: { limit: 10000 }
+    });
+
+    return resposta.data || [];
+}
+
+async function obterTodosTiposAdmin(req, apiUrl) {
+    const resposta = await axios.get(`${apiUrl}/tipos-recurso/todos`, {
+        headers: obterHeadersAutorizacao(req)
+    });
+    return resposta.data;
+}
+
+function renderErroVista(res, err, fallback, vista = 'erro', extras = {}) {
+    res.status(err.response?.status || 500).render(vista, {
+        titulo: 'Erro',
+        mensagem: obterMensagemErroAPI(err, fallback),
+        ...extras
+    });
+}
+
+async function obterTiposAtivos(apiUrl) {
+    const resposta = await axios.get(`${apiUrl}/tipos-recurso`);
+    return resposta.data;
+}
+
+async function encaminharRecursoSip(req, apiUrl) {
+    const form = new FormData();
+
+    // Adicionar arquivo ZIP com o nome 'file' que o backend espera
+    if (req.file) {
+        form.append('file', req.file.buffer, {
+            filename: req.file.originalname || 'recurso.zip',
+            contentType: req.file.mimetype || 'application/zip'
+        });
+    }
+
+    return axios.post(`${apiUrl}/ingestao/sip`, form, {
+        headers: {
+            ...obterHeadersAutorizacao(req),
+            ...form.getHeaders()
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity
+    });
+}
+
+async function encaminharSipZip(req, apiUrl) {
+    const form = new FormData();
+
+    if (req.file) {
+        form.append('file', req.file.buffer, {
+            filename: req.file.originalname || 'sip.zip',
+            contentType: req.file.mimetype || 'application/zip'
+        });
+    }
+
+    Object.entries(req.body || {}).forEach(([chave, valor]) => {
+        if (valor !== undefined && valor !== null) {
+            form.append(chave, valor);
+        }
+    });
+
+    return axios.post(`${apiUrl}/ingestao/sip`, form, {
+        headers: {
+            ...obterHeadersAutorizacao(req),
+            ...form.getHeaders()
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity
+    });
+}
+
+async function submeterRecursoSip(req, res, apiUrl) {
+    try {
+        const resposta = await encaminharRecursoSip(req, apiUrl);
+        const body = resposta.data || {};
+
+        if (body.status === 'ok') {
+            return res.redirect(`/recursos?autor=${req.user.sub || ''}`);
+        }
+
+        let tiposRecurso = [];
+        try {
+            tiposRecurso = await obterTiposAtivos(apiUrl);
+        } catch (tiposErr) {
+            tiposRecurso = [];
+        }
+
+        // Extrair erros específicos
+        let mensagensErro = [];
+        if (body.erros && Array.isArray(body.erros)) {
+            mensagensErro = body.erros.map(e => `${e.categoria}: ${e.mensagem}`);
+        }
+
+        return res.status(400).render('recursos/form', {
+            titulo: 'Submeter Recurso',
+            recurso: req.body,
+            tiposRecurso,
+            erro: body.mensagem || 'SIP rejeitado - validação falhou',
+            erros: mensagensErro,
+            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : ''
+        });
+    } catch (err) {
+        let tiposRecurso = [];
+        try {
+            tiposRecurso = await obterTiposAtivos(apiUrl);
+        } catch (tiposErr) {
+            tiposRecurso = [];
+        }
+
+        const body = err.response && err.response.data ? err.response.data : {};
+        return res.status(err.response?.status || 500).render('recursos/form', {
+            titulo: 'Submeter Recurso',
+            recurso: req.body,
+            tiposRecurso,
+            erro: body.mensagem || obterMensagemErroAPI(err, 'Erro ao submeter o recurso.'),
+            erros: body.erros ? body.erros.map(e => `${e.categoria}: ${e.mensagem}`) : [],
+            detalhes: body.relatorio ? JSON.stringify(body.relatorio, null, 2) : (body.erros ? JSON.stringify(body.erros, null, 2) : '')
+        });
+    }
+}
+
+function obterDestinoRecurso(req) {
+    return req.body && req.body.recurso ? `/recursos/${req.body.recurso}` : '/recursos';
+}
+
 module.exports = {
     obterToken,
     obterHeadersAutorizacao,
     utilizadorEhAdmin,
     obterMensagemErroAPI,
     enviarJSONDownload,
-    obterContentTypePreview
+    obterContentTypePreview,
+    garantirAdmin,
+    obterTodosRecursos,
+    obterTodosTiposAdmin,
+    renderErroVista,
+    obterTiposAtivos,
+    encaminharRecursoSip,
+    encaminharSipZip,
+    submeterRecursoSip,
+    obterDestinoRecurso
 };

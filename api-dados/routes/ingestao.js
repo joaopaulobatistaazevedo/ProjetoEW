@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ingestaoController = require('../controllers/ingestaoController');
 // Upload de SIP em ZIP
-const { uploadSipZip, uploadMultipleFiles } = require('../middleware/uploadZip');
+const { uploadSipZip, uploadMultipleFiles } = require('../middleware/uploads');
 const { authenticate, authorize } = require('../middleware/auth');
 
 // POST /ingestao/sip — submeter SIP (autenticado, qualquer utilizador)

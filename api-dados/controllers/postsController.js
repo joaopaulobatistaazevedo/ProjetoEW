@@ -1,3 +1,4 @@
+const { eAdmin } = require('../utils/controllerUtils');
 const Post = require('../models/post');
 const Recurso = require('../models/recurso');
 
@@ -37,13 +38,16 @@ const postsController = {
     createPost: async (req, res) => {
         try {
             const { recurso: recursoId, conteudo, titulo } = req.body;
-            if (!conteudo || conteudo.trim().length < 2) return res.status(400).json({ error: 'Conteúdo inválido' });
+            if (!conteudo || conteudo.trim().length < 2) {
+                return res.status(400).json({ error: 'Conteúdo inválido' });
+            }
 
             // Se associado a recurso, validar existencia e visibilidade
             if (recursoId) {
                 const recurso = await Recurso.findById(recursoId);
                 if (!recurso) return res.status(400).json({ error: 'Recurso associado não encontrado' });
-                if (recurso.visibilidade === 'privado' && req.user.role !== 'admin' && req.user.id !== recurso.autor.toString()) {
+                
+                if (recurso.visibilidade === 'privado' && !eAdmin(req.user) && String(req.user.id) !== String(recurso.autor)) {
                     return res.status(403).json({ error: 'Sem permissão para postar neste recurso' });
                 }
             }
@@ -62,7 +66,7 @@ const postsController = {
             const post = await Post.findById(req.params.id);
             if (!post) return res.status(404).json({ error: 'Não encontrado' });
 
-            if (req.user.role !== 'admin' && req.user.id !== post.autor.toString()) {
+            if (!eAdmin(req.user) && String(req.user.id) !== String(post.autor)) {
                 return res.status(403).json({ error: 'Sem permissão' });
             }
 
@@ -79,7 +83,7 @@ const postsController = {
             const post = await Post.findById(req.params.id);
             if (!post) return res.status(404).json({ error: 'Não encontrado' });
 
-            if (req.user.role !== 'admin' && req.user.id !== post.autor.toString()) {
+            if (!eAdmin(req.user) && String(req.user.id) !== String(post.autor)) {
                 return res.status(403).json({ error: 'Sem permissão' });
             }
 
@@ -95,8 +99,12 @@ const postsController = {
         try {
             const post = await Post.findById(req.params.id);
             if (!post) return res.status(404).json({ error: 'Não encontrado' });
+            
             const { conteudo } = req.body;
-            if (!conteudo || conteudo.trim().length < 1) return res.status(400).json({ error: 'Comentário inválido' });
+            if (!conteudo || conteudo.trim().length < 1) {
+                return res.status(400).json({ error: 'Comentário inválido' });
+            }
+            
             post.comentarios.push({ conteudo, autor: req.user.id });
             await post.save();
             res.status(201).json(post);
@@ -114,7 +122,7 @@ const postsController = {
             const comentario = post.comentarios.id(req.params.cid);
             if (!comentario) return res.status(404).json({ error: 'Comentário não encontrado' });
 
-            if (req.user.role !== 'admin' && req.user.id !== comentario.autor.toString()) {
+            if (!eAdmin(req.user) && String(req.user.id) !== String(comentario.autor)) {
                 return res.status(403).json({ error: 'Sem permissão' });
             }
 

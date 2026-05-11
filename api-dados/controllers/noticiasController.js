@@ -2,6 +2,7 @@ const Noticia = require('../models/noticia');
 const Recurso = require('../models/recurso');
 const Post = require('../models/post');
 const TipoRecurso = require('../models/tipoRecurso');
+const { parsePositiveInt, inicioDoDia } = require('../utils/controllerUtils');
 
 const TIPOS_NOTICIA = [
     'sistema',
@@ -13,17 +14,6 @@ const TIPOS_NOTICIA = [
     'stats',
     'milestone'
 ];
-
-function parsePositiveInt(value) {
-    const parsed = parseInt(value);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-}
-
-function inicioDoDia(data) {
-    const inicio = new Date(data);
-    inicio.setHours(0, 0, 0, 0);
-    return inicio;
-}
 
 async function criarNoticiaSeNaoExistir(noticia, filtro = null) {
     const existe = await Noticia.exists(filtro || {
