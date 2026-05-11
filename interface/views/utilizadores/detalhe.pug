@@ -63,6 +63,13 @@ block content
             
             .card-body
               if recursos && recursos.length > 0
+                .mb-4(style='text-align: right;')
+                  a.btn.btn-primary(href='/utilizadores/' + utilizador._id + '/recursos/download')
+                    i.fas.fa-download
+                    if isAdmin
+                      span  Descarregar Recursos
+                    else
+                      span  Descarregar Recursos Públicos
                 ul(style='list-style: none; padding: 0; margin: 0;')
                   each recurso in recursos
                     li(style='padding: 0.6rem 0; border-bottom: 1px solid var(--border, #e5e7eb);')

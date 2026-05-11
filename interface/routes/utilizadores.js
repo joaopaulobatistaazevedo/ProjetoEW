@@ -55,6 +55,61 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// GET /utilizadores/:id/recursos/download — exportar recursos visiveis do utilizador
+router.get('/:id/recursos/download', async (req, res) => {
+    try {
+        const filtrosRecursos = { autor: req.params.id, limit: 10000 };
+
+        if (!req.user || req.user.role !== 'admin') {
+            filtrosRecursos.visibilidade = 'publico';
+        }
+
+        const recursosRes = await axios.get(`${API}/recursos`, {
+            params: filtrosRecursos
+        });
+
+        const ids = (recursosRes.data || [])
+            .map(recurso => recurso._id)
+            .filter(Boolean);
+
+        if (ids.length === 0) {
+            return res.status(404).render('erro', {
+                titulo: 'Sem recursos para exportar',
+                mensagem: req.user && req.user.role === 'admin'
+                    ? 'Este utilizador ainda não publicou recursos.'
+                    : 'Este utilizador não tem recursos públicos para exportar.',
+                linkVoltar: `/utilizadores/${req.params.id}`,
+                botaoVolta: 'Voltar ao Utilizador'
+            });
+        }
+
+        const resposta = await axios.get(`${API}/disseminacao/recursos/exportar-multiplos`, {
+            params: { ids: ids.join(',') },
+            headers: obterHeadersAutorizacao(req),
+            responseType: 'arraybuffer'
+        });
+
+        ['content-type', 'content-disposition', 'content-length', 'x-resources-count'].forEach(nome => {
+            if (resposta.headers[nome]) {
+                res.setHeader(nome, resposta.headers[nome]);
+            }
+        });
+
+        if (!res.getHeader('Content-Disposition')) {
+            res.setHeader('Content-Disposition', `attachment; filename="recursos-utilizador-${req.params.id}-${Date.now()}.zip"`);
+        }
+
+        res.send(Buffer.from(resposta.data));
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro ao exportar recursos',
+            mensagem: 'Não foi possível exportar os recursos deste utilizador.',
+            linkVoltar: `/utilizadores/${req.params.id}`,
+            botaoVolta: 'Voltar ao Utilizador'
+        });
+    }
+});
+
 // POST /utilizadores/:id/editar — atualizar
 router.post('/:id/editar', async (req, res) => {
     try {
