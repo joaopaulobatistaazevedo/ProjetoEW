@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
+var FormData = require('form-data');
 const { uploadSipZip, uploadMultipleFiles } = require('../middleware/uploadZip');
 const {
     obterHeadersAutorizacao,

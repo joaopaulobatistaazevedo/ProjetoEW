@@ -12,6 +12,7 @@
     "axios": "^1.14.0",
     "cookie-parser": "^1.4.5",
     "express": "^5.2.1",
+    "form-data": "^4.0.5",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",

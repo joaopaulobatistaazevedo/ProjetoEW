@@ -26,21 +26,25 @@ async function criarNoticiaSeNaoExistir(noticia, filtro = null) {
     return Noticia.create(noticia);
 }
 
-async function atualizarNoticiaAutomatica(filtro, noticia) {
-    return Noticia.findOneAndUpdate(
-        filtro,
-        {
-            $set: {
-                ...noticia,
-                dataCriacao: new Date()
-            }
-        },
-        {
-            upsert: true,
-            new: true,
-            setDefaultsOnInsert: true
+async function atualizarNoticiaAutomaticaSeMudar(filtro, noticia) {
+    const existente = await Noticia.findOne(filtro);
+
+    if (existente) {
+        if (existente.conteudo === noticia.conteudo) {
+            return existente;
         }
-    );
+
+        existente.set({
+            ...noticia,
+            dataCriacao: new Date()
+        });
+        return existente.save();
+    }
+
+    return Noticia.create({
+        ...noticia,
+        dataCriacao: new Date()
+    });
 }
 
 async function gerarNoticiasAutomaticas(diasAnalise = null) {
@@ -109,7 +113,7 @@ async function gerarNoticiasAutomaticas(diasAnalise = null) {
 
     if (destaqueTipo.length > 0) {
         const tipo = await TipoRecurso.findOne({ slug: destaqueTipo[0]._id }).select('nome slug');
-        await atualizarNoticiaAutomatica({
+        await atualizarNoticiaAutomaticaSeMudar({
             titulo: 'Tipo em destaque',
             tipo: 'tipo_destaque',
             link: '/recursos'
@@ -128,7 +132,7 @@ async function gerarNoticiasAutomaticas(diasAnalise = null) {
         { $group: { _id: null, media: { $avg: '$mediaEstrelas' } } }
     ]);
 
-    await atualizarNoticiaAutomatica({
+    await atualizarNoticiaAutomaticaSeMudar({
         titulo: 'Estatísticas da plataforma',
         tipo: 'stats',
         link: '/recursos'

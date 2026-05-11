@@ -191,7 +191,7 @@ Existem notícias manuais e notícias automáticas, por exemplo:
 - estatísticas da plataforma;
 - tipo de recurso em destaque.
 
-As notícias automáticas associadas a eventos, como a criação de um novo recurso, são geradas no momento em que esse evento acontece. Já as notícias agregadas, como estatísticas da plataforma ou tipo de recurso em destaque, são atualizadas quando a página de notícias é aberta. Isto evita que dados como “número de recursos” ou “tipo em destaque” fiquem desatualizados.
+As notícias automáticas associadas a eventos, como a criação de um novo recurso, são geradas no momento em que esse evento acontece. Já as notícias agregadas, como estatísticas da plataforma ou tipo de recurso em destaque, são recalculadas quando a página de notícias é aberta, mas só são atualizadas se o conteúdo tiver mudado. Assim, os dados não ficam desatualizados e estas notícias não sobem artificialmente para o topo sempre que a página é visitada.
 
 ## 11. Documentação e Swagger
 
