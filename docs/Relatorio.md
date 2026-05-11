@@ -147,7 +147,6 @@ Nesta área estão concentradas as operações que pertencem ao administrador:
 - gestão de tipos de recurso;
 - gestão de AIPs;
 - exportação de dados;
-- acesso a operações globais da plataforma.
 
 A exportação ficou concentrada em:
 

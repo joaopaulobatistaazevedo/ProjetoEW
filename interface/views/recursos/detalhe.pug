@@ -227,7 +227,7 @@ block content
                 
                 .form-group
                   label(for='conteudo') Conteúdo
-                  textarea#conteudo.form-control(name='conteudo', placeholder='Partilhe suas ideias e insights...', required=true)
+                  textarea#conteudo.form-control(name='conteudo', placeholder='Partilhe suas ideias e insights...', required=true, rows='5', style='min-height: 140px; resize: vertical;')
               
               .card-footer
                 button.btn.btn-primary(type='submit')
@@ -276,10 +276,10 @@ block content
                 if user
                   form.mt-3(method='POST', action='/posts/' + post._id + '/comentarios')
                     input(type='hidden', name='recurso', value=recurso._id)
+                    .form-group
+                      textarea.form-control(name='conteudo', placeholder='Deixe seu comentário...', required=true, rows='4', style='width: 100%; min-height: 120px; resize: vertical;')
                     .row
-                      .col-10
-                        textarea.form-control(name='conteudo', placeholder='Deixe seu comentário...', required=true, style='resize: none; height: 60px;')
-                      .col-2
+                      .col-12(style='text-align: right;')
                         button.btn.btn-primary.btn-block(type='submit')
                           i.fas.fa-reply
                           span Comentar
