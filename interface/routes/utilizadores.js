@@ -1,16 +1,16 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
+const { obterHeadersAutorizacao } = require('./utils');
 
 const AUTH        = process.env.AUTH_URL    || 'http://localhost:3002/users';
-const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
+const API         = process.env.API_URL     || 'http://localhost:3001';
 
 // GET /utilizadores — listar todos (via auth service)
 router.get('/', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         const resposta = await axios.get(`${AUTH}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.render('utilizadores/lista', { titulo: 'Utilizadores', utilizadores: resposta.data });
     } catch (err) {
@@ -21,13 +21,92 @@ router.get('/', async (req, res) => {
 // GET /utilizadores/:id — ver um utilizador
 router.get('/:id', async (req, res) => {
     try {
-        const token = req.cookies[COOKIE_NAME];
         const resposta = await axios.get(`${AUTH}/${req.params.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
-        res.render('utilizadores/detalhe', { titulo: 'Utilizador', utilizador: resposta.data });
+
+        const filtrosRecursos = { autor: req.params.id };
+        const podeVerPrivados = req.user && (
+            req.user.role === 'admin' ||
+            String(req.user.sub || req.user.id) === String(req.params.id)
+        );
+
+        if (!podeVerPrivados) {
+            filtrosRecursos.visibilidade = 'publico';
+        }
+
+        let recursos = [];
+        try {
+            const recursosRes = await axios.get(`${API}/recursos`, {
+                params: filtrosRecursos
+            });
+            recursos = recursosRes.data || [];
+        } catch (recursosErr) {
+            recursos = [];
+        }
+
+        res.render('utilizadores/detalhe', {
+            titulo: 'Utilizador',
+            utilizador: resposta.data,
+            recursos
+        });
     } catch (err) {
         res.redirect('/utilizadores');
+    }
+});
+
+// GET /utilizadores/:id/recursos/download — exportar recursos visiveis do utilizador
+router.get('/:id/recursos/download', async (req, res) => {
+    try {
+        const filtrosRecursos = { autor: req.params.id, limit: 10000 };
+
+        if (!req.user || req.user.role !== 'admin') {
+            filtrosRecursos.visibilidade = 'publico';
+        }
+
+        const recursosRes = await axios.get(`${API}/recursos`, {
+            params: filtrosRecursos
+        });
+
+        const ids = (recursosRes.data || [])
+            .map(recurso => recurso._id)
+            .filter(Boolean);
+
+        if (ids.length === 0) {
+            return res.status(404).render('erro', {
+                titulo: 'Sem recursos para exportar',
+                mensagem: req.user && req.user.role === 'admin'
+                    ? 'Este utilizador ainda não publicou recursos.'
+                    : 'Este utilizador não tem recursos públicos para exportar.',
+                linkVoltar: `/utilizadores/${req.params.id}`,
+                botaoVolta: 'Voltar ao Utilizador'
+            });
+        }
+
+        const resposta = await axios.get(`${API}/disseminacao/recursos/exportar-multiplos`, {
+            params: { ids: ids.join(',') },
+            headers: obterHeadersAutorizacao(req),
+            responseType: 'arraybuffer'
+        });
+
+        ['content-type', 'content-disposition', 'content-length', 'x-resources-count'].forEach(nome => {
+            if (resposta.headers[nome]) {
+                res.setHeader(nome, resposta.headers[nome]);
+            }
+        });
+
+        if (!res.getHeader('Content-Disposition')) {
+            res.setHeader('Content-Disposition', `attachment; filename="recursos-utilizador-${req.params.id}-${Date.now()}.zip"`);
+        }
+
+        res.send(Buffer.from(resposta.data));
+    } catch (err) {
+        res.status(err.response?.status || 500).render('erro', {
+            titulo: 'Erro ao exportar recursos',
+            mensagem: 'Não foi possível exportar os recursos deste utilizador.',
+            linkVoltar: `/utilizadores/${req.params.id}`,
+            botaoVolta: 'Voltar ao Utilizador'
+        });
     }
 });
 
@@ -41,7 +120,6 @@ router.post('/:id/editar', async (req, res) => {
             return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
-        const token = req.cookies[COOKIE_NAME];
         const dados = { ...req.body };
 
         // A interface nao permite alterar passwords por este formulario.
@@ -53,7 +131,7 @@ router.post('/:id/editar', async (req, res) => {
         }
 
         await axios.put(`${AUTH}/${req.params.id}`, dados, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect(`/utilizadores/${req.params.id}`);
     } catch (err) {
@@ -68,9 +146,8 @@ router.post('/:id/apagar', async (req, res) => {
             return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
-        const token = req.cookies[COOKIE_NAME];
         await axios.delete(`${AUTH}/${req.params.id}`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect('/utilizadores');
     } catch (err) {
@@ -85,9 +162,8 @@ router.post('/:id/promover/admin', async (req, res) => {
             return res.redirect(`/utilizadores/${req.params.id}`);
         }
 
-        const token = req.cookies[COOKIE_NAME];
         await axios.put(`${AUTH}/${req.params.id}/promote/admin`, {}, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: obterHeadersAutorizacao(req)
         });
         res.redirect(`/utilizadores/${req.params.id}`);
     } catch (err) {

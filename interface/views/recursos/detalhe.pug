@@ -10,7 +10,7 @@ block content
 
     // Detalhe do recurso
     .row.mb-6
-      .col-8
+      .col-12
         .card
           .card-header
             h1= recurso.titulo
@@ -64,7 +64,6 @@ block content
                       i.fas.fa-star
                       |  Avaliar
 
-                // Script mínimo para gerir clique nas estrelas
                 script.
                   document.addEventListener('DOMContentLoaded', function(){
                     var stars = Array.from(document.querySelectorAll('.star-btn'));
@@ -77,7 +76,6 @@ block content
                         else { icon.classList.remove('fas'); icon.classList.add('far'); icon.style.color = 'var(--light-gray)'; }
                       });
                     }
-                    // inicializar com valor actual se houver
                     var inicial = parseInt(input.value,10) || 0;
                     if(inicial) colorize(inicial);
                     stars.forEach(function(s, idx){
@@ -95,32 +93,61 @@ block content
               h3 Descrição
               p!= recurso.descricao
 
-            if recurso.ficheiro
+            if recurso.ficheirosList && recurso.ficheirosList.length > 0
               .card(style='margin-top: 1.5rem; border: 1px solid var(--light-gray);')
                 .card-body
-                  h3(style='margin-top: 0;') Ficheiro associado
-                  p(style='margin-bottom: 0.75rem;')
-                    strong Nome:
-                    |  #{recurso.ficheiroNome || recurso.ficheiro.split('/').pop()}
-                  p(style='margin-bottom: 1rem;')
-                    strong Path:
-                    |  #{recurso.ficheiro}
+                  h3(style='margin-top: 0;') Ficheiros associados (#{recurso.ficheirosList.length})
+                  
+                  .list-group
+                    - for (var i = 0; i < recurso.ficheirosList.length; i++)
+                      - var f = recurso.ficheirosList[i];
+                      .list-group-item(style='padding: 1rem; border-bottom: 1px solid var(--light-gray);')
+                        .row
+                          .col-12
+                            p(style='margin-bottom: 0.5rem;')
+                              strong= f.nome
+                            .resource-meta(style='margin-bottom: 0.75rem;')
+                              span
+                                i.fas.fa-file
+                                |  Tamanho: #{(f.tamanho / 1024).toFixed(2)} KB
+                              span
+                                i.fas.fa-calendar
+                                |  Adicionado: #{new Date(f.dataAdicionado).toLocaleDateString('pt-PT')}
+                              span
+                                i.fas.fa-fingerprint
+                                |  Versão AIP: #{f.versaoAIP}
+                            
+                            // Preview do ficheiro
+                            - var ext = f.nome ? f.nome.split('.').pop().toLowerCase() : '';
+                            - var isImagem = ['jpg','jpeg','png','gif','webp','svg'].includes(ext);
+                            - var isPdf = ext === 'pdf';
+                            - var isVideo = ['mp4','webm','ogg'].includes(ext);
+                            - var isAudio = ['mp3','wav','ogg','m4a'].includes(ext);
+                            - var isTexto = ['txt','md','csv','json','xml','html'].includes(ext);
 
-                  - const ficheiroNome = (recurso.ficheiroNome || recurso.ficheiro.split('/').pop() || '').toLowerCase();
-                  - const podeMostrarImagem = /\.(png|jpe?g|gif|webp)$/i.test(ficheiroNome);
-                  - const podeMostrarPdf = /\.pdf$/i.test(ficheiroNome);
+                            if isImagem
+                              img(src='/recursos/' + recurso._id + '/ficheiro/' + i, alt=f.nome, style='max-width: 100%; max-height: 620px; border-radius: 0.25rem; border: 1px solid var(--light-gray);')
+                            else if isPdf
+                              iframe(src='/recursos/' + recurso._id + '/ficheiro/' + i, style='width: 100%; height: 760px; border: 1px solid var(--light-gray); border-radius: 0.25rem; overflow: auto;')
+                            else if isVideo
+                              video(controls, style='width: 100%; border-radius: 0.25rem;')
+                                source(src='/recursos/' + recurso._id + '/ficheiro/' + i, type='video/' + ext)
+                                | O seu browser não suporta a reprodução de vídeo.
+                            else if isAudio
+                              audio(controls, style='width: 100%; margin-top: 0.25rem;')
+                                source(src='/recursos/' + recurso._id + '/ficheiro/' + i, type='audio/' + ext)
+                                | O seu browser não suporta a reprodução de áudio.
+                            else if isTexto
+                              iframe(src='/recursos/' + recurso._id + '/ficheiro/' + i, style='width: 100%; height: 620px; border: 1px solid var(--light-gray); border-radius: 0.25rem; font-family: monospace; overflow: auto;')
+                            else
+                              small.text-muted
+                                i.fas.fa-eye-slash(style='margin-right: 0.25rem;')
+                                | Pré-visualização não disponível para este tipo de ficheiro.
 
-                  if recurso.ficheiroPreviewUrl && podeMostrarImagem
-                    .file-preview
-                      img(src=recurso.ficheiroPreviewUrl, alt=recurso.ficheiroNome || 'Pré-visualização do ficheiro', style='max-width: 100%; height: auto; border-radius: 0.5rem; border: 1px solid var(--light-gray);')
-                  else if recurso.ficheiroPreviewUrl && podeMostrarPdf
-                    .file-preview
-                      iframe(src=recurso.ficheiroPreviewUrl, title=recurso.ficheiroNome || 'Pré-visualização do PDF', style='width: 100%; min-height: 520px; border: 1px solid var(--light-gray); border-radius: 0.5rem;')
-                  else
-                    .alert.alert-info(style='margin-bottom: 0;')
-                      i.fas.fa-info-circle(style='margin-right: 0.5rem;')
-                      | Não há pré-visualização inline para este tipo de ficheiro. O caminho acima identifica o ficheiro guardado.
-            
+                            div(style='margin-top: 0.75rem; text-align: right;')
+                              a.btn.btn-sm.btn-outline-primary(href=f.downloadUrl, title='Descarregar este ficheiro')
+                                i.fas.fa-download
+                                |  Descarregar
             - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
             - const podeExportar = user && (user.role === 'admin' || recurso.visibilidade === 'publico' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
 
@@ -128,73 +155,62 @@ block content
               .card-footer
                 a.btn.btn-primary(href='/recursos/' + recurso._id + '/editar')
                   i.fas.fa-edit
-                  span Editar Recurso
+                  span  Editar Recurso
                 form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline', onsubmit='return confirm("Tem a certeza? Esta ação não pode ser desfeita.");')
                   button.btn.btn-danger(type='submit')
                     i.fas.fa-trash-alt
-                    span Apagar Recurso
-      
-      .col-4
-        // Sidebar de informacoes
+                    span  Apagar Recurso
+    .row.mb-6
+      .col-12
         .card
           .card-header
             i.fas.fa-info-circle
             span  Informações
           .card-body
-            if recurso.tipo
-              div.mb-4
-                strong Tipo:
-                p= recurso.tipoNome || recurso.tipo
-            
-            if recurso.visibilidade
-              div.mb-4
-                strong Visibilidade:
-                p
-                  if recurso.visibilidade === 'publico'
-                    i.fas.fa-globe(style='color: var(--primary); margin-right: 0.25rem;')
-                    | Público
-                  else
-                    i.fas.fa-lock(style='color: var(--warning); margin-right: 0.25rem;')
-                    | Privado
-            
-            if recurso.autor
-              div.mb-4
-                strong Autor:
-                p= recurso.autor.nome
-            
-            if recurso.criatedAt
-              div
-                strong Criado em:
-                p= new Date(recurso.criatedAt).toLocaleDateString('pt-PT')
+            .row
+              if recurso.tipo
+                .col-3
+                  strong Tipo:
+                  p= recurso.tipoNome || recurso.tipo
+              
+              if recurso.visibilidade
+                .col-3
+                  strong Visibilidade:
+                  p
+                    if recurso.visibilidade === 'publico'
+                      i.fas.fa-globe(style='color: var(--primary); margin-right: 0.25rem;')
+                      | Público
+                    else
+                      i.fas.fa-lock(style='color: var(--warning); margin-right: 0.25rem;')
+                      | Privado
+              
+              if recurso.autor
+                .col-3
+                  strong Autor:
+                  p= recurso.autor.nome
+              
+              if recurso.criatedAt
+                .col-3
+                  strong Criado em:
+                  p= new Date(recurso.criatedAt).toLocaleDateString('pt-PT')
 
     .row.mb-6
       .col-12
         .card
           .card-header
-            i.fas.fa-box-open
-            span  Disseminação OAIS (DIP)
+            i.fas.fa-download
+            span  Download do Recurso
           .card-body
-            p.dip-intro
-              | Nesta fase inicial, o DIP é exportado como um pacote equivalente ao SIP.
-              |  O sistema devolve o recurso preservado em formato ZIP, mantendo a mesma estrutura base de manifesto e ficheiros.
-
-            .alert.alert-info
-              i.fas.fa-circle-info(style='margin-right: 0.5rem;')
-              strong Fase inicial:
-              |  o utilizador descarrega o pacote completo, sem filtros nem transformações adicionais.
-
+            p.text-muted(style='margin-bottom: 1.25rem;')
+              | Descarregue o recurso completo num único pacote ZIP, incluindo todos os ficheiros e o respetivo manifesto. O pacote está pronto para reimportação no sistema caso seja necessário.
             if podeExportar
-              .dip-toolbar
-                a.btn.btn-secondary(href='/recursos/' + recurso._id + '/exportar-dip')
-                  i.fas.fa-download
-                  span Exportar DIP
-                p.dip-help
-                  | Numa fase seguinte poderemos separar DIP e SIP com mais detalhe, mas por agora mantemos a equivalência para fechar o ciclo base de ingestão e disseminação.
+              a.btn.btn-primary(href='/recursos/' + recurso._id + '/exportar-dip')
+                i.fas.fa-download
+                span  Descarregar Pacote
 
     // Posts e comentarios
     .row
       .col-12
-        // Novo Post
         if user
           .card.mb-6
             .card-header
@@ -211,7 +227,7 @@ block content
                 
                 .form-group
                   label(for='conteudo') Conteúdo
-                  textarea#conteudo.form-control(name='conteudo', placeholder='Partilhe suas ideias e insights...', required=true)
+                  textarea#conteudo.form-control(name='conteudo', placeholder='Partilhe suas ideias e insights...', required=true, rows='5', style='min-height: 140px; resize: vertical;')
               
               .card-footer
                 button.btn.btn-primary(type='submit')
@@ -224,7 +240,6 @@ block content
               a(href='/auth/login') Faça login
               |  para publicar discussões e comentários.
 
-        // Lista de Posts
         .card
           .card-header
             i.fas.fa-comments
@@ -243,7 +258,6 @@ block content
                 
                 p(style='color: #475569; line-height: 1.6;')= post.conteudo
                 
-                // Comentários
                 if post.comentarios && post.comentarios.length
                   .mt-4
                     .mb-3
@@ -259,18 +273,17 @@ block content
                             br
                             small.text-muted= c.conteudo
                 
-                // Formulário de Comentário
                 if user
                   form.mt-3(method='POST', action='/posts/' + post._id + '/comentarios')
+                    input(type='hidden', name='recurso', value=recurso._id)
+                    .form-group
+                      textarea.form-control(name='conteudo', placeholder='Deixe seu comentário...', required=true, rows='4', style='width: 100%; min-height: 120px; resize: vertical;')
                     .row
-                      .col-10
-                        textarea.form-control(name='conteudo', placeholder='Deixe seu comentário...', required=true, style='resize: none; height: 60px;')
-                      .col-2
+                      .col-12(style='text-align: right;')
                         button.btn.btn-primary.btn-block(type='submit')
                           i.fas.fa-reply
                           span Comentar
                 
-                // Ação Apagar Post (se autorizado)
                 if user && (user.role === 'admin' || user.sub === post.autor._id)
                   form.mt-3(method='POST', action='/posts/' + post._id + '/apagar', onsubmit='return confirm("Tem a certeza?");')
                     input(type='hidden', name='recurso', value=recurso._id)

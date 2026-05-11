@@ -84,13 +84,6 @@ const disseminacaoController = {
                 });
             }
             
-            if (recursoIds.length > 100) {
-                return res.status(400).json({
-                    status: 'erro',
-                    mensagem: 'Máximo de 100 recursos por lote'
-                });
-            }
-            
             // Verificar permissao para cada recurso
             const recursosPermitidos = [];
             for (const recursoId of recursoIds) {
@@ -231,6 +224,56 @@ const disseminacaoController = {
             res.status(500).json({
                 status: 'erro',
                 mensagem: 'Erro ao exportar recursos',
+                erro: err.message
+            });
+        }
+    },
+
+    /**
+     * GET /disseminacao/recursos/:recursoId/ficheiros/:indice/exportar
+     * Exporta apenas um ficheiro preservado do AIP
+     */
+    exportarFicheiroIndividual: async (req, res) => {
+        try {
+            const { recursoId, indice } = req.params;
+            const utilizadorId = req.user.id;
+            const papelUtilizador = req.user.role || 'consumidor';
+
+            const { buffer, metadata } = await disseminacaoService.exportarFicheiroIndividual(
+                recursoId,
+                Number(indice),
+                utilizadorId,
+                papelUtilizador
+            );
+
+            try {
+                await disseminacaoService.registarExportacao(
+                    metadata.aipId,
+                    recursoId,
+                    utilizadorId,
+                    metadata,
+                    req
+                );
+            } catch (auditErr) {
+                console.warn('Aviso: Falha ao registar auditoria:', auditErr.message);
+            }
+
+            const nomeArquivo = String(metadata.nomeArquivo || `ficheiro-${indice}`)
+                .replace(/"/g, '');
+
+            res.setHeader('Content-Type', metadata.contentType || 'application/octet-stream');
+            res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
+            res.setHeader('Content-Length', buffer.length);
+            res.setHeader('X-DIP-Checksum', metadata.checksumDIP);
+            res.setHeader('X-DIP-Size', metadata.tamanhoZIP);
+            res.setHeader('X-DIP-Tipo-Pedido', 'ficheiro-individual');
+
+            res.send(buffer);
+        } catch (err) {
+            console.error('Erro ao exportar ficheiro individual:', err);
+            res.status(err.statusCode || 500).json({
+                status: 'erro',
+                mensagem: err.message || 'Erro ao exportar ficheiro',
                 erro: err.message
             });
         }

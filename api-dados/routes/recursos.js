@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const recursosController = require('../controllers/recursosController');
 // Upload de ficheiro do recurso
-const upload = require('../middleware/upload');
+const { uploadRecursos } = require('../middleware/uploads');
 const { authenticate, authorize } = require('../middleware/auth');
 
 // GET /recursos — listar com filtros (público)
@@ -21,7 +21,10 @@ router.get('/:id/preview', recursosController.previewRecurso);
 function conditionalUpload(req, res, next) {
 	const ct = (req.headers['content-type'] || '').toLowerCase();
 	if (ct.startsWith('multipart/form-data')) {
-		return upload.single('ficheiro')(req, res, next);
+		return uploadRecursos.fields([
+			{ name: 'ficheiro', maxCount: 1 },
+			{ name: 'ficheirosNovos', maxCount: 20 }
+		])(req, res, next);
 	}
 	return next();
 }

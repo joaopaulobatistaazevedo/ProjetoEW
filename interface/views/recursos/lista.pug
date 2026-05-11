@@ -13,13 +13,6 @@ block content
           a.btn.btn-primary.btn-block(href='/recursos/novo')
             i.fas.fa-plus
             span Submeter Recurso
-          // novos botoes para acessar recursos e AIPs do utilizador
-          a.btn.btn-outline.btn-block.mt-2(href='/recursos?autor=' + (user.sub || ''))
-            i.fas.fa-folder-open
-            |  Meus Recursos
-          a.btn.btn-outline.btn-block.mt-2(href='/recursos/aips')
-            i.fas.fa-archive
-            |  Ver os meus AIPs
     
     // Alerta de erro (se houver)
     if erro
@@ -33,6 +26,7 @@ block content
         i.fas.fa-filter
         span  Filtrar Recursos
       .card-body
+        - const meusRecursosAtivo = user && filtros && String(filtros.autor || '') === String(user.sub || '');
         form.row(method='GET', action='/recursos')
           .col-4
             .form-group
@@ -55,13 +49,6 @@ block content
               input#ano.form-control(type='number', name='ano', placeholder='2026', value=(filtros && filtros.ano) || '')
           .col-3
             .form-group
-              label(for='visibilidade') Visibilidade
-              select#visibilidade.form-control(name='visibilidade')
-                option(value='') Todas
-                option(value='publico' selected=((filtros && filtros.visibilidade) === 'publico')) Publico
-                option(value='privado' selected=((filtros && filtros.visibilidade) === 'privado')) Privado
-          .col-3
-            .form-group
               label(for='sort') Ordenar por
               select#sort.form-control(name='sort')
                 option(value='dataRegisto' selected=((filtros && filtros.sort) === 'dataRegisto' || !(filtros && filtros.sort))) Mais recentes
@@ -73,6 +60,18 @@ block content
               select#order.form-control(name='order')
                 option(value='desc' selected=((filtros && filtros.order) === 'desc' || !(filtros && filtros.order))) Descendente
                 option(value='asc' selected=((filtros && filtros.order) === 'asc')) Ascendente
+          if user
+            .col-12
+              .form-group.filters-inline-row
+                label.checkbox-filter(for='meus-recursos')
+                  input#meus-recursos.checkbox-filter-input(type='checkbox', name='autor', value=(user.sub || '') checked=((filtros && filtros.autor) === (user.sub || '')))
+                  span Mostrar apenas os meus recursos
+                .visibility-inline#visibilidade-filter(style=meusRecursosAtivo ? '' : 'display:none;')
+                  label(for='visibilidade') Visibilidade
+                  select#visibilidade.form-control(name='visibilidade' disabled=!meusRecursosAtivo)
+                    option(value='') Todas
+                    option(value='publico' selected=((filtros && filtros.visibilidade) === 'publico')) Publico
+                    option(value='privado' selected=((filtros && filtros.visibilidade) === 'privado')) Privado
           .col-12
             .filters-actions
               button.btn.btn-primary(type='submit')
@@ -81,6 +80,24 @@ block content
               a.btn.btn-outline(href='/recursos')
                 i.fas.fa-rotate-left
                 span Limpar Filtros
+        if user
+          script.
+            document.addEventListener('DOMContentLoaded', function () {
+              var meusRecursos = document.getElementById('meus-recursos');
+              var visibilidadeFiltro = document.getElementById('visibilidade-filter');
+              var visibilidade = document.getElementById('visibilidade');
+              if (!meusRecursos || !visibilidadeFiltro || !visibilidade) return;
+
+              function atualizarVisibilidade() {
+                var ativo = meusRecursos.checked;
+                visibilidadeFiltro.style.display = ativo ? '' : 'none';
+                visibilidade.disabled = !ativo;
+                if (!ativo) visibilidade.value = '';
+              }
+
+              meusRecursos.addEventListener('change', atualizarVisibilidade);
+              atualizarVisibilidade();
+            });
     
     // Lista de recursos
     if recursos && recursos.length
@@ -110,6 +127,13 @@ block content
                     span
                       i.fas.fa-user
                       | #{recurso.autor.nome}
+
+                if recurso.hashtags && recurso.hashtags.length
+                  .resource-tags
+                    each tag in recurso.hashtags
+                      span.resource-tag
+                        i.fas.fa-hashtag
+                        | #{tag}
                 
                 p(style='color: #64748b; font-size: 0.9rem; display:flex; align-items:center; gap:0.5rem;')
                   // Mostrar estrelas com base na média (arredondada)
@@ -131,14 +155,14 @@ block content
                 if podeExportar
                   a.btn.btn-secondary.btn-sm(href='/recursos/' + recurso._id + '/exportar-dip', title='Exportar DIP')
                     i.fas.fa-file-export
-                    span Exportar DIP
+                    span Exportar
 
                 - const podeEditar = user && (user.role === 'admin' || (user.role === 'produtor' && recurso.autor && String(user.sub) === String(recurso.autor._id)));
                 if podeEditar
                   a.btn.btn-primary.btn-sm(href='/recursos/' + recurso._id + '/editar')
                     i.fas.fa-edit
                     span Editar
-                  form(method='POST', action='/recursos/' + recurso._id + '/apagar', style='display:inline', onsubmit='return confirm("Tem a certeza?");')
+                  form.resource-action-form(method='POST', action='/recursos/' + recurso._id + '/apagar', onsubmit='return confirm("Tem a certeza?");')
                     button.btn.btn-danger.btn-sm(type='submit')
                       i.fas.fa-trash-alt
                       span Apagar

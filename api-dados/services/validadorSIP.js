@@ -62,7 +62,6 @@ class ValidadorSIP {
                 // Se todos os ficheiros começam com a mesma pasta
                 if (todasAsPastas.every(nome => nome.startsWith(primeiraNivel + '/'))) {
                     pastaRaiz = primeiraNivel;
-                    console.log(`Detectada pasta raiz: ${pastaRaiz}. Normalizando...`);
                 }
             }
 

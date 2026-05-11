@@ -6,11 +6,11 @@ block content
       .col-8
         h1
           i.fas.fa-archive(style='margin-right: 0.75rem; color: var(--primary);')
-          span AIPs
+          span= titulo || 'AIPs'
       .col-4
-        a.btn.btn-outline.btn-block(href='/recursos')
+        a.btn.btn-outline.btn-block(href=admin ? '/admin' : '/recursos')
           i.fas.fa-arrow-left
-          span Voltar aos Recursos
+          span= admin ? 'Voltar à Administração' : 'Voltar aos Recursos'
 
     if erro
       .alert.alert-danger

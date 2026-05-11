@@ -1,13 +1,26 @@
 services:
+  gateway:
+    build: ./gateway
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - interface
+      - api-dados
+      - auth
+    networks:
+      - app-network
+
   api-dados:
     build: ./api-dados
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
       - JWT_SECRET=jcr_secret_2026
       - COOKIE_NAME=token
+      - SWAGGER_URL=http://localhost:3000/api-dados
       - INTERFACE_URL=http://interface:3000
+      - INTERNAL_NEWS_SECRET=jcr_internal_news_2026
     depends_on:
       - mongodb_api
     volumes:
@@ -17,15 +30,16 @@ services:
 
   auth:
     build: ./auth
-    ports:
-      - "3002:2623"
+    expose:
+      - "2623"
     environment:
       - MONGO_URL=mongodb://mongodb_api:27017/recursos_educativos
       - PORT=2623
       - JWT_SECRET=jcr_secret_2026
       - COOKIE_NAME=token
-      - SWAGGER_URL=http://localhost:3002
+      - SWAGGER_URL=http://localhost:3000/auth-service
       - INTERFACE_URL=http://interface:3000
+      - INTERNAL_NEWS_SECRET=jcr_internal_news_2026
     depends_on:
       - mongodb_api
     networks:
@@ -33,14 +47,15 @@ services:
 
   interface:
     build: ./interface
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - PORT=3000
       - API_URL=http://api-dados:3001
       - AUTH_URL=http://auth:2623/users
       - COOKIE_NAME=token
       - JWT_SECRET=jcr_secret_2026
+      - INTERNAL_NEWS_SECRET=jcr_internal_news_2026
     depends_on:
       - api-dados
       - auth
@@ -51,8 +66,8 @@ services:
     build:
       context: ./api-dados
       dockerfile: Dockerfile.mongo
-    ports:
-      - "27018:27017"
+    expose:
+      - "27017"
     volumes:
       - mongodb_api_data:/data/db
       - ./api-dados/mongo_init:/docker-entrypoint-initdb.d

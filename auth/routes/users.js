@@ -34,11 +34,11 @@ function toPublicUser(userDoc) {
 // POST /users/register — criar conta
 router.post('/register', async (req, res) => {
     try {
-        // Forçar role a 'consumidor' independentemente do input
+        // Criar conta com role consumidor por defeito
         const data = { ...req.body, role: 'consumidor' };
         const novo = await Utilizador.insert(data);
 
-        // Criar notícia automática sobre o novo registo (melhor esforço)
+        // Criar notícia automática sobre o novo registo 
         try {
             await axios.post(`${API_URL}/noticias/internal`, {
                 titulo: `Novo utilizador registado: ${novo.nome || novo.username}`,
@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         const dados = await Utilizador.login(username, password);
-        // Cookie HTTP-only para sessao
+        
         res.cookie(COOKIE_NAME, dados.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

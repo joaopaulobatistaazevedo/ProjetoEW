@@ -10,5 +10,6 @@ const upload = multer({
 });
 
 module.exports = {
-    uploadSipZip: upload.single('ficheiro')  // Aceita campo 'ficheiro' do formulário
+    uploadSipZip: upload.single('ficheiro'),  // Aceita campo 'ficheiro' do formulário (SIP ZIP)
+    uploadMultipleFiles: upload  // Para upload múltiplo de ficheiros (formulário assistido)
 };

@@ -1,6 +1,7 @@
 const ValidadorSIP = require('../services/validadorSIP');
 const SIPProcessor = require('../services/sIPProcessor');
 const AIP = require('../models/aip');
+const Recurso = require('../models/recurso');
 const fs = require('fs').promises;
 
 const ingestaoController = {
@@ -28,16 +29,6 @@ const ingestaoController = {
 
             // Se validação falhou
             if (!resultadoValidacao.ok) {
-                // Registar erro no AIP (para auditoria)
-                const processor = new SIPProcessor();
-                const aipId = await processor.registarErroAIP(
-                    resultadoValidacao.manifesto,
-                    utilizadorId,
-                    checksumZip,
-                    resultadoValidacao.relatorio.erros,
-                    resultadoValidacao.relatorio.avisos
-                );
-
                 // Limpar ficheiro temporario
                 try {
                     await fs.unlink(caminhoZip);
@@ -47,7 +38,6 @@ const ingestaoController = {
 
                 return res.status(400).json({
                     status: 'erro',
-                    aipId: aipId,
                     mensagem: 'SIP rejeitado - validação falhou',
                     categoria: resultadoValidacao.relatorio.erros.length > 0
                         ? resultadoValidacao.relatorio.erros[0].categoria
@@ -69,7 +59,8 @@ const ingestaoController = {
                 resultadoValidacao.manifesto,
                 utilizadorId,
                 caminhoZip,
-                checksumZip
+                checksumZip,
+                req.user
             );
 
             return res.status(201).json({
@@ -107,7 +98,7 @@ const ingestaoController = {
     listarAIPs: async (req, res) => {
         try {
             const { status, page, limit } = req.query;
-            const filtro = { produtor: req.user.id };
+            const filtro = req.user.role === 'admin' ? {} : { produtor: req.user.id };
 
             if (status && ['ok', 'erro'].includes(status)) {
                 filtro.status = status;
@@ -218,6 +209,143 @@ const ingestaoController = {
             return res.status(500).json({
                 status: 'erro',
                 mensagem: 'Erro ao obter relatório',
+                erro: err.message
+            });
+        }
+    },
+
+    // GET /ingestao/recursos/:recursoId/historico-aip — histórico de versões
+    historicoAIP: async (req, res) => {
+        try {
+            const { recursoId } = req.params;
+            
+            // Verificar autenticação
+            if (!req.user) {
+                return res.status(401).json({
+                    status: 'erro',
+                    mensagem: 'Autenticação obrigatória'
+                });
+            }
+
+            // Carregar todas as versões de AIP para este recurso
+            const aips = await AIP.find({ recursoId })
+                .sort({ versao: -1 })
+                .populate('produtor', 'nome email')
+                .populate('aipAnterior', 'sipId versao dataIngestao');
+
+            if (aips.length === 0) {
+                return res.status(404).json({
+                    status: 'erro',
+                    mensagem: 'Nenhum AIP encontrado para este recurso'
+                });
+            }
+
+            // Apenas produtor/admin pode ver histórico de AIP privado
+            const recurso = await Recurso.findById(recursoId);
+            if (recurso.visibilidade === 'privado') {
+                if (req.user.role !== 'admin' && req.user.id !== recurso.autor.toString()) {
+                    return res.status(403).json({
+                        status: 'erro',
+                        mensagem: 'Acesso negado'
+                    });
+                }
+            }
+
+            // Formatar resposta
+            const historico = aips.map(aip => ({
+                versao: aip.versao,
+                sipId: aip.sipId,
+                status: aip.status,
+                dataIngestao: aip.dataIngestao,
+                motivoAtualizacao: aip.motivoAtualizacao,
+                produtor: aip.produtor ? { nome: aip.produtor.nome, email: aip.produtor.email } : null,
+                aipAnterior: aip.aipAnterior ? {
+                    sipId: aip.aipAnterior.sipId,
+                    versao: aip.aipAnterior.versao
+                } : null,
+                ficheirosNoAIP: aip.manifesto?.files?.length || 0
+            }));
+
+            res.json({
+                status: 'ok',
+                recursoId,
+                totalVersoes: historico.length,
+                versoes: historico
+            });
+        } catch (err) {
+            console.error('Erro ao obter histórico AIP:', err);
+            return res.status(500).json({
+                status: 'erro',
+                mensagem: 'Erro ao obter histórico',
+                erro: err.message
+            });
+        }
+    },
+
+    // POST /ingestao/form — receber formulário + ficheiros, gerar SIP, processar
+    submeterFormulario: async (req, res) => {
+        try {
+            const utilizadorId = req.user.id;
+
+            // 1. Validar ficheiros
+            if (!req.files || req.files.length === 0) {
+                return res.status(400).json({
+                    status: 'erro',
+                    mensagem: 'Nenhum ficheiro foi selecionado',
+                    categoria: 'upload'
+                });
+            }
+
+            // 2. Gerar SIP do formulário
+            const formToSIPGenerator = require('../services/formToSIPGenerator');
+            const caminhoZipGerado = await formToSIPGenerator.gerarSIPDoFormulario(req.body, req.files);
+
+            // 3. Validar SIP gerado
+            const validador = new ValidadorSIP();
+            const resultadoValidacao = await validador.validarCompleto(caminhoZipGerado);
+            const checksumZip = await validador.calcularChecksumZip(caminhoZipGerado);
+
+            // Se validação falhou
+            if (!resultadoValidacao.ok) {
+                try {
+                    await fs.unlink(caminhoZipGerado);
+                } catch (err) {
+                    console.error('Erro ao limpar ZIP gerado:', err.message);
+                }
+
+                return res.status(400).json({
+                    status: 'erro',
+                    mensagem: 'SIP gerado falhou validação',
+                    erros: resultadoValidacao.relatorio.erros,
+                    avisos: resultadoValidacao.relatorio.avisos,
+                    validacoes: resultadoValidacao.validacoes,
+                    relatorio: resultadoValidacao.relatorio
+                });
+            }
+
+            // 4. Processar SIP (mesmo fluxo que modo ZIP)
+            const processor = new SIPProcessor();
+            const resultado = await processor.processarSIP(
+                resultadoValidacao.manifesto,
+                utilizadorId,
+                caminhoZipGerado,
+                checksumZip,
+                req.user
+            );
+
+            // 5. Retornar sucesso
+            return res.status(201).json({
+                status: 'ok',
+                mensagem: 'Recurso criado com sucesso via formulário',
+                recursoId: resultado.recursoId,
+                aipId: resultado.aipId,
+                modo: 'formulario'
+            });
+        } catch (err) {
+            console.error('Erro ao submeter formulário:', err);
+            return res.status(500).json({
+                status: 'erro',
+                mensagem: 'Erro ao processar formulário de ingestão',
                 erro: err.message
             });
         }

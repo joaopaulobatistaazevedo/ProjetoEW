@@ -1,23 +1,21 @@
 var express = require('express');
 var router = express.Router();
 var axios = require('axios');
+const { obterHeadersAutorizacao, renderErroVista } = require('./utils');
 
 const API = process.env.API_URL || 'http://localhost:3001';
-const COOKIE_NAME = process.env.COOKIE_NAME || 'auth_token_alunos';
-
-function obterToken(req) {
-    return req.cookies[COOKIE_NAME];
-}
-
-function obterHeadersAutorizacao(req) {
-    const token = obterToken(req);
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
+const LIMITE_NOTICIAS_PAGINA = 20;
+const DIAS_NOTICIAS_PAGINA = 3;
 
 // GET /noticias - lista publica
 router.get('/', async (req, res) => {
     try {
-        const resposta = await axios.get(`${API}/noticias`, { params: { limit: req.query.limit || 50 } });
+        const resposta = await axios.get(`${API}/noticias/latest`, {
+            params: {
+                limit: req.query.limit || LIMITE_NOTICIAS_PAGINA,
+                dias: req.query.dias || DIAS_NOTICIAS_PAGINA
+            }
+        });
         res.render('noticias/lista', { titulo: 'Notícias', noticias: resposta.data });
     } catch (err) {
         res.render('noticias/lista', { titulo: 'Notícias', noticias: [], erro: err.message });
@@ -35,11 +33,19 @@ router.get('/novo', (req, res) => {
 
 // POST /noticias/novo - criar noticia (formulario admin) -> encaminha para API
 router.post('/novo', async (req, res) => {
+    const user = res.locals.user;
+    if (!user || user.role !== 'admin') {
+        return res.redirect('/noticias');
+    }
+
     try {
-        await axios.post(`${API}/noticias`, req.body, { headers: obterHeadersAutorizacao(req) });
+        await axios.post(`${API}/noticias`, { ...req.body, tipo: 'admin' }, { headers: obterHeadersAutorizacao(req) });
         res.redirect('/noticias');
     } catch (err) {
-        res.redirect('/noticias');
+        renderErroVista(res, err, err.response?.data?.erro || 'Nao foi possivel criar a notícia.', 'noticias/form', {
+            noticia: req.body,
+            titulo: 'Nova Notícia'
+        });
     }
 });
 

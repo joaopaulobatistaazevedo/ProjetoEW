@@ -57,4 +57,15 @@ router.get(
     disseminacaoController.exportarTodosRecursos
 );
 
+/**
+ * GET /disseminacao/recursos/:recursoId/ficheiros/:indice/exportar
+ * Exporta um ficheiro individual do AIP
+ */
+router.get(
+    '/recursos/:recursoId/ficheiros/:indice/exportar',
+    authenticate,
+    verificarPermissaoExportacao,
+    disseminacaoController.exportarFicheiroIndividual
+);
+
 module.exports = router;

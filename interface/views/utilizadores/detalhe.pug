@@ -54,7 +54,37 @@ block content
                   i.fas.fa-calendar-alt(style='margin-right: 0.5rem;')
                   | Membro desde
                 p= utilizador.dataRegisto ? new Date(utilizador.dataRegisto).toLocaleDateString('pt-PT') : 'N/A'
-          
+
+          // Recursos do utilizador
+          .card.mb-6
+            .card-header
+              i.fas.fa-box-open
+              span  Recursos Publicados
+            
+            .card-body
+              if recursos && recursos.length > 0
+                .mb-4(style='text-align: right;')
+                  a.btn.btn-primary(href='/utilizadores/' + utilizador._id + '/recursos/download')
+                    i.fas.fa-download
+                    if isAdmin
+                      span  Descarregar Recursos
+                    else
+                      span  Descarregar Recursos Públicos
+                ul(style='list-style: none; padding: 0; margin: 0;')
+                  each recurso in recursos
+                    li(style='padding: 0.6rem 0; border-bottom: 1px solid var(--border, #e5e7eb);')
+                      a(href='/recursos/' + recurso._id, style='display: flex; align-items: center; gap: 0.5rem; color: var(--primary); text-decoration: none;')
+                        i.fas.fa-file-alt
+                        span= recurso.titulo
+                      if recurso.dataCriacao
+                        small.text-muted(style='margin-left: 1.5rem;')
+                          i.fas.fa-calendar(style='margin-right: 0.25rem;')
+                          | #{new Date(recurso.dataCriacao).toLocaleDateString('pt-PT')}
+              else
+                p.text-muted(style='margin: 0;')
+                  i.fas.fa-info-circle(style='margin-right: 0.5rem;')
+                  | Este utilizador ainda não publicou nenhum recurso.
+
           // Editar utilizador (admin ou o proprio utilizador)
           if isAdmin || isSelf
             .card

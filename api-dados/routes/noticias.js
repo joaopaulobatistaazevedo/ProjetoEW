@@ -16,6 +16,9 @@ function verificarSegredoInterno(req, res, next) {
 // GET /noticias - lista publica (limit opcional)
 router.get('/', noticiasController.getAllNoticias);
 
+// GET /noticias/latest - lista noticias recentes (ultimos 3 dias por defeito)
+router.get('/latest', noticiasController.getLatestNoticias);
+
 // POST /noticias - criar noticia (apenas admin)
 router.post('/', authenticate, authorize('admin'), noticiasController.createNoticia);
 

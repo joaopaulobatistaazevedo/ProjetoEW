@@ -58,6 +58,15 @@ function sanitizarNomeArquivo(nome = '') {
         .toLowerCase();
 }
 
+function caminhoAbsolutoDeUpload(caminhoGuardado = '') {
+    const relativo = String(caminhoGuardado).replace(/^\/+/, '');
+    const semUploads = relativo.startsWith('uploads/')
+        ? relativo.substring('uploads/'.length)
+        : relativo;
+
+    return path.join(__dirname, '..', 'uploads', semUploads);
+}
+
 async function localizarFicheiroPreservado(baseDir, nomePedido) {
     const caminhoDireto = path.join(baseDir, nomePedido);
 
@@ -248,7 +257,9 @@ const disseminacaoService = {
     },
 
     carregarContextoRecurso: async function(recursoId) {
+        //  Carregar versão mais recente do AIP (compatível com versionamento)
         const aip = await AIP.findOne({ recursoId: recursoId })
+            .sort({ versao: -1 })  // Obter versão mais alta
             .populate('recursoId', 'titulo visibilidade autor');
 
         if (!aip) {
@@ -267,6 +278,26 @@ const disseminacaoService = {
         };
     },
 
+    // Método para extrair lista de ficheiros (apenas array novo)
+    obterListaFicheiros: function(recurso, manifesto) {
+        // Prioridade: usar array novo `ficheiros` se existir
+        if (Array.isArray(recurso.ficheiros) && recurso.ficheiros.length > 0) {
+            // Novo formato: array de ficheiros com metadados
+            return recurso.ficheiros.map(f => ({
+                name: f.nome,
+                path: f.caminho,
+                size: f.tamanho,
+                type: f.tipo,
+                checksum_sha256: f.checksum,
+                versaoAIP: f.versaoAIP
+            }));
+        } else if (Array.isArray(manifesto.files) && manifesto.files.length > 0) {
+            // Formato alternativo: ficheiros do manifesto
+            return manifesto.files;
+        }
+        return [];
+    },
+
     prepararFicheirosParaExportacao: async function(aip, ficheirosIncluidos, transformacao) {
         const pastaData = path.join(aip.storageLocal || '', 'data');
         const ficheirosPreparados = [];
@@ -276,7 +307,9 @@ const disseminacaoService = {
             let conteudoOriginal = null;
 
             try {
-                caminhoLocal = await localizarFicheiroPreservado(pastaData, ficheiro.name);
+                caminhoLocal = ficheiro.path
+                    ? caminhoAbsolutoDeUpload(ficheiro.path)
+                    : await localizarFicheiroPreservado(pastaData, ficheiro.name);
                 conteudoOriginal = await fs.readFile(caminhoLocal);
             } catch (err) {
                 conteudoOriginal = await obterConteudoDoSIPOriginal(aip, ficheiro.name);
@@ -317,6 +350,9 @@ const disseminacaoService = {
             } else {
                 enriquecido.size = conteudoOriginal.length;
                 enriquecido.checksum_sha256 = checksumOriginal;
+                if (!caminhoLocal) {
+                    enriquecido.conteudoBuffer = conteudoOriginal;
+                }
             }
 
             ficheirosPreparados.push(enriquecido);
@@ -636,6 +672,60 @@ const disseminacaoService = {
         } catch (err) {
             throw err;
         }
+    },
+
+    /**
+     * Exporta um único ficheiro preservado do AIP, sem empacotar em ZIP.
+     */
+    exportarFicheiroIndividual: async function(recursoId, indice, utilizadorId, papelUtilizador = 'consumidor') {
+        const tempoInicio = Date.now();
+        const { aip, recurso, manifesto } = await this.carregarContextoRecurso(recursoId);
+        const ficheirosManifesto = Array.isArray(manifesto.files) ? manifesto.files : [];
+
+        if (!Number.isInteger(indice) || indice < 0 || indice >= ficheirosManifesto.length) {
+            throw criarErro('Ficheiro não encontrado no AIP', 404);
+        }
+
+        const ficheiroPedido = ficheirosManifesto[indice];
+        const filtro = await verificacaoPermissoes.filtrarFicheirosParaDIP(
+            aip,
+            utilizadorId,
+            papelUtilizador,
+            { ficheirosSolicitados: [ficheiroPedido.name] }
+        );
+
+        if (!filtro.ficheirosIncluidos || filtro.ficheirosIncluidos.length !== 1) {
+            throw criarErro('O ficheiro pedido não está disponível para exportação', 403);
+        }
+
+        const [ficheiro] = await this.prepararFicheirosParaExportacao(
+            aip,
+            filtro.ficheirosIncluidos,
+            'original'
+        );
+
+        const buffer = ficheiro.conteudoBuffer || await fs.readFile(ficheiro.caminhoLocal);
+        const checksumDIP = calcularChecksum(buffer);
+
+        return {
+            buffer,
+            metadata: {
+                aipId: aip._id.toString(),
+                recursoId,
+                titulo: recurso.titulo,
+                formato: 'ficheiro',
+                tipoPedido: 'ficheiro-individual',
+                transformacao: 'original',
+                ficheirosSolicitados: [ficheiro.name],
+                tamanhoZIP: buffer.length,
+                checksumDIP,
+                tempoProcessamento: Date.now() - tempoInicio,
+                ficheirosIncluidos: 1,
+                ficheirosExcluidos: ficheirosManifesto.length - 1,
+                nomeArquivo: ficheiro.name,
+                contentType: ficheiro.type || 'application/octet-stream'
+            }
+        };
     }
 
 };

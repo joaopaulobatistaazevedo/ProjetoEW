@@ -351,6 +351,50 @@ textarea {
   justify-content: flex-end;
 }
 
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.checkbox-filter {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.65rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--light-gray);
+  border-radius: 0.5rem;
+  background: var(--light);
+  cursor: pointer;
+}
+
+.checkbox-filter-input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.filters-inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.visibility-inline {
+  min-width: 180px;
+}
+
+.visibility-inline label {
+  margin-bottom: 0.5rem;
+}
+
 /* ===== TABLES ===== */
 .table {
   width: 100%;
@@ -505,6 +549,23 @@ textarea {
   flex-direction: column;
 }
 
+.resource-card .card-footer {
+  align-items: center;
+}
+
+.resource-card .btn-sm {
+  min-height: 2.4rem;
+}
+
+.resource-action-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.resource-card > .resource-badge {
+  margin: 1rem 1rem 0;
+}
+
 .resource-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -523,6 +584,25 @@ textarea {
 .badge-private {
   background-color: #fed7aa;
   color: #7c2d12;
+}
+
+.resource-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+}
+
+.resource-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .resource-title {
