@@ -1,78 +1,19 @@
 const path = require('path');
 const fs = require('fs');
-const crypto = require('crypto');
 const Recurso = require('../models/recurso');
 const Noticia = require('../models/noticia');
 const AIP = require('../models/aip');
 const { obterTipoAtivoPorSlug, enriquecerComTipos } = require('../services/tiposRecursoService');
+const {
+    normalizarHashtags,
+    normalizarLista,
+    sanitizarSegmentoCaminho,
+    ficheirosRecebidos,
+    calcularChecksumBuffer,
+    gerarSipIdVersao
+} = require('../utils/controllerUtils');
 const AdmZip = require('adm-zip');
 const zip = new AdmZip();
-
-// Normalize hashtags input into array of strings
-function normalizarHashtags(valor) {
-    if (!valor) return [];
-    if (Array.isArray(valor)) return valor.map(tag => String(tag).trim()).filter(Boolean);
-
-    if (typeof valor === 'string') {
-        try {
-            const parsed = JSON.parse(valor);
-            if (Array.isArray(parsed)) {
-                return parsed.map(tag => String(tag).trim()).filter(Boolean);
-            }
-        } catch (err) {
-            return valor.split(',').map(tag => tag.trim()).filter(Boolean);
-        }
-    }
-
-    return [];
-}
-
-function normalizarLista(valor) {
-    if (!valor) return [];
-    return Array.isArray(valor) ? valor.filter(Boolean) : [valor].filter(Boolean);
-}
-
-function sanitizarSegmentoCaminho(nome = 'ficheiro') {
-    return String(nome)
-        .replace(/\\/g, '/')
-        .split('/')
-        .filter(Boolean)
-        .join('/');
-}
-
-async function obterSipIdBase(aip) {
-    let atual = aip;
-
-    while (atual && atual.aipAnterior) {
-        const anterior = await AIP.findById(atual.aipAnterior);
-        if (!anterior) break;
-        atual = anterior;
-    }
-
-    return String((atual && atual.sipId) || (aip && aip.sipId) || 'sip')
-        .replace(/-v\d+$/i, '');
-}
-
-async function gerarSipIdVersao(aipAnterior, novaVersao) {
-    const base = await obterSipIdBase(aipAnterior);
-    return `${base}-v${novaVersao}`;
-}
-
-function ficheirosRecebidos(req) {
-    if (req.files && Array.isArray(req.files.ficheirosNovos)) {
-        return req.files.ficheirosNovos;
-    }
-
-    if (req.file) return [req.file];
-    if (req.files && Array.isArray(req.files)) return req.files;
-    if (req.files && Array.isArray(req.files.ficheiro)) return req.files.ficheiro;
-
-    return [];
-}
-
-function calcularChecksumBuffer(buffer) {
-    return crypto.createHash('sha256').update(buffer).digest('hex');
-}
 
 async function criarNovaVersaoAIPDoRecurso(recurso, utilizadorId, ficheirosRemoverIds, novosFicheiros) {
     const aipAnterior = await AIP.findOne({ recursoId: recurso._id })
@@ -160,7 +101,7 @@ async function criarNovaVersaoAIPDoRecurso(recurso, utilizadorId, ficheirosRemov
     };
 
     const novoAIP = await AIP.create({
-        sipId: await gerarSipIdVersao(aipAnterior, novaVersao),
+        sipId: await gerarSipIdVersao(aipAnterior, novaVersao, (id) => AIP.findById(id)),
         recursoId: recurso._id,
         versao: novaVersao,
         aipAnterior: aipAnterior._id,

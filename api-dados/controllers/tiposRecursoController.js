@@ -5,16 +5,7 @@ const {
     listarTodosTipos
 } = require('../services/tiposRecursoService');
 
-function normalizarPayload(reqBody = {}) {
-    const nome = String(reqBody.nome || '').trim();
-    const descricao = String(reqBody.descricao || '').trim();
-    const ordem = Number.isFinite(Number(reqBody.ordem)) ? Number(reqBody.ordem) : 0;
-    const ativo = reqBody.ativo === undefined
-        ? undefined
-        : reqBody.ativo === true || reqBody.ativo === 'true' || reqBody.ativo === 'on';
-
-    return { nome, descricao, ordem, ativo };
-}
+const { normalizarPayload } = require('../utils/controllerUtils');
 
 const tiposRecursoController = {
     getTiposAtivos: async (req, res) => {
@@ -37,7 +28,11 @@ const tiposRecursoController = {
 
     createTipo: async (req, res) => {
         try {
-            const { nome, descricao, ordem } = normalizarPayload(req.body);
+            const { nome, descricao, ordem } = normalizarPayload(req.body, {
+                nome: 'string',
+                descricao: 'string',
+                ordem: 'int'
+            });
 
             if (!nome) {
                 return res.status(400).json({ erro: 'O nome do tipo e obrigatorio.' });
@@ -79,7 +74,12 @@ const tiposRecursoController = {
                 return res.status(404).json({ erro: 'Tipo de recurso nao encontrado.' });
             }
 
-            const { nome, descricao, ordem, ativo } = normalizarPayload(req.body);
+            const { nome, descricao, ordem, ativo } = normalizarPayload(req.body, {
+                nome: 'string',
+                descricao: 'string',
+                ordem: 'int',
+                ativo: 'boolean'
+            });
 
             if (nome) {
                 const conflito = await TipoRecurso.findOne({
