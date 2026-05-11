@@ -15,6 +15,20 @@ const {
 
 const API         = process.env.API_URL     || 'http://localhost:3001';
 
+function escaparHTML(valor = '') {
+    return String(valor)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function ficheiroEhTextoPreview(nome = '') {
+    const ext = String(nome || '').split('.').pop().toLowerCase();
+    return ['txt', 'md', 'csv', 'json', 'xml', 'html', 'py'].includes(ext);
+}
+
 // GET /recursos — listagem com filtros
 router.get('/', async (req, res) => {
     try {
@@ -391,6 +405,23 @@ router.get('/:id/ficheiro/:indice', async (req, res) => {
         );
 
         const buffer = Buffer.from(resposta.data);
+
+        if (req.query.preview === 'texto' && ficheiroEhTextoPreview(ficheiro.nome)) {
+            const texto = buffer.toString('utf8');
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            return res.send(`<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<style>
+body { margin: 0; background: #ffffff; color: #0f172a; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 14px; line-height: 1.55; }
+pre { margin: 0; padding: 1rem; white-space: pre-wrap; word-break: break-word; }
+</style>
+</head>
+<body><pre>${escaparHTML(texto)}</pre></body>
+</html>`);
+        }
+
         res.setHeader('Content-Type', obterContentTypePreview(ficheiro.nome, resposta.headers['content-type']));
         res.setHeader('Content-Disposition', `inline; filename="${String(ficheiro.nome || `ficheiro-${indice}`).replace(/"/g, '')}"`);
         res.setHeader('Content-Length', buffer.length);
