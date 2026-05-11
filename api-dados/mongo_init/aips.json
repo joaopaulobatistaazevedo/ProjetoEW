@@ -1,0 +1,1210 @@
+[
+  {
+    "_id": {
+      "$oid": "200000000000000000000001"
+    },
+    "sipId": "SIP-SEED-SLIDES-SSI",
+    "recursoId": {
+      "$oid": "100000000000000000000001"
+    },
+    "versao": 1,
+    "motivoAtualizacao": "ingestao_inicial",
+    "status": "ok",
+    "dataIngestao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "produtor": {
+      "$oid": "000000000000000000000001"
+    },
+    "manifesto": {
+      "titulo": "Slides de Segurança de Sistemas Informáticos",
+      "subtitulo": "Materiais de apoio sobre criptografia, PKI, protocolos e controlo de acesso",
+      "descricao": "Conjunto de slides e documentos PDF usados como material de apoio à unidade curricular de Segurança de Sistemas Informáticos.",
+      "tipo": "slides",
+      "dataCriacao": "2026-05-11T00:00:00.000Z",
+      "visibilidade": "publico",
+      "hashtags": [
+        "ssi",
+        "seguranca",
+        "criptografia",
+        "slides"
+      ],
+      "files": [
+        {
+          "name": "20260212 - Access Control and the Linux Filesystem.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/20260212 - Access Control and the Linux Filesystem.pdf",
+          "size": 1239669,
+          "type": "application/pdf",
+          "checksum_sha256": "dd1395cc8862638770cedd994836b8b221ad9dddf3bf98e247b1a10008b71e4c",
+          "required": true
+        },
+        {
+          "name": "Asymmetric1.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/Asymmetric1.pdf",
+          "size": 2828391,
+          "type": "application/pdf",
+          "checksum_sha256": "bb4c7f339a8914db6ee99d94e1837db296ca6bc41fc64771d033d6e2ae0e3b00",
+          "required": true
+        },
+        {
+          "name": "Asymmetric2.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/Asymmetric2.pdf",
+          "size": 10881577,
+          "type": "application/pdf",
+          "checksum_sha256": "a674d76db51d4ad1bb7c0376afee5c8221ee62383c891f100ffc8f73bb079f9c",
+          "required": true
+        },
+        {
+          "name": "Hashes.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/Hashes.pdf",
+          "size": 1964181,
+          "type": "application/pdf",
+          "checksum_sha256": "0ca9ff3272b1298340283adea9654a14a5c37983d0834c576555eaefdecb1fdd",
+          "required": true
+        },
+        {
+          "name": "InternetProtocols.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/InternetProtocols.pdf",
+          "size": 5206037,
+          "type": "application/pdf",
+          "checksum_sha256": "5fad322a40030f7dd81f05cf403c261f4e49c0110ffb7e54683928f47d1c8ef5",
+          "required": true
+        },
+        {
+          "name": "MACs.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/MACs.pdf",
+          "size": 1507358,
+          "type": "application/pdf",
+          "checksum_sha256": "d464de6b886153c94d7b7530fcd9480ffe5e9ddc7ee527bdb0399544a51f3f58",
+          "required": true
+        },
+        {
+          "name": "PKI.pdf",
+          "path": "/uploads/recursos/100000000000000000000001/data/PKI.pdf",
+          "size": 5029986,
+          "type": "application/pdf",
+          "checksum_sha256": "1355c1874cdc33c331010ffdad769a78d3966576949e2b8c41df8e4879205970",
+          "required": true
+        }
+      ]
+    },
+    "validacoes": {
+      "estrutura": {
+        "ok": true,
+        "detalhes": "Estrutura importada por seed inicial"
+      },
+      "metadados": {
+        "ok": true,
+        "detalhes": "Metadados importados por seed inicial"
+      },
+      "seguranca": {
+        "ok": true,
+        "detalhes": "Ficheiros importados por seed inicial"
+      },
+      "consistencia": {
+        "ok": true,
+        "detalhes": "Consistência importada por seed inicial"
+      }
+    },
+    "storageLocal": "/app/uploads/recursos/100000000000000000000001",
+    "relatorio": {
+      "dataValidacao": {
+        "$date": "2026-05-11T00:00:00.000Z"
+      },
+      "erros": [],
+      "avisos": []
+    },
+    "checksumSIP": "seed-inicial",
+    "downloadCount": 0
+  },
+  {
+    "_id": {
+      "$oid": "200000000000000000000002"
+    },
+    "sipId": "SIP-SEED-DATASETS-ADI",
+    "recursoId": {
+      "$oid": "100000000000000000000002"
+    },
+    "versao": 1,
+    "motivoAtualizacao": "ingestao_inicial",
+    "status": "ok",
+    "dataIngestao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "produtor": {
+      "$oid": "000000000000000000000001"
+    },
+    "manifesto": {
+      "titulo": "Datasets de Qualidade de Vinho",
+      "subtitulo": "Ficheiros CSV para análise de dados",
+      "descricao": "Conjunto de datasets de qualidade de vinho, separados em treino e teste, para exercícios de análise de dados e aprendizagem automática.",
+      "tipo": "outro",
+      "dataCriacao": "2026-05-11T00:00:00.000Z",
+      "visibilidade": "publico",
+      "hashtags": [
+        "adi",
+        "dataset",
+        "csv",
+        "vinho"
+      ],
+      "files": [
+        {
+          "name": "winequality-red test.csv",
+          "path": "/uploads/recursos/100000000000000000000002/data/winequality-red test.csv",
+          "size": 30851,
+          "type": "text/csv",
+          "checksum_sha256": "334c8b8df15d7920be8b1b6b49011f07c81cfc727a9b147833b62eca7220ba5c",
+          "required": true
+        },
+        {
+          "name": "winequality-red train.csv",
+          "path": "/uploads/recursos/100000000000000000000002/data/winequality-red train.csv",
+          "size": 95251,
+          "type": "text/csv",
+          "checksum_sha256": "1fad9d6322830432c1b0b5badfe739ecdcfd92b214b5ce226638144c1b64beb5",
+          "required": true
+        },
+        {
+          "name": "winequality-white test.csv",
+          "path": "/uploads/recursos/100000000000000000000002/data/winequality-white test.csv",
+          "size": 76421,
+          "type": "text/csv",
+          "checksum_sha256": "e3981c9da0ff192f9c5beb5860cc71326b13ec3fc99dea25f2eeb882699375fc",
+          "required": true
+        },
+        {
+          "name": "winequality-white train.csv",
+          "path": "/uploads/recursos/100000000000000000000002/data/winequality-white train.csv",
+          "size": 302935,
+          "type": "text/csv",
+          "checksum_sha256": "29cf93d4bd95000de9d478206341746e7065f03b2ba974be5eb5b92a2f6776b7",
+          "required": true
+        },
+        {
+          "name": "winequality.txt",
+          "path": "/uploads/recursos/100000000000000000000002/data/winequality.txt",
+          "size": 1061,
+          "type": "text/plain",
+          "checksum_sha256": "004f136c690d2c80d86105de9bf19e894fbaf32a5767111499246409135e501f",
+          "required": true
+        }
+      ]
+    },
+    "validacoes": {
+      "estrutura": {
+        "ok": true,
+        "detalhes": "Estrutura importada por seed inicial"
+      },
+      "metadados": {
+        "ok": true,
+        "detalhes": "Metadados importados por seed inicial"
+      },
+      "seguranca": {
+        "ok": true,
+        "detalhes": "Ficheiros importados por seed inicial"
+      },
+      "consistencia": {
+        "ok": true,
+        "detalhes": "Consistência importada por seed inicial"
+      }
+    },
+    "storageLocal": "/app/uploads/recursos/100000000000000000000002",
+    "relatorio": {
+      "dataValidacao": {
+        "$date": "2026-05-11T00:00:00.000Z"
+      },
+      "erros": [],
+      "avisos": []
+    },
+    "checksumSIP": "seed-inicial",
+    "downloadCount": 0
+  },
+  {
+    "_id": {
+      "$oid": "200000000000000000000003"
+    },
+    "sipId": "SIP-SEED-SPRITES-LI1",
+    "recursoId": {
+      "$oid": "100000000000000000000003"
+    },
+    "versao": 1,
+    "motivoAtualizacao": "ingestao_inicial",
+    "status": "ok",
+    "dataIngestao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "produtor": {
+      "$oid": "000000000000000000000001"
+    },
+    "manifesto": {
+      "titulo": "Sprites para Projeto de LI1",
+      "subtitulo": "Imagens e sprites para jogo académico",
+      "descricao": "Coleção de imagens, sprites e elementos gráficos para utilização num projeto de Laboratórios de Informática I.",
+      "tipo": "aplicacao",
+      "dataCriacao": "2026-05-11T00:00:00.000Z",
+      "visibilidade": "publico",
+      "hashtags": [
+        "li1",
+        "sprites",
+        "jogo",
+        "imagens"
+      ],
+      "files": [
+        {
+          "name": "bloco-alcapao.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/bloco-alcapao.bmp",
+          "size": 111,
+          "type": "image/bmp",
+          "checksum_sha256": "3d7d5b2e636af75506a89bfb063e59508f525a82d3bc72ef9a193a5bd6dbf6f4",
+          "required": true
+        },
+        {
+          "name": "bloco-escada.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/bloco-escada.bmp",
+          "size": 104,
+          "type": "image/bmp",
+          "checksum_sha256": "cdc7108f1fff74d0294aa3bbafe3670c890793bd967125cc432ce3f84571ef92",
+          "required": true
+        },
+        {
+          "name": "bloco-plataforma.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/bloco-plataforma.bmp",
+          "size": 133,
+          "type": "image/bmp",
+          "checksum_sha256": "f9bb04581687405598aec5fd095b19e99c969077e73195e79c9efeebd21ed1f3",
+          "required": true
+        },
+        {
+          "name": "bloco-vazio.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/bloco-vazio.png",
+          "size": 144,
+          "type": "image/png",
+          "checksum_sha256": "d008c7b84488225b13b903c9df7d4b902507a349ea9c9b2c18b961cf74017408",
+          "required": true
+        },
+        {
+          "name": "botaocreditos.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/botaocreditos.png",
+          "size": 228,
+          "type": "image/png",
+          "checksum_sha256": "62a2e485d4f5bb96cc2c08275c7ea0aff0c61bf17e87f647cba34be588a13248",
+          "required": true
+        },
+        {
+          "name": "botaoJogo1.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/botaoJogo1.png",
+          "size": 212,
+          "type": "image/png",
+          "checksum_sha256": "c2ac2ee4b5f22e67b0459517c71184a7ac00f2b8e4e098571201baadc86eb990",
+          "required": true
+        },
+        {
+          "name": "botaojogo2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/botaojogo2.png",
+          "size": 221,
+          "type": "image/png",
+          "checksum_sha256": "ccb63b399b02cf11e83a6f8a3e9509fd5ee1934ee3128c4432e9aa4e8d916eed",
+          "required": true
+        },
+        {
+          "name": "botaosair.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/botaosair.png",
+          "size": 214,
+          "type": "image/png",
+          "checksum_sha256": "5d4c3904a92aae15924f4800ef126628f73a286c02b7468f3795b4668367efaa",
+          "required": true
+        },
+        {
+          "name": "cinco.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/cinco.bmp",
+          "size": 130,
+          "type": "image/bmp",
+          "checksum_sha256": "32baa4854375d09efd40d6eaf3daa0392a1bb84eb2767da940af446cfa55f64a",
+          "required": true
+        },
+        {
+          "name": "creditos.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/creditos.png",
+          "size": 61320,
+          "type": "image/png",
+          "checksum_sha256": "6efce845e2d8f7ca9e87197c8e98a73e3430c06a12588e0b53eb654852252a33",
+          "required": true
+        },
+        {
+          "name": "dois.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/dois.bmp",
+          "size": 123,
+          "type": "image/bmp",
+          "checksum_sha256": "3924a0467c8c7a47c49fc7c1a38ee04ff63801b362a8738cada3e91d7cb876e1",
+          "required": true
+        },
+        {
+          "name": "estrela.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/estrela.bmp",
+          "size": 253,
+          "type": "image/bmp",
+          "checksum_sha256": "7389cea2ba9bcd09c870f9f9677a5442bcc3955afa7089803d57676910e1d64a",
+          "required": true
+        },
+        {
+          "name": "fantasma1.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/fantasma1.bmp",
+          "size": 248,
+          "type": "image/bmp",
+          "checksum_sha256": "ef3586a03419784cd26937022918ba07faf3ff9056db15818c19bd138932c67e",
+          "required": true
+        },
+        {
+          "name": "fantasma2.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/fantasma2.bmp",
+          "size": 229,
+          "type": "image/bmp",
+          "checksum_sha256": "f94953bccd29b7d6f7cb04a5018c3af8812cc91a741a06f299ff0c7e58d74e18",
+          "required": true
+        },
+        {
+          "name": "fantasma3.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/fantasma3.bmp",
+          "size": 232,
+          "type": "image/bmp",
+          "checksum_sha256": "659646e68275582e2f4e557859eafc70c5a1e26db8bb3aff14ec2432aeb1e8e3",
+          "required": true
+        },
+        {
+          "name": "GameOver.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/GameOver.png",
+          "size": 1203,
+          "type": "image/png",
+          "checksum_sha256": "cffc1633d1d73e157ad9d77850e0fc9135eb81e0434a21296ce846fb97e037f8",
+          "required": true
+        },
+        {
+          "name": "macacoMalvado1.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/macacoMalvado1.bmp",
+          "size": 702,
+          "type": "image/bmp",
+          "checksum_sha256": "81b4a9992289a9efb834b402e7ef5a77640b8025906ae136ec8a147b5517a577",
+          "required": true
+        },
+        {
+          "name": "macacomalvado2.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/macacomalvado2.bmp",
+          "size": 771,
+          "type": "image/bmp",
+          "checksum_sha256": "01ee65ce359cce44376caea2ec8ec4ce3297a1336635b132f4b45b0b1ecd9bce",
+          "required": true
+        },
+        {
+          "name": "macacomalvado3.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/macacomalvado3.bmp",
+          "size": 788,
+          "type": "image/bmp",
+          "checksum_sha256": "a3356f847560a4a84535ffc0f0d287ff5bc32d44ba7805e13b2feaea32886169",
+          "required": true
+        },
+        {
+          "name": "mario-1.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-1.png",
+          "size": 1794,
+          "type": "image/png",
+          "checksum_sha256": "894688efbc1bc4baec0455f494cf496a2088f3f936acdd01ece02c556288d001",
+          "required": true
+        },
+        {
+          "name": "mario-10.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-10.png",
+          "size": 1691,
+          "type": "image/png",
+          "checksum_sha256": "d709c8d018316f877762d88cffafbd3960bf1dbdaf0e118340858b19a63059d6",
+          "required": true
+        },
+        {
+          "name": "mario-11.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-11.png",
+          "size": 1857,
+          "type": "image/png",
+          "checksum_sha256": "876c7e723150216760651fe90749c3ac6971f6ff65b6085d2f303cbf9656ba72",
+          "required": true
+        },
+        {
+          "name": "mario-12.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-12.png",
+          "size": 1825,
+          "type": "image/png",
+          "checksum_sha256": "3719737415ab8660eddad0284c1ae1469f97fc556b8af13f60c3e7ae6ea4c3c5",
+          "required": true
+        },
+        {
+          "name": "mario-13.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-13.png",
+          "size": 2097,
+          "type": "image/png",
+          "checksum_sha256": "af5981bf1bb680cf51cbbb81f76ba8c1bb165f15e3451a08de3646aa46c4fa01",
+          "required": true
+        },
+        {
+          "name": "mario-14.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-14.png",
+          "size": 1840,
+          "type": "image/png",
+          "checksum_sha256": "54f531665d14e5d6c76b5f30511a8234a47961075a6af79e44ff063b9e4054eb",
+          "required": true
+        },
+        {
+          "name": "mario-15.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-15.png",
+          "size": 1929,
+          "type": "image/png",
+          "checksum_sha256": "e30863f2605b9bda941c38122070b19db210b82d5b23ee13bc85be351b9d4a47",
+          "required": true
+        },
+        {
+          "name": "mario-2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-2.png",
+          "size": 1762,
+          "type": "image/png",
+          "checksum_sha256": "51c895ed6caf3edf34573ec66eaef62df9a11c7740ebc478dd5d44656143dbcd",
+          "required": true
+        },
+        {
+          "name": "mario-3.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-3.png",
+          "size": 1777,
+          "type": "image/png",
+          "checksum_sha256": "3972eef31386d69c2c07110ada2d0159ad19fffbdc5691b9662a43651cc1b1ce",
+          "required": true
+        },
+        {
+          "name": "mario-4.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-4.png",
+          "size": 1302,
+          "type": "image/png",
+          "checksum_sha256": "a7755b73480d6f7ccaa1ea4303b118db1ed704974d7eb1b9ba5e374be90d95a1",
+          "required": true
+        },
+        {
+          "name": "mario-5.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-5.png",
+          "size": 1471,
+          "type": "image/png",
+          "checksum_sha256": "6d604742d8bf8b7ef12b660f89f20cf03d438971ae701515f5ed8d5719827c19",
+          "required": true
+        },
+        {
+          "name": "mario-6.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-6.png",
+          "size": 947,
+          "type": "image/png",
+          "checksum_sha256": "7be79d0452e843f0003344e4c837d00d1377dad8f8df312ec762c59d3852f216",
+          "required": true
+        },
+        {
+          "name": "mario-7.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-7.png",
+          "size": 1174,
+          "type": "image/png",
+          "checksum_sha256": "c03c39c1b4344804893e5e1aa162e1524cad54a0c74d6dff6cb0970c5b226c82",
+          "required": true
+        },
+        {
+          "name": "mario-8.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-8.png",
+          "size": 1371,
+          "type": "image/png",
+          "checksum_sha256": "b2f6831a79bd839d5faf9e39c797c86bb926aa3052bdf8ca5845d4ee59590dff",
+          "required": true
+        },
+        {
+          "name": "mario-9.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-9.png",
+          "size": 1864,
+          "type": "image/png",
+          "checksum_sha256": "1d626786f59fba2d9cd73abd1bd68874c1a79aba628211ef53198f20983e5e30",
+          "required": true
+        },
+        {
+          "name": "mario-andar1.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-andar1.bmp",
+          "size": 250,
+          "type": "image/bmp",
+          "checksum_sha256": "1ec517206681a888884ec849d0b5d228a3becd6505a191d0413288227806b7be",
+          "required": true
+        },
+        {
+          "name": "mario-andar2.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-andar2.bmp",
+          "size": 256,
+          "type": "image/bmp",
+          "checksum_sha256": "1862fa9b531bf03edf70d078862b9d3a7b62222d9d5a0e671b1eaa729e10d105",
+          "required": true
+        },
+        {
+          "name": "mario-andar3.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-andar3.bmp",
+          "size": 241,
+          "type": "image/bmp",
+          "checksum_sha256": "3b86fd7610d8960eb112cf56b45a6757260b602387bfa5e04e1e31860c4a95e5",
+          "required": true
+        },
+        {
+          "name": "mario-martelo1.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-martelo1.bmp",
+          "size": 334,
+          "type": "image/bmp",
+          "checksum_sha256": "d09a813bb2727654b0eea8512206faf080748a81ca8ecaabfee025ab42b857e5",
+          "required": true
+        },
+        {
+          "name": "mario-martelo2.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-martelo2.bmp",
+          "size": 364,
+          "type": "image/bmp",
+          "checksum_sha256": "8ffd7be5eac9b4351aa8347cdeda6aacfe92bac7582d8fb4d9db7b9a8e190243",
+          "required": true
+        },
+        {
+          "name": "mario-martelo3.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-martelo3.bmp",
+          "size": 337,
+          "type": "image/bmp",
+          "checksum_sha256": "3ae84e5dbbdca0c6ccc04f0a3cd534e280107d76db6f13675a0e5b04af67c801",
+          "required": true
+        },
+        {
+          "name": "mario-martelo4.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-martelo4.bmp",
+          "size": 361,
+          "type": "image/bmp",
+          "checksum_sha256": "c199a7d9271e3f0f04d1d50907ee8bb117cf76d0bb9578e324435a59ef487969",
+          "required": true
+        },
+        {
+          "name": "mario-martelo5.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-martelo5.bmp",
+          "size": 338,
+          "type": "image/bmp",
+          "checksum_sha256": "e38cb3c4a494e3a5bea63edeb9d4656ea793abe00e594b69d4e9201e0b647f64",
+          "required": true
+        },
+        {
+          "name": "mario-martelo6.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-martelo6.bmp",
+          "size": 346,
+          "type": "image/bmp",
+          "checksum_sha256": "e989412dac0e52dcbf29f64114d9a232a15e2b9c9854f4c21763c301918c9787",
+          "required": true
+        },
+        {
+          "name": "mario-subir1.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-subir1.bmp",
+          "size": 222,
+          "type": "image/bmp",
+          "checksum_sha256": "2f1e4fa334be680a6732624c4d70a5096ed9fcdccfcb1b93867f2c9cca29fb31",
+          "required": true
+        },
+        {
+          "name": "mario-subir2.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-subir2.bmp",
+          "size": 237,
+          "type": "image/bmp",
+          "checksum_sha256": "b7832867fa61bbb57aa1f6d20621d024213dbbf6b528a023870131db5a38dcd8",
+          "required": true
+        },
+        {
+          "name": "mario-subir3.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-subir3.bmp",
+          "size": 210,
+          "type": "image/bmp",
+          "checksum_sha256": "e0b9a892209c8dda0ea6c563185b7b1f5aeb483bae2e701c0dc3e660496c73bd",
+          "required": true
+        },
+        {
+          "name": "mario-subir4.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/mario-subir4.bmp",
+          "size": 233,
+          "type": "image/bmp",
+          "checksum_sha256": "917de4e103a8f8b19c7c4bb2a62ee2b14f2c6f84e35f951c103bcb7ab372b967",
+          "required": true
+        },
+        {
+          "name": "martelo.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/martelo.bmp",
+          "size": 150,
+          "type": "image/bmp",
+          "checksum_sha256": "8c0753d65895df45649fc0f435d903bcd4d80bda3f114fee218bad706bb23288",
+          "required": true
+        },
+        {
+          "name": "moeda.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/moeda.png",
+          "size": 1249,
+          "type": "image/png",
+          "checksum_sha256": "1f3019e6de8a161b7b220925066f3a621a301affadb6d01617a024992da94322",
+          "required": true
+        },
+        {
+          "name": "NewImage-1.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-1.png",
+          "size": 3874,
+          "type": "image/png",
+          "checksum_sha256": "4175fbe4560fdec90849d70e34f615008bb085a2c959075c5e1994c255aa1cf5",
+          "required": true
+        },
+        {
+          "name": "NewImage-10.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-10.png",
+          "size": 3078,
+          "type": "image/png",
+          "checksum_sha256": "a12275d5046fb09df5af5ab506aac2eff93bc8263a6f2921a1f0135cb776e10f",
+          "required": true
+        },
+        {
+          "name": "NewImage-11.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-11.png",
+          "size": 3854,
+          "type": "image/png",
+          "checksum_sha256": "2a055aeca8854b782acb04a06ddadb31ce2ae289634f9b0079c91ba101a726b7",
+          "required": true
+        },
+        {
+          "name": "NewImage-2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-2.png",
+          "size": 3670,
+          "type": "image/png",
+          "checksum_sha256": "737fcfc2c9e89ee3eb9fb5c9a44e6d234fdf74fbf87e0ed27bfe4351a9cc5254",
+          "required": true
+        },
+        {
+          "name": "NewImage-3.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-3.png",
+          "size": 4044,
+          "type": "image/png",
+          "checksum_sha256": "42eda927f6a5153d7146cafddf7fac3043caa3ee4876e5babe95f84c7d23f5cc",
+          "required": true
+        },
+        {
+          "name": "NewImage-4.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-4.png",
+          "size": 3876,
+          "type": "image/png",
+          "checksum_sha256": "5571e0f2dc330a03d4ad98c53b3f41ba593a7fbe6a3838bf77a0672adf61728a",
+          "required": true
+        },
+        {
+          "name": "NewImage-5.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-5.png",
+          "size": 3714,
+          "type": "image/png",
+          "checksum_sha256": "b3d7919fd929ce7804e5b2bf96cb532229392de79b74d2224017c6d93d21b63b",
+          "required": true
+        },
+        {
+          "name": "NewImage-6.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-6.png",
+          "size": 3329,
+          "type": "image/png",
+          "checksum_sha256": "f1aa1e971041e10d0b0d9b7e5218e4489439da76db25005ee04f198028981f4a",
+          "required": true
+        },
+        {
+          "name": "NewImage-7.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-7.png",
+          "size": 4084,
+          "type": "image/png",
+          "checksum_sha256": "95973839791559f85bdade5b4e5a04a5cdc53c51d52e186ed12c8cd49d3cc4c9",
+          "required": true
+        },
+        {
+          "name": "NewImage-8.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-8.png",
+          "size": 3858,
+          "type": "image/png",
+          "checksum_sha256": "ff95e66daa20210af33276160bfe5aa394a2cc410139b7bf6b7cbb26399f08f3",
+          "required": true
+        },
+        {
+          "name": "NewImage-9.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/NewImage-9.png",
+          "size": 3126,
+          "type": "image/png",
+          "checksum_sha256": "f78372a0fb95fd2920a29eb9705b5240628d6229a81efae4fee5dad79ad96509",
+          "required": true
+        },
+        {
+          "name": "nove.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/nove.bmp",
+          "size": 128,
+          "type": "image/bmp",
+          "checksum_sha256": "9a80b6834fd09affbd0a890c1c6903fa1e278e56e3f6d4e0eb289b8676c53e5d",
+          "required": true
+        },
+        {
+          "name": "oito.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/oito.bmp",
+          "size": 113,
+          "type": "image/bmp",
+          "checksum_sha256": "1bc3d1d494b8756d9a7407fb782444bac386e384bfed54fe4ba986c5158264c6",
+          "required": true
+        },
+        {
+          "name": "peaches-1.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/peaches-1.png",
+          "size": 1454,
+          "type": "image/png",
+          "checksum_sha256": "812aab4497b920db596ede808af6c695ee99d30f7a77dc23aabe6bb7f198b38e",
+          "required": true
+        },
+        {
+          "name": "peaches-2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/peaches-2.png",
+          "size": 1551,
+          "type": "image/png",
+          "checksum_sha256": "02bc1eb39388ab6096b7c1dd6ef726947036b7d53bb0b98bf46664793fc30a1c",
+          "required": true
+        },
+        {
+          "name": "peaches-3.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/peaches-3.png",
+          "size": 1257,
+          "type": "image/png",
+          "checksum_sha256": "0c97843d6cfb12066c02c1ba560a077fb6abae69341feace27fe5415e22ef565",
+          "required": true
+        },
+        {
+          "name": "peaches-4.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/peaches-4.png",
+          "size": 2207,
+          "type": "image/png",
+          "checksum_sha256": "c17b5aa9cdb856650901c495db9fe743615f11cb25eccc6bca6814a2c6858b77",
+          "required": true
+        },
+        {
+          "name": "quatro.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/quatro.bmp",
+          "size": 130,
+          "type": "image/bmp",
+          "checksum_sha256": "df222e7fefb2501a2cdd66140a8ce54646e0925399151c87536832f618dbce27",
+          "required": true
+        },
+        {
+          "name": "seis.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/seis.bmp",
+          "size": 128,
+          "type": "image/bmp",
+          "checksum_sha256": "9eaef2dbf53edffece8611cf4f4d57f820604c8435388504b9029df75f9e658c",
+          "required": true
+        },
+        {
+          "name": "sete.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/sete.bmp",
+          "size": 124,
+          "type": "image/bmp",
+          "checksum_sha256": "3c317e479ca5fa0013adc1304962b4f8c88f66e9d39547c3c72755d4e4fa6f78",
+          "required": true
+        },
+        {
+          "name": "spritesdonkeykong copy.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/spritesdonkeykong copy.bmp",
+          "size": 40585,
+          "type": "image/bmp",
+          "checksum_sha256": "91e7bd483df3d0af6b89ee72778853790eecd6eb29846745e3bf17fdfa29d00c",
+          "required": true
+        },
+        {
+          "name": "titulo.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/titulo.png",
+          "size": 3055,
+          "type": "image/png",
+          "checksum_sha256": "ea0af03bbc06b395fc99986c81d5b82ad6f48d594e7404cb577e3da27d581e49",
+          "required": true
+        },
+        {
+          "name": "tres.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/tres.bmp",
+          "size": 129,
+          "type": "image/bmp",
+          "checksum_sha256": "7c26ea597c83e9c3ef8cd9969b79acd4633c05cf1c35a8e79ca0b7ed898554f5",
+          "required": true
+        },
+        {
+          "name": "um.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/um.bmp",
+          "size": 119,
+          "type": "image/bmp",
+          "checksum_sha256": "2d58825e43252f93e559e5b91dbcf7f9aecc4a56bfc73cf54204751f99379833",
+          "required": true
+        },
+        {
+          "name": "verde-1.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-1.png",
+          "size": 1573,
+          "type": "image/png",
+          "checksum_sha256": "7194a5842e92a5bbf0ec5e1ecd59e0cd1e9b1de893c2063cd0a4bfa44e59deb5",
+          "required": true
+        },
+        {
+          "name": "verde-10.2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-10.2.png",
+          "size": 1884,
+          "type": "image/png",
+          "checksum_sha256": "70cdddc70c558e5392c915df8b935b387ca42a2d21762624b8fb3a58f6f072e8",
+          "required": true
+        },
+        {
+          "name": "verde-11.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-11.png",
+          "size": 1930,
+          "type": "image/png",
+          "checksum_sha256": "c870a97b850b3cb817669ae60247cb00dd6137d7cc6760b7626b58fed6e21789",
+          "required": true
+        },
+        {
+          "name": "verde-12.2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-12.2.png",
+          "size": 1906,
+          "type": "image/png",
+          "checksum_sha256": "43e7e5bd2792da64538876ed1ca14c1616f89a8535660313581b86e0ea3224f2",
+          "required": true
+        },
+        {
+          "name": "verde-13.2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-13.2.png",
+          "size": 1930,
+          "type": "image/png",
+          "checksum_sha256": "c870a97b850b3cb817669ae60247cb00dd6137d7cc6760b7626b58fed6e21789",
+          "required": true
+        },
+        {
+          "name": "verde-14.2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-14.2.png",
+          "size": 1298,
+          "type": "image/png",
+          "checksum_sha256": "caffc04d1e329e8b007241de7707e044b968385850f3c244c8b2af2f61e5fcf8",
+          "required": true
+        },
+        {
+          "name": "verde-15.2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-15.2.png",
+          "size": 2105,
+          "type": "image/png",
+          "checksum_sha256": "f34875ba51c35f85ce2c8e05efd8fd27f1814d539b1aa46c73f9d35ad39bc62e",
+          "required": true
+        },
+        {
+          "name": "verde-2.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-2.png",
+          "size": 1554,
+          "type": "image/png",
+          "checksum_sha256": "ead823c6f96f7ce48d56ade7e75aed3d5683239bdf5ad80761bc9f35edde6eb6",
+          "required": true
+        },
+        {
+          "name": "verde-3.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-3.png",
+          "size": 1617,
+          "type": "image/png",
+          "checksum_sha256": "73c968fc96383d66b2c65413ae11c2b36e5afaaaa00962d7b57e307055f347aa",
+          "required": true
+        },
+        {
+          "name": "verde-4.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-4.png",
+          "size": 885,
+          "type": "image/png",
+          "checksum_sha256": "36dbbaae62ac9d42d515e3b4bcd64fa6f5f58627c3fa4cef9c3a08058f6a5235",
+          "required": true
+        },
+        {
+          "name": "verde-5.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-5.png",
+          "size": 1394,
+          "type": "image/png",
+          "checksum_sha256": "dbc7ded84ac7bea379b8baf75b244affb98c17fa4240ae5a112fb4ce7aa70f74",
+          "required": true
+        },
+        {
+          "name": "verde-6.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-6.png",
+          "size": 996,
+          "type": "image/png",
+          "checksum_sha256": "596f4f7c16fb3a93ca8a7f173856fe2cdff866283979bacdde89c5c7a97c69a9",
+          "required": true
+        },
+        {
+          "name": "verde-7.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-7.png",
+          "size": 1394,
+          "type": "image/png",
+          "checksum_sha256": "bc1c95bda24b4cde108a939cbe524de4c324531b65c5aca6151939e80a1d39fe",
+          "required": true
+        },
+        {
+          "name": "verde-8.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-8.png",
+          "size": 1628,
+          "type": "image/png",
+          "checksum_sha256": "9d2b86b80b166a2bc138622f1058f4ea7fe41ea60b963653cda0625fe5a670fd",
+          "required": true
+        },
+        {
+          "name": "verde-9.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/verde-9.png",
+          "size": 1912,
+          "type": "image/png",
+          "checksum_sha256": "33c95f0730014508f3ca6091b12fc8542ee56c2afafee30c191e4a0d4c28d808",
+          "required": true
+        },
+        {
+          "name": "vida.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/vida.bmp",
+          "size": 182,
+          "type": "image/bmp",
+          "checksum_sha256": "6ba7c0d0d48b1e09600c20c28065eedac11c7fe249ca00da9daffe8615ea9697",
+          "required": true
+        },
+        {
+          "name": "Win.png",
+          "path": "/uploads/recursos/100000000000000000000003/data/Win.png",
+          "size": 1052,
+          "type": "image/png",
+          "checksum_sha256": "04475853271acbd47f4081812f7ce5203edb8207ec01498a2b2209c2a6925fb9",
+          "required": true
+        },
+        {
+          "name": "zero.bmp",
+          "path": "/uploads/recursos/100000000000000000000003/data/zero.bmp",
+          "size": 131,
+          "type": "image/bmp",
+          "checksum_sha256": "88748887b672e8602cb86a4e6b565d85d92f3d330dc199a3a2da5f2607e6953e",
+          "required": true
+        }
+      ]
+    },
+    "validacoes": {
+      "estrutura": {
+        "ok": true,
+        "detalhes": "Estrutura importada por seed inicial"
+      },
+      "metadados": {
+        "ok": true,
+        "detalhes": "Metadados importados por seed inicial"
+      },
+      "seguranca": {
+        "ok": true,
+        "detalhes": "Ficheiros importados por seed inicial"
+      },
+      "consistencia": {
+        "ok": true,
+        "detalhes": "Consistência importada por seed inicial"
+      }
+    },
+    "storageLocal": "/app/uploads/recursos/100000000000000000000003",
+    "relatorio": {
+      "dataValidacao": {
+        "$date": "2026-05-11T00:00:00.000Z"
+      },
+      "erros": [],
+      "avisos": []
+    },
+    "checksumSIP": "seed-inicial",
+    "downloadCount": 0
+  },
+  {
+    "_id": {
+      "$oid": "200000000000000000000004"
+    },
+    "sipId": "SIP-SEED-EXEMPLOS-PL",
+    "recursoId": {
+      "$oid": "100000000000000000000004"
+    },
+    "versao": 1,
+    "motivoAtualizacao": "ingestao_inicial",
+    "status": "ok",
+    "dataIngestao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "produtor": {
+      "$oid": "000000000000000000000001"
+    },
+    "manifesto": {
+      "titulo": "Exemplos de Processamento de Linguagens",
+      "subtitulo": "Lexers, parsers e avaliadores em Python",
+      "descricao": "Conjunto de exemplos em Python para estudo de análise lexical, parsing recursivo, ASTs e avaliação de expressões.",
+      "tipo": "aplicacao",
+      "dataCriacao": "2026-05-11T00:00:00.000Z",
+      "visibilidade": "publico",
+      "hashtags": [
+        "pl",
+        "python",
+        "parser",
+        "lexer"
+      ],
+      "files": [
+        {
+          "name": "arithmetic_ast_tuples_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_ast_tuples_parser.py",
+          "size": 2305,
+          "type": "text/x-python",
+          "checksum_sha256": "d2309e8dc29c26a60a866e1b69827cac1836cf965a820856576cb25e3ecb548e",
+          "required": true
+        },
+        {
+          "name": "arithmetic_ast_tuples_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_ast_tuples_program.py",
+          "size": 309,
+          "type": "text/x-python",
+          "checksum_sha256": "f8a8f89f504ec8bd34c335529527970202381e0def527545b50aab12fa36a846",
+          "required": true
+        },
+        {
+          "name": "arithmetic_eval_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_eval_parser.py",
+          "size": 2300,
+          "type": "text/x-python",
+          "checksum_sha256": "98bdeb4d424f2f3b47f7e9785698513892c026ceb98a207e139ee362ab405f9a",
+          "required": true
+        },
+        {
+          "name": "arithmetic_eval_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_eval_program.py",
+          "size": 303,
+          "type": "text/x-python",
+          "checksum_sha256": "020b4465646545123404ec625c43cb73de3dc7f1ecce0794c729ea24c15743f7",
+          "required": true
+        },
+        {
+          "name": "arithmetic_lexer.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_lexer.py",
+          "size": 632,
+          "type": "text/x-python",
+          "checksum_sha256": "8c6703fe400bdf340d179a22211e4afa021499ade76bfb44a0c7adaae5137963",
+          "required": true
+        },
+        {
+          "name": "arithmetic_rec_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_rec_parser.py",
+          "size": 2676,
+          "type": "text/x-python",
+          "checksum_sha256": "8f75d9b7eb0689ac04c4f2ef2dcc8da98b3cd01775cedb2245d1352a11e913d9",
+          "required": true
+        },
+        {
+          "name": "arithmetic_rec_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/arithmetic_rec_program.py",
+          "size": 295,
+          "type": "text/x-python",
+          "checksum_sha256": "84c7844aea908cb982be868c64c3017b215a26bd8a72937af53e53de0f44f2ba",
+          "required": true
+        },
+        {
+          "name": "lists_ast_classes_rec_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_ast_classes_rec_parser.py",
+          "size": 2798,
+          "type": "text/x-python",
+          "checksum_sha256": "752040fc70f53ba28979496080e9a8dfd9702eae416a62316af8bc4818854369",
+          "required": true
+        },
+        {
+          "name": "lists_ast_tuples_rec_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_ast_tuples_rec_parser.py",
+          "size": 2416,
+          "type": "text/x-python",
+          "checksum_sha256": "2ada176e9a334671adb068f2d44f159c6fc6d2409a3b3bfcb705a7ab0fff82f9",
+          "required": true
+        },
+        {
+          "name": "lists_ast_tuples_rec_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_ast_tuples_rec_program.py",
+          "size": 294,
+          "type": "text/x-python",
+          "checksum_sha256": "8c14a52db77ae1e3e838d7d77b20274e6c92b169129ad687e25860ae299a71e1",
+          "required": true
+        },
+        {
+          "name": "lists_check_table_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_check_table_program.py",
+          "size": 284,
+          "type": "text/x-python",
+          "checksum_sha256": "377c3df0abfcea67376296b1bb6982db75ade34f153f594be7124343b3e2c6ef",
+          "required": true
+        },
+        {
+          "name": "lists_eval_rec_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_eval_rec_parser.py",
+          "size": 2368,
+          "type": "text/x-python",
+          "checksum_sha256": "fb107c1f959d6f2fc901f828cc64233f324ade74c3d5dcaa0ea8dd3ac13ac894",
+          "required": true
+        },
+        {
+          "name": "lists_eval_rec_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_eval_rec_program.py",
+          "size": 288,
+          "type": "text/x-python",
+          "checksum_sha256": "35264f73df1479cbb70643f26ef77dbb04fa45d0d7850cb4b72f5627ee5ae322",
+          "required": true
+        },
+        {
+          "name": "lists_lexer (1).py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_lexer (1).py",
+          "size": 679,
+          "type": "text/x-python",
+          "checksum_sha256": "a01c33f983dbe1492b57e6b27cc7d222a580cc7532020a34a0506bdcb74c81c9",
+          "required": true
+        },
+        {
+          "name": "lists_lexer.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_lexer.py",
+          "size": 679,
+          "type": "text/x-python",
+          "checksum_sha256": "a01c33f983dbe1492b57e6b27cc7d222a580cc7532020a34a0506bdcb74c81c9",
+          "required": true
+        },
+        {
+          "name": "lists_struct_rec_parser.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_struct_rec_parser.py",
+          "size": 2380,
+          "type": "text/x-python",
+          "checksum_sha256": "5fe6b9fdd689af78fa1f5930dd33b143232c966a3e44a56cede35f0015877aa9",
+          "required": true
+        },
+        {
+          "name": "lists_struct_rec_program.py",
+          "path": "/uploads/recursos/100000000000000000000004/data/lists_struct_rec_program.py",
+          "size": 290,
+          "type": "text/x-python",
+          "checksum_sha256": "955e4265e3ef818d07f076e3ed002c0fcd4f5d58e42fbdf13545ab04f2a17dd5",
+          "required": true
+        }
+      ]
+    },
+    "validacoes": {
+      "estrutura": {
+        "ok": true,
+        "detalhes": "Estrutura importada por seed inicial"
+      },
+      "metadados": {
+        "ok": true,
+        "detalhes": "Metadados importados por seed inicial"
+      },
+      "seguranca": {
+        "ok": true,
+        "detalhes": "Ficheiros importados por seed inicial"
+      },
+      "consistencia": {
+        "ok": true,
+        "detalhes": "Consistência importada por seed inicial"
+      }
+    },
+    "storageLocal": "/app/uploads/recursos/100000000000000000000004",
+    "relatorio": {
+      "dataValidacao": {
+        "$date": "2026-05-11T00:00:00.000Z"
+      },
+      "erros": [],
+      "avisos": []
+    },
+    "checksumSIP": "seed-inicial",
+    "downloadCount": 0
+  }
+]

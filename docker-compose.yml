@@ -11,7 +11,9 @@ services:
       - app-network
 
   api-dados:
-    build: ./api-dados
+    build:
+      context: .
+      dockerfile: api-dados/Dockerfile
     expose:
       - "3001"
     environment:

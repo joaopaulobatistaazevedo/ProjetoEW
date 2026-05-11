@@ -1,0 +1,1798 @@
+[
+  {
+    "_id": {
+      "$oid": "100000000000000000000001"
+    },
+    "titulo": "Slides de Segurança de Sistemas Informáticos",
+    "subtitulo": "Materiais de apoio sobre criptografia, PKI, protocolos e controlo de acesso",
+    "descricao": "Conjunto de slides e documentos PDF usados como material de apoio à unidade curricular de Segurança de Sistemas Informáticos.",
+    "tipo": "slides",
+    "dataCriacao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "dataRegisto": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "visibilidade": "publico",
+    "autor": {
+      "$oid": "000000000000000000000001"
+    },
+    "hashtags": [
+      "ssi",
+      "seguranca",
+      "criptografia",
+      "slides"
+    ],
+    "ficheiros": [
+      {
+        "_id": {
+          "$oid": "301000000000000000000001"
+        },
+        "nome": "20260212 - Access Control and the Linux Filesystem.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/20260212 - Access Control and the Linux Filesystem.pdf",
+        "tamanho": 1239669,
+        "tipo": "application/pdf",
+        "checksum": "dd1395cc8862638770cedd994836b8b221ad9dddf3bf98e247b1a10008b71e4c",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "301000000000000000000002"
+        },
+        "nome": "Asymmetric1.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/Asymmetric1.pdf",
+        "tamanho": 2828391,
+        "tipo": "application/pdf",
+        "checksum": "bb4c7f339a8914db6ee99d94e1837db296ca6bc41fc64771d033d6e2ae0e3b00",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "301000000000000000000003"
+        },
+        "nome": "Asymmetric2.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/Asymmetric2.pdf",
+        "tamanho": 10881577,
+        "tipo": "application/pdf",
+        "checksum": "a674d76db51d4ad1bb7c0376afee5c8221ee62383c891f100ffc8f73bb079f9c",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "301000000000000000000004"
+        },
+        "nome": "Hashes.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/Hashes.pdf",
+        "tamanho": 1964181,
+        "tipo": "application/pdf",
+        "checksum": "0ca9ff3272b1298340283adea9654a14a5c37983d0834c576555eaefdecb1fdd",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "301000000000000000000005"
+        },
+        "nome": "InternetProtocols.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/InternetProtocols.pdf",
+        "tamanho": 5206037,
+        "tipo": "application/pdf",
+        "checksum": "5fad322a40030f7dd81f05cf403c261f4e49c0110ffb7e54683928f47d1c8ef5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "301000000000000000000006"
+        },
+        "nome": "MACs.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/MACs.pdf",
+        "tamanho": 1507358,
+        "tipo": "application/pdf",
+        "checksum": "d464de6b886153c94d7b7530fcd9480ffe5e9ddc7ee527bdb0399544a51f3f58",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "301000000000000000000007"
+        },
+        "nome": "PKI.pdf",
+        "caminho": "/uploads/recursos/100000000000000000000001/data/PKI.pdf",
+        "tamanho": 5029986,
+        "tipo": "application/pdf",
+        "checksum": "1355c1874cdc33c331010ffdad769a78d3966576949e2b8c41df8e4879205970",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      }
+    ],
+    "ratings": [],
+    "mediaEstrelas": 0
+  },
+  {
+    "_id": {
+      "$oid": "100000000000000000000002"
+    },
+    "titulo": "Datasets de Qualidade de Vinho",
+    "subtitulo": "Ficheiros CSV para análise de dados",
+    "descricao": "Conjunto de datasets de qualidade de vinho, separados em treino e teste, para exercícios de análise de dados e aprendizagem automática.",
+    "tipo": "outro",
+    "dataCriacao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "dataRegisto": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "visibilidade": "publico",
+    "autor": {
+      "$oid": "000000000000000000000001"
+    },
+    "hashtags": [
+      "adi",
+      "dataset",
+      "csv",
+      "vinho"
+    ],
+    "ficheiros": [
+      {
+        "_id": {
+          "$oid": "302000000000000000000001"
+        },
+        "nome": "winequality-red test.csv",
+        "caminho": "/uploads/recursos/100000000000000000000002/data/winequality-red test.csv",
+        "tamanho": 30851,
+        "tipo": "text/csv",
+        "checksum": "334c8b8df15d7920be8b1b6b49011f07c81cfc727a9b147833b62eca7220ba5c",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "302000000000000000000002"
+        },
+        "nome": "winequality-red train.csv",
+        "caminho": "/uploads/recursos/100000000000000000000002/data/winequality-red train.csv",
+        "tamanho": 95251,
+        "tipo": "text/csv",
+        "checksum": "1fad9d6322830432c1b0b5badfe739ecdcfd92b214b5ce226638144c1b64beb5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "302000000000000000000003"
+        },
+        "nome": "winequality-white test.csv",
+        "caminho": "/uploads/recursos/100000000000000000000002/data/winequality-white test.csv",
+        "tamanho": 76421,
+        "tipo": "text/csv",
+        "checksum": "e3981c9da0ff192f9c5beb5860cc71326b13ec3fc99dea25f2eeb882699375fc",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "302000000000000000000004"
+        },
+        "nome": "winequality-white train.csv",
+        "caminho": "/uploads/recursos/100000000000000000000002/data/winequality-white train.csv",
+        "tamanho": 302935,
+        "tipo": "text/csv",
+        "checksum": "29cf93d4bd95000de9d478206341746e7065f03b2ba974be5eb5b92a2f6776b7",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "302000000000000000000005"
+        },
+        "nome": "winequality.txt",
+        "caminho": "/uploads/recursos/100000000000000000000002/data/winequality.txt",
+        "tamanho": 1061,
+        "tipo": "text/plain",
+        "checksum": "004f136c690d2c80d86105de9bf19e894fbaf32a5767111499246409135e501f",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      }
+    ],
+    "ratings": [],
+    "mediaEstrelas": 0
+  },
+  {
+    "_id": {
+      "$oid": "100000000000000000000003"
+    },
+    "titulo": "Sprites para Projeto de LI1",
+    "subtitulo": "Imagens e sprites para jogo académico",
+    "descricao": "Coleção de imagens, sprites e elementos gráficos para utilização num projeto de Laboratórios de Informática I.",
+    "tipo": "aplicacao",
+    "dataCriacao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "dataRegisto": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "visibilidade": "publico",
+    "autor": {
+      "$oid": "000000000000000000000001"
+    },
+    "hashtags": [
+      "li1",
+      "sprites",
+      "jogo",
+      "imagens"
+    ],
+    "ficheiros": [
+      {
+        "_id": {
+          "$oid": "303000000000000000000001"
+        },
+        "nome": "bloco-alcapao.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/bloco-alcapao.bmp",
+        "tamanho": 111,
+        "tipo": "image/bmp",
+        "checksum": "3d7d5b2e636af75506a89bfb063e59508f525a82d3bc72ef9a193a5bd6dbf6f4",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000002"
+        },
+        "nome": "bloco-escada.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/bloco-escada.bmp",
+        "tamanho": 104,
+        "tipo": "image/bmp",
+        "checksum": "cdc7108f1fff74d0294aa3bbafe3670c890793bd967125cc432ce3f84571ef92",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000003"
+        },
+        "nome": "bloco-plataforma.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/bloco-plataforma.bmp",
+        "tamanho": 133,
+        "tipo": "image/bmp",
+        "checksum": "f9bb04581687405598aec5fd095b19e99c969077e73195e79c9efeebd21ed1f3",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000004"
+        },
+        "nome": "bloco-vazio.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/bloco-vazio.png",
+        "tamanho": 144,
+        "tipo": "image/png",
+        "checksum": "d008c7b84488225b13b903c9df7d4b902507a349ea9c9b2c18b961cf74017408",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000005"
+        },
+        "nome": "botaocreditos.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/botaocreditos.png",
+        "tamanho": 228,
+        "tipo": "image/png",
+        "checksum": "62a2e485d4f5bb96cc2c08275c7ea0aff0c61bf17e87f647cba34be588a13248",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000006"
+        },
+        "nome": "botaoJogo1.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/botaoJogo1.png",
+        "tamanho": 212,
+        "tipo": "image/png",
+        "checksum": "c2ac2ee4b5f22e67b0459517c71184a7ac00f2b8e4e098571201baadc86eb990",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000007"
+        },
+        "nome": "botaojogo2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/botaojogo2.png",
+        "tamanho": 221,
+        "tipo": "image/png",
+        "checksum": "ccb63b399b02cf11e83a6f8a3e9509fd5ee1934ee3128c4432e9aa4e8d916eed",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000008"
+        },
+        "nome": "botaosair.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/botaosair.png",
+        "tamanho": 214,
+        "tipo": "image/png",
+        "checksum": "5d4c3904a92aae15924f4800ef126628f73a286c02b7468f3795b4668367efaa",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000009"
+        },
+        "nome": "cinco.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/cinco.bmp",
+        "tamanho": 130,
+        "tipo": "image/bmp",
+        "checksum": "32baa4854375d09efd40d6eaf3daa0392a1bb84eb2767da940af446cfa55f64a",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000010"
+        },
+        "nome": "creditos.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/creditos.png",
+        "tamanho": 61320,
+        "tipo": "image/png",
+        "checksum": "6efce845e2d8f7ca9e87197c8e98a73e3430c06a12588e0b53eb654852252a33",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000011"
+        },
+        "nome": "dois.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/dois.bmp",
+        "tamanho": 123,
+        "tipo": "image/bmp",
+        "checksum": "3924a0467c8c7a47c49fc7c1a38ee04ff63801b362a8738cada3e91d7cb876e1",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000012"
+        },
+        "nome": "estrela.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/estrela.bmp",
+        "tamanho": 253,
+        "tipo": "image/bmp",
+        "checksum": "7389cea2ba9bcd09c870f9f9677a5442bcc3955afa7089803d57676910e1d64a",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000013"
+        },
+        "nome": "fantasma1.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/fantasma1.bmp",
+        "tamanho": 248,
+        "tipo": "image/bmp",
+        "checksum": "ef3586a03419784cd26937022918ba07faf3ff9056db15818c19bd138932c67e",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000014"
+        },
+        "nome": "fantasma2.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/fantasma2.bmp",
+        "tamanho": 229,
+        "tipo": "image/bmp",
+        "checksum": "f94953bccd29b7d6f7cb04a5018c3af8812cc91a741a06f299ff0c7e58d74e18",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000015"
+        },
+        "nome": "fantasma3.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/fantasma3.bmp",
+        "tamanho": 232,
+        "tipo": "image/bmp",
+        "checksum": "659646e68275582e2f4e557859eafc70c5a1e26db8bb3aff14ec2432aeb1e8e3",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000016"
+        },
+        "nome": "GameOver.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/GameOver.png",
+        "tamanho": 1203,
+        "tipo": "image/png",
+        "checksum": "cffc1633d1d73e157ad9d77850e0fc9135eb81e0434a21296ce846fb97e037f8",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000017"
+        },
+        "nome": "macacoMalvado1.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/macacoMalvado1.bmp",
+        "tamanho": 702,
+        "tipo": "image/bmp",
+        "checksum": "81b4a9992289a9efb834b402e7ef5a77640b8025906ae136ec8a147b5517a577",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000018"
+        },
+        "nome": "macacomalvado2.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/macacomalvado2.bmp",
+        "tamanho": 771,
+        "tipo": "image/bmp",
+        "checksum": "01ee65ce359cce44376caea2ec8ec4ce3297a1336635b132f4b45b0b1ecd9bce",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000019"
+        },
+        "nome": "macacomalvado3.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/macacomalvado3.bmp",
+        "tamanho": 788,
+        "tipo": "image/bmp",
+        "checksum": "a3356f847560a4a84535ffc0f0d287ff5bc32d44ba7805e13b2feaea32886169",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000020"
+        },
+        "nome": "mario-1.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-1.png",
+        "tamanho": 1794,
+        "tipo": "image/png",
+        "checksum": "894688efbc1bc4baec0455f494cf496a2088f3f936acdd01ece02c556288d001",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000021"
+        },
+        "nome": "mario-10.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-10.png",
+        "tamanho": 1691,
+        "tipo": "image/png",
+        "checksum": "d709c8d018316f877762d88cffafbd3960bf1dbdaf0e118340858b19a63059d6",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000022"
+        },
+        "nome": "mario-11.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-11.png",
+        "tamanho": 1857,
+        "tipo": "image/png",
+        "checksum": "876c7e723150216760651fe90749c3ac6971f6ff65b6085d2f303cbf9656ba72",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000023"
+        },
+        "nome": "mario-12.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-12.png",
+        "tamanho": 1825,
+        "tipo": "image/png",
+        "checksum": "3719737415ab8660eddad0284c1ae1469f97fc556b8af13f60c3e7ae6ea4c3c5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000024"
+        },
+        "nome": "mario-13.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-13.png",
+        "tamanho": 2097,
+        "tipo": "image/png",
+        "checksum": "af5981bf1bb680cf51cbbb81f76ba8c1bb165f15e3451a08de3646aa46c4fa01",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000025"
+        },
+        "nome": "mario-14.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-14.png",
+        "tamanho": 1840,
+        "tipo": "image/png",
+        "checksum": "54f531665d14e5d6c76b5f30511a8234a47961075a6af79e44ff063b9e4054eb",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000026"
+        },
+        "nome": "mario-15.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-15.png",
+        "tamanho": 1929,
+        "tipo": "image/png",
+        "checksum": "e30863f2605b9bda941c38122070b19db210b82d5b23ee13bc85be351b9d4a47",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000027"
+        },
+        "nome": "mario-2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-2.png",
+        "tamanho": 1762,
+        "tipo": "image/png",
+        "checksum": "51c895ed6caf3edf34573ec66eaef62df9a11c7740ebc478dd5d44656143dbcd",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000028"
+        },
+        "nome": "mario-3.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-3.png",
+        "tamanho": 1777,
+        "tipo": "image/png",
+        "checksum": "3972eef31386d69c2c07110ada2d0159ad19fffbdc5691b9662a43651cc1b1ce",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000029"
+        },
+        "nome": "mario-4.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-4.png",
+        "tamanho": 1302,
+        "tipo": "image/png",
+        "checksum": "a7755b73480d6f7ccaa1ea4303b118db1ed704974d7eb1b9ba5e374be90d95a1",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000030"
+        },
+        "nome": "mario-5.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-5.png",
+        "tamanho": 1471,
+        "tipo": "image/png",
+        "checksum": "6d604742d8bf8b7ef12b660f89f20cf03d438971ae701515f5ed8d5719827c19",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000031"
+        },
+        "nome": "mario-6.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-6.png",
+        "tamanho": 947,
+        "tipo": "image/png",
+        "checksum": "7be79d0452e843f0003344e4c837d00d1377dad8f8df312ec762c59d3852f216",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000032"
+        },
+        "nome": "mario-7.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-7.png",
+        "tamanho": 1174,
+        "tipo": "image/png",
+        "checksum": "c03c39c1b4344804893e5e1aa162e1524cad54a0c74d6dff6cb0970c5b226c82",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000033"
+        },
+        "nome": "mario-8.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-8.png",
+        "tamanho": 1371,
+        "tipo": "image/png",
+        "checksum": "b2f6831a79bd839d5faf9e39c797c86bb926aa3052bdf8ca5845d4ee59590dff",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000034"
+        },
+        "nome": "mario-9.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-9.png",
+        "tamanho": 1864,
+        "tipo": "image/png",
+        "checksum": "1d626786f59fba2d9cd73abd1bd68874c1a79aba628211ef53198f20983e5e30",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000035"
+        },
+        "nome": "mario-andar1.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-andar1.bmp",
+        "tamanho": 250,
+        "tipo": "image/bmp",
+        "checksum": "1ec517206681a888884ec849d0b5d228a3becd6505a191d0413288227806b7be",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000036"
+        },
+        "nome": "mario-andar2.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-andar2.bmp",
+        "tamanho": 256,
+        "tipo": "image/bmp",
+        "checksum": "1862fa9b531bf03edf70d078862b9d3a7b62222d9d5a0e671b1eaa729e10d105",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000037"
+        },
+        "nome": "mario-andar3.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-andar3.bmp",
+        "tamanho": 241,
+        "tipo": "image/bmp",
+        "checksum": "3b86fd7610d8960eb112cf56b45a6757260b602387bfa5e04e1e31860c4a95e5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000038"
+        },
+        "nome": "mario-martelo1.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-martelo1.bmp",
+        "tamanho": 334,
+        "tipo": "image/bmp",
+        "checksum": "d09a813bb2727654b0eea8512206faf080748a81ca8ecaabfee025ab42b857e5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000039"
+        },
+        "nome": "mario-martelo2.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-martelo2.bmp",
+        "tamanho": 364,
+        "tipo": "image/bmp",
+        "checksum": "8ffd7be5eac9b4351aa8347cdeda6aacfe92bac7582d8fb4d9db7b9a8e190243",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000040"
+        },
+        "nome": "mario-martelo3.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-martelo3.bmp",
+        "tamanho": 337,
+        "tipo": "image/bmp",
+        "checksum": "3ae84e5dbbdca0c6ccc04f0a3cd534e280107d76db6f13675a0e5b04af67c801",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000041"
+        },
+        "nome": "mario-martelo4.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-martelo4.bmp",
+        "tamanho": 361,
+        "tipo": "image/bmp",
+        "checksum": "c199a7d9271e3f0f04d1d50907ee8bb117cf76d0bb9578e324435a59ef487969",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000042"
+        },
+        "nome": "mario-martelo5.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-martelo5.bmp",
+        "tamanho": 338,
+        "tipo": "image/bmp",
+        "checksum": "e38cb3c4a494e3a5bea63edeb9d4656ea793abe00e594b69d4e9201e0b647f64",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000043"
+        },
+        "nome": "mario-martelo6.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-martelo6.bmp",
+        "tamanho": 346,
+        "tipo": "image/bmp",
+        "checksum": "e989412dac0e52dcbf29f64114d9a232a15e2b9c9854f4c21763c301918c9787",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000044"
+        },
+        "nome": "mario-subir1.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-subir1.bmp",
+        "tamanho": 222,
+        "tipo": "image/bmp",
+        "checksum": "2f1e4fa334be680a6732624c4d70a5096ed9fcdccfcb1b93867f2c9cca29fb31",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000045"
+        },
+        "nome": "mario-subir2.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-subir2.bmp",
+        "tamanho": 237,
+        "tipo": "image/bmp",
+        "checksum": "b7832867fa61bbb57aa1f6d20621d024213dbbf6b528a023870131db5a38dcd8",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000046"
+        },
+        "nome": "mario-subir3.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-subir3.bmp",
+        "tamanho": 210,
+        "tipo": "image/bmp",
+        "checksum": "e0b9a892209c8dda0ea6c563185b7b1f5aeb483bae2e701c0dc3e660496c73bd",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000047"
+        },
+        "nome": "mario-subir4.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/mario-subir4.bmp",
+        "tamanho": 233,
+        "tipo": "image/bmp",
+        "checksum": "917de4e103a8f8b19c7c4bb2a62ee2b14f2c6f84e35f951c103bcb7ab372b967",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000048"
+        },
+        "nome": "martelo.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/martelo.bmp",
+        "tamanho": 150,
+        "tipo": "image/bmp",
+        "checksum": "8c0753d65895df45649fc0f435d903bcd4d80bda3f114fee218bad706bb23288",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000049"
+        },
+        "nome": "moeda.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/moeda.png",
+        "tamanho": 1249,
+        "tipo": "image/png",
+        "checksum": "1f3019e6de8a161b7b220925066f3a621a301affadb6d01617a024992da94322",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000050"
+        },
+        "nome": "NewImage-1.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-1.png",
+        "tamanho": 3874,
+        "tipo": "image/png",
+        "checksum": "4175fbe4560fdec90849d70e34f615008bb085a2c959075c5e1994c255aa1cf5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000051"
+        },
+        "nome": "NewImage-10.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-10.png",
+        "tamanho": 3078,
+        "tipo": "image/png",
+        "checksum": "a12275d5046fb09df5af5ab506aac2eff93bc8263a6f2921a1f0135cb776e10f",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000052"
+        },
+        "nome": "NewImage-11.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-11.png",
+        "tamanho": 3854,
+        "tipo": "image/png",
+        "checksum": "2a055aeca8854b782acb04a06ddadb31ce2ae289634f9b0079c91ba101a726b7",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000053"
+        },
+        "nome": "NewImage-2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-2.png",
+        "tamanho": 3670,
+        "tipo": "image/png",
+        "checksum": "737fcfc2c9e89ee3eb9fb5c9a44e6d234fdf74fbf87e0ed27bfe4351a9cc5254",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000054"
+        },
+        "nome": "NewImage-3.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-3.png",
+        "tamanho": 4044,
+        "tipo": "image/png",
+        "checksum": "42eda927f6a5153d7146cafddf7fac3043caa3ee4876e5babe95f84c7d23f5cc",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000055"
+        },
+        "nome": "NewImage-4.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-4.png",
+        "tamanho": 3876,
+        "tipo": "image/png",
+        "checksum": "5571e0f2dc330a03d4ad98c53b3f41ba593a7fbe6a3838bf77a0672adf61728a",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000056"
+        },
+        "nome": "NewImage-5.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-5.png",
+        "tamanho": 3714,
+        "tipo": "image/png",
+        "checksum": "b3d7919fd929ce7804e5b2bf96cb532229392de79b74d2224017c6d93d21b63b",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000057"
+        },
+        "nome": "NewImage-6.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-6.png",
+        "tamanho": 3329,
+        "tipo": "image/png",
+        "checksum": "f1aa1e971041e10d0b0d9b7e5218e4489439da76db25005ee04f198028981f4a",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000058"
+        },
+        "nome": "NewImage-7.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-7.png",
+        "tamanho": 4084,
+        "tipo": "image/png",
+        "checksum": "95973839791559f85bdade5b4e5a04a5cdc53c51d52e186ed12c8cd49d3cc4c9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000059"
+        },
+        "nome": "NewImage-8.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-8.png",
+        "tamanho": 3858,
+        "tipo": "image/png",
+        "checksum": "ff95e66daa20210af33276160bfe5aa394a2cc410139b7bf6b7cbb26399f08f3",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000060"
+        },
+        "nome": "NewImage-9.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/NewImage-9.png",
+        "tamanho": 3126,
+        "tipo": "image/png",
+        "checksum": "f78372a0fb95fd2920a29eb9705b5240628d6229a81efae4fee5dad79ad96509",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000061"
+        },
+        "nome": "nove.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/nove.bmp",
+        "tamanho": 128,
+        "tipo": "image/bmp",
+        "checksum": "9a80b6834fd09affbd0a890c1c6903fa1e278e56e3f6d4e0eb289b8676c53e5d",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000062"
+        },
+        "nome": "oito.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/oito.bmp",
+        "tamanho": 113,
+        "tipo": "image/bmp",
+        "checksum": "1bc3d1d494b8756d9a7407fb782444bac386e384bfed54fe4ba986c5158264c6",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000063"
+        },
+        "nome": "peaches-1.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/peaches-1.png",
+        "tamanho": 1454,
+        "tipo": "image/png",
+        "checksum": "812aab4497b920db596ede808af6c695ee99d30f7a77dc23aabe6bb7f198b38e",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000064"
+        },
+        "nome": "peaches-2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/peaches-2.png",
+        "tamanho": 1551,
+        "tipo": "image/png",
+        "checksum": "02bc1eb39388ab6096b7c1dd6ef726947036b7d53bb0b98bf46664793fc30a1c",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000065"
+        },
+        "nome": "peaches-3.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/peaches-3.png",
+        "tamanho": 1257,
+        "tipo": "image/png",
+        "checksum": "0c97843d6cfb12066c02c1ba560a077fb6abae69341feace27fe5415e22ef565",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000066"
+        },
+        "nome": "peaches-4.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/peaches-4.png",
+        "tamanho": 2207,
+        "tipo": "image/png",
+        "checksum": "c17b5aa9cdb856650901c495db9fe743615f11cb25eccc6bca6814a2c6858b77",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000067"
+        },
+        "nome": "quatro.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/quatro.bmp",
+        "tamanho": 130,
+        "tipo": "image/bmp",
+        "checksum": "df222e7fefb2501a2cdd66140a8ce54646e0925399151c87536832f618dbce27",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000068"
+        },
+        "nome": "seis.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/seis.bmp",
+        "tamanho": 128,
+        "tipo": "image/bmp",
+        "checksum": "9eaef2dbf53edffece8611cf4f4d57f820604c8435388504b9029df75f9e658c",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000069"
+        },
+        "nome": "sete.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/sete.bmp",
+        "tamanho": 124,
+        "tipo": "image/bmp",
+        "checksum": "3c317e479ca5fa0013adc1304962b4f8c88f66e9d39547c3c72755d4e4fa6f78",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000070"
+        },
+        "nome": "spritesdonkeykong copy.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/spritesdonkeykong copy.bmp",
+        "tamanho": 40585,
+        "tipo": "image/bmp",
+        "checksum": "91e7bd483df3d0af6b89ee72778853790eecd6eb29846745e3bf17fdfa29d00c",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000071"
+        },
+        "nome": "titulo.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/titulo.png",
+        "tamanho": 3055,
+        "tipo": "image/png",
+        "checksum": "ea0af03bbc06b395fc99986c81d5b82ad6f48d594e7404cb577e3da27d581e49",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000072"
+        },
+        "nome": "tres.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/tres.bmp",
+        "tamanho": 129,
+        "tipo": "image/bmp",
+        "checksum": "7c26ea597c83e9c3ef8cd9969b79acd4633c05cf1c35a8e79ca0b7ed898554f5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000073"
+        },
+        "nome": "um.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/um.bmp",
+        "tamanho": 119,
+        "tipo": "image/bmp",
+        "checksum": "2d58825e43252f93e559e5b91dbcf7f9aecc4a56bfc73cf54204751f99379833",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000074"
+        },
+        "nome": "verde-1.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-1.png",
+        "tamanho": 1573,
+        "tipo": "image/png",
+        "checksum": "7194a5842e92a5bbf0ec5e1ecd59e0cd1e9b1de893c2063cd0a4bfa44e59deb5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000075"
+        },
+        "nome": "verde-10.2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-10.2.png",
+        "tamanho": 1884,
+        "tipo": "image/png",
+        "checksum": "70cdddc70c558e5392c915df8b935b387ca42a2d21762624b8fb3a58f6f072e8",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000076"
+        },
+        "nome": "verde-11.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-11.png",
+        "tamanho": 1930,
+        "tipo": "image/png",
+        "checksum": "c870a97b850b3cb817669ae60247cb00dd6137d7cc6760b7626b58fed6e21789",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000077"
+        },
+        "nome": "verde-12.2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-12.2.png",
+        "tamanho": 1906,
+        "tipo": "image/png",
+        "checksum": "43e7e5bd2792da64538876ed1ca14c1616f89a8535660313581b86e0ea3224f2",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000078"
+        },
+        "nome": "verde-13.2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-13.2.png",
+        "tamanho": 1930,
+        "tipo": "image/png",
+        "checksum": "c870a97b850b3cb817669ae60247cb00dd6137d7cc6760b7626b58fed6e21789",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000079"
+        },
+        "nome": "verde-14.2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-14.2.png",
+        "tamanho": 1298,
+        "tipo": "image/png",
+        "checksum": "caffc04d1e329e8b007241de7707e044b968385850f3c244c8b2af2f61e5fcf8",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000080"
+        },
+        "nome": "verde-15.2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-15.2.png",
+        "tamanho": 2105,
+        "tipo": "image/png",
+        "checksum": "f34875ba51c35f85ce2c8e05efd8fd27f1814d539b1aa46c73f9d35ad39bc62e",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000081"
+        },
+        "nome": "verde-2.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-2.png",
+        "tamanho": 1554,
+        "tipo": "image/png",
+        "checksum": "ead823c6f96f7ce48d56ade7e75aed3d5683239bdf5ad80761bc9f35edde6eb6",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000082"
+        },
+        "nome": "verde-3.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-3.png",
+        "tamanho": 1617,
+        "tipo": "image/png",
+        "checksum": "73c968fc96383d66b2c65413ae11c2b36e5afaaaa00962d7b57e307055f347aa",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000083"
+        },
+        "nome": "verde-4.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-4.png",
+        "tamanho": 885,
+        "tipo": "image/png",
+        "checksum": "36dbbaae62ac9d42d515e3b4bcd64fa6f5f58627c3fa4cef9c3a08058f6a5235",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000084"
+        },
+        "nome": "verde-5.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-5.png",
+        "tamanho": 1394,
+        "tipo": "image/png",
+        "checksum": "dbc7ded84ac7bea379b8baf75b244affb98c17fa4240ae5a112fb4ce7aa70f74",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000085"
+        },
+        "nome": "verde-6.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-6.png",
+        "tamanho": 996,
+        "tipo": "image/png",
+        "checksum": "596f4f7c16fb3a93ca8a7f173856fe2cdff866283979bacdde89c5c7a97c69a9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000086"
+        },
+        "nome": "verde-7.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-7.png",
+        "tamanho": 1394,
+        "tipo": "image/png",
+        "checksum": "bc1c95bda24b4cde108a939cbe524de4c324531b65c5aca6151939e80a1d39fe",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000087"
+        },
+        "nome": "verde-8.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-8.png",
+        "tamanho": 1628,
+        "tipo": "image/png",
+        "checksum": "9d2b86b80b166a2bc138622f1058f4ea7fe41ea60b963653cda0625fe5a670fd",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000088"
+        },
+        "nome": "verde-9.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/verde-9.png",
+        "tamanho": 1912,
+        "tipo": "image/png",
+        "checksum": "33c95f0730014508f3ca6091b12fc8542ee56c2afafee30c191e4a0d4c28d808",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000089"
+        },
+        "nome": "vida.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/vida.bmp",
+        "tamanho": 182,
+        "tipo": "image/bmp",
+        "checksum": "6ba7c0d0d48b1e09600c20c28065eedac11c7fe249ca00da9daffe8615ea9697",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000090"
+        },
+        "nome": "Win.png",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/Win.png",
+        "tamanho": 1052,
+        "tipo": "image/png",
+        "checksum": "04475853271acbd47f4081812f7ce5203edb8207ec01498a2b2209c2a6925fb9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "303000000000000000000091"
+        },
+        "nome": "zero.bmp",
+        "caminho": "/uploads/recursos/100000000000000000000003/data/zero.bmp",
+        "tamanho": 131,
+        "tipo": "image/bmp",
+        "checksum": "88748887b672e8602cb86a4e6b565d85d92f3d330dc199a3a2da5f2607e6953e",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      }
+    ],
+    "ratings": [],
+    "mediaEstrelas": 0
+  },
+  {
+    "_id": {
+      "$oid": "100000000000000000000004"
+    },
+    "titulo": "Exemplos de Processamento de Linguagens",
+    "subtitulo": "Lexers, parsers e avaliadores em Python",
+    "descricao": "Conjunto de exemplos em Python para estudo de análise lexical, parsing recursivo, ASTs e avaliação de expressões.",
+    "tipo": "aplicacao",
+    "dataCriacao": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "dataRegisto": {
+      "$date": "2026-05-11T00:00:00.000Z"
+    },
+    "visibilidade": "publico",
+    "autor": {
+      "$oid": "000000000000000000000001"
+    },
+    "hashtags": [
+      "pl",
+      "python",
+      "parser",
+      "lexer"
+    ],
+    "ficheiros": [
+      {
+        "_id": {
+          "$oid": "304000000000000000000001"
+        },
+        "nome": "arithmetic_ast_tuples_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_ast_tuples_parser.py",
+        "tamanho": 2305,
+        "tipo": "text/x-python",
+        "checksum": "d2309e8dc29c26a60a866e1b69827cac1836cf965a820856576cb25e3ecb548e",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000002"
+        },
+        "nome": "arithmetic_ast_tuples_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_ast_tuples_program.py",
+        "tamanho": 309,
+        "tipo": "text/x-python",
+        "checksum": "f8a8f89f504ec8bd34c335529527970202381e0def527545b50aab12fa36a846",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000003"
+        },
+        "nome": "arithmetic_eval_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_eval_parser.py",
+        "tamanho": 2300,
+        "tipo": "text/x-python",
+        "checksum": "98bdeb4d424f2f3b47f7e9785698513892c026ceb98a207e139ee362ab405f9a",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000004"
+        },
+        "nome": "arithmetic_eval_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_eval_program.py",
+        "tamanho": 303,
+        "tipo": "text/x-python",
+        "checksum": "020b4465646545123404ec625c43cb73de3dc7f1ecce0794c729ea24c15743f7",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000005"
+        },
+        "nome": "arithmetic_lexer.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_lexer.py",
+        "tamanho": 632,
+        "tipo": "text/x-python",
+        "checksum": "8c6703fe400bdf340d179a22211e4afa021499ade76bfb44a0c7adaae5137963",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000006"
+        },
+        "nome": "arithmetic_rec_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_rec_parser.py",
+        "tamanho": 2676,
+        "tipo": "text/x-python",
+        "checksum": "8f75d9b7eb0689ac04c4f2ef2dcc8da98b3cd01775cedb2245d1352a11e913d9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000007"
+        },
+        "nome": "arithmetic_rec_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/arithmetic_rec_program.py",
+        "tamanho": 295,
+        "tipo": "text/x-python",
+        "checksum": "84c7844aea908cb982be868c64c3017b215a26bd8a72937af53e53de0f44f2ba",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000008"
+        },
+        "nome": "lists_ast_classes_rec_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_ast_classes_rec_parser.py",
+        "tamanho": 2798,
+        "tipo": "text/x-python",
+        "checksum": "752040fc70f53ba28979496080e9a8dfd9702eae416a62316af8bc4818854369",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000009"
+        },
+        "nome": "lists_ast_tuples_rec_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_ast_tuples_rec_parser.py",
+        "tamanho": 2416,
+        "tipo": "text/x-python",
+        "checksum": "2ada176e9a334671adb068f2d44f159c6fc6d2409a3b3bfcb705a7ab0fff82f9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000010"
+        },
+        "nome": "lists_ast_tuples_rec_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_ast_tuples_rec_program.py",
+        "tamanho": 294,
+        "tipo": "text/x-python",
+        "checksum": "8c14a52db77ae1e3e838d7d77b20274e6c92b169129ad687e25860ae299a71e1",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000011"
+        },
+        "nome": "lists_check_table_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_check_table_program.py",
+        "tamanho": 284,
+        "tipo": "text/x-python",
+        "checksum": "377c3df0abfcea67376296b1bb6982db75ade34f153f594be7124343b3e2c6ef",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000012"
+        },
+        "nome": "lists_eval_rec_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_eval_rec_parser.py",
+        "tamanho": 2368,
+        "tipo": "text/x-python",
+        "checksum": "fb107c1f959d6f2fc901f828cc64233f324ade74c3d5dcaa0ea8dd3ac13ac894",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000013"
+        },
+        "nome": "lists_eval_rec_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_eval_rec_program.py",
+        "tamanho": 288,
+        "tipo": "text/x-python",
+        "checksum": "35264f73df1479cbb70643f26ef77dbb04fa45d0d7850cb4b72f5627ee5ae322",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000014"
+        },
+        "nome": "lists_lexer (1).py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_lexer (1).py",
+        "tamanho": 679,
+        "tipo": "text/x-python",
+        "checksum": "a01c33f983dbe1492b57e6b27cc7d222a580cc7532020a34a0506bdcb74c81c9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000015"
+        },
+        "nome": "lists_lexer.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_lexer.py",
+        "tamanho": 679,
+        "tipo": "text/x-python",
+        "checksum": "a01c33f983dbe1492b57e6b27cc7d222a580cc7532020a34a0506bdcb74c81c9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000016"
+        },
+        "nome": "lists_struct_rec_parser.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_struct_rec_parser.py",
+        "tamanho": 2380,
+        "tipo": "text/x-python",
+        "checksum": "5fe6b9fdd689af78fa1f5930dd33b143232c966a3e44a56cede35f0015877aa9",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      },
+      {
+        "_id": {
+          "$oid": "304000000000000000000017"
+        },
+        "nome": "lists_struct_rec_program.py",
+        "caminho": "/uploads/recursos/100000000000000000000004/data/lists_struct_rec_program.py",
+        "tamanho": 290,
+        "tipo": "text/x-python",
+        "checksum": "955e4265e3ef818d07f076e3ed002c0fcd4f5d58e42fbdf13545ab04f2a17dd5",
+        "dataAdicionado": {
+          "$date": "2026-05-11T00:00:00.000Z"
+        },
+        "versaoAIP": 1
+      }
+    ],
+    "ratings": [],
+    "mediaEstrelas": 0
+  }
+]
